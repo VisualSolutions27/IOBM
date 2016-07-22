@@ -115,6 +115,7 @@
     <Compile Include="ViewModels\ViewBillingCFViewModel.cs" />
     <Compile Include="ViewModels\ViewCompanyViewModel.cs" />
     <Compile Include="ViewModels\ViewConfigViewModel.cs" />
+    <Compile Include="ViewModels\ViewDataValidationViewModel.cs" />
     <Compile Include="ViewModels\ViewDeviceMakeViewModel.cs" />
     <Compile Include="ViewModels\ViewDeviceModelViewModel.cs" />
     <Compile Include="ViewModels\ViewMobileManagerViewModel.cs" />
