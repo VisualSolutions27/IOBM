@@ -35,20 +35,6 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="Billing View" Style="{StaticResource UXHeaderTextStyle}"></TextBlock>
-                <!--<StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,1,10,0">
-                    <Button x:Name="ButtonCellularCancel" ToolTip="Cancel the current operation." TabIndex="41" Margin="0,0,2,0" 
-                        Style="{StaticResource UXHeaderImageButtonStyle}" Command="{Binding CancelCommand}">
-                        <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/stop_32.ico" Margin="2"/>
-                    </Button>
-                    <Button x:Name="ButtonCellularAdd" ToolTip="Add new cellular data." TabIndex="42" Margin="0,0,2,0"
-                        Style="{StaticResource UXHeaderImageButtonStyle}" Command="{Binding AddCommand}">
-                        <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/508.png" Margin="2,2,2,2"/>
-                    </Button>
-                    <Button x:Name="ButtonCellularSave" ToolTip="Save the cellular data." TabIndex="43" Margin="0"
-                        Style="{StaticResource UXHeaderImageButtonStyle}" Command="{Binding SaveCommand}">
-                        <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/save_32.ico" Margin="2"/>
-                    </Button>
-                </StackPanel>-->
             </Grid>
         </Border>
         <Border Grid.Row="1" Grid.Column="0" Background="#FFF2E9C1" Margin="5,5,0,5" BorderBrush="Silver" BorderThickness="1,1,0,1">
@@ -97,18 +83,22 @@
                         </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
-                <TextBlock x:Name="TextBlockVolumeProgress" Grid.Row="8" Grid.Column="1" Style="{StaticResource UXLabelTextStyle}"
-                    Text="{Binding BillingWizardProgress, UpdateSourceTrigger=PropertyChanged}">
+                <TextBlock x:Name="TextBlockWizardPages" Grid.Row="8" Grid.Column="1" Style="{StaticResource UXLabelTextStyle}"
+                    Text="{Binding BillingWizardDescription, UpdateSourceTrigger=PropertyChanged}">
                 </TextBlock>
-                <ProgressBar x:Name="ProgressBarVolumes" Grid.Row="9" Grid.Column="1" Height="25" BorderBrush="DarkGray" BorderThickness="1" />
-                <TextBlock x:Name="TextBlockDocumentProgress" Grid.Row="11" Grid.Column="1" Style="{StaticResource UXLabelTextStyle}"
-                    Text="{Binding BillinProcessProgress, UpdateSourceTrigger=PropertyChanged}">
+                <ProgressBar x:Name="ProgressBarWizardPages" Grid.Row="9" Grid.Column="1" Height="25" BorderBrush="DarkGray" BorderThickness="1" 
+                    Value="{Binding BillingWizardProgress, UpdateSourceTrigger=PropertyChanged}" Maximum="{Binding BillingWizardPageCount}">
+                </ProgressBar>                             
+                <TextBlock x:Name="TextBlockProcessProgress" Grid.Row="11" Grid.Column="1" Style="{StaticResource UXLabelTextStyle}"
+                    Text="{Binding BillinProcessDescription, UpdateSourceTrigger=PropertyChanged}">
                 </TextBlock>
-                <ProgressBar x:Name="ProgressBarDocuments" Grid.Row="12" Grid.Column="1" Height="25" BorderBrush="DarkGray" BorderThickness="1"/>
+                <ProgressBar x:Name="ProgressBarProcesses" Grid.Row="12" Grid.Column="1" Height="25" BorderBrush="DarkGray" BorderThickness="1"
+                    Value="{Binding BillingProcessProgress, UpdateSourceTrigger=PropertyChanged}" Maximum="{Binding BillingProcessCount}">
+                </ProgressBar>
             </Grid>
         </Border>
         <xctk:Wizard x:Name="WizardBilling" Grid.Row="1" Grid.Column="1" FinishButtonClosesWindow="True" HelpButtonVisibility="Collapsed" CancelButtonVisibility="Collapsed" ExteriorPanelMinWidth="0" Margin="0,5,5,5">
-            <!--<xctk:WizardPage x:Name="WizardPage1" ExteriorPanelBackground="White" Title="Billing Wizard" Description="This Wizard will walk you through the month-end billing process." 
+            <xctk:WizardPage x:Name="WizardPage1" ExteriorPanelBackground="White" Title="Billing Wizard" Description="This Wizard will walk you through the month-end billing process." 
                 CanSelectNextPage="{Binding BillingRunStarted}" >
                 <Grid IsEnabled="{Binding CanBillingOptionsChange, UpdateSourceTrigger=PropertyChanged}">
                     <Grid.RowDefinitions>
@@ -124,50 +114,31 @@
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="132" />
                         <ColumnDefinition Width="80" />
                         <ColumnDefinition Width="80" />
                         <ColumnDefinition Width="2*" />
                     </Grid.ColumnDefinitions>
-                    <xctk:RichTextBox  Grid.Row="2" Grid.Column="1" Grid.RowSpan="5" Margin="0,1,5,1" BorderThickness="0"
-                        FontStyle="Italic" FontFamily="Arial" FontSize="14" FontWeight="Bold" >
-                        <FlowDocument>
-                            <Paragraph>
-                                <Span FontSize="16">
-                                    <Run Text="Please select the billing period and billing processes to include."/>
-                                </Span>
-                            </Paragraph>
-                        </FlowDocument>
-                    </xctk:RichTextBox>
+                    <TextBox  Grid.Row="2" Grid.Column="1" Grid.RowSpan="6" Margin="0,0,15,1" BorderThickness="0"
+                        FontStyle="Italic" FontFamily="Arial" FontSize="14" FontWeight="Bold" TextWrapping="Wrap"
+                        Text="Please accept the billing period as correct. NOTE Accepting the billing period will start the billing run and cannot be cancelled.">
+                    </TextBox>
                     <TextBlock Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Text="Billing period:" VerticalAlignment="Bottom" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-                    <xctk:DateTimeUpDown Grid.Row="2" Grid.Column="2" Format="Custom" FormatString="MM" CurrentDateTimePart="Month" TabIndex="0"
-                        DefaultValue="{Binding DefaultBillingPeriod, UpdateSourceTrigger=PropertyChanged}" DisplayDefaultValueOnEmptyText="True"
-                        Text="{Binding SelectedBillingMonth, UpdateSourceTrigger=PropertyChanged}">
-                    </xctk:DateTimeUpDown>
-                    <xctk:DateTimeUpDown Grid.Row="2" Grid.Column="3" CurrentDateTimePart="Year" Format="Custom" FormatString="yyyy" TabIndex="1"
-                        DefaultValue="{Binding DefaultBillingPeriod, UpdateSourceTrigger=PropertyChanged}" DisplayDefaultValueOnEmptyText="True"
-                        Text="{Binding SelectedBillingYear, UpdateSourceTrigger=PropertyChanged}">
-                    </xctk:DateTimeUpDown>
+                    <TextBox Grid.Row="2" Grid.Column="2" IsTabStop="False" IsReadOnly="True" HorizontalContentAlignment="Center" Text="{Binding SelectedBillingMonth, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBox Grid.Row="2" Grid.Column="3" IsTabStop="False" IsReadOnly="True" HorizontalContentAlignment="Center" Text="{Binding SelectedBillingYear, UpdateSourceTrigger=PropertyChanged}"/>
                     <TextBlock Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="2" Text="Billing processes:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-                    <xctk:CheckListBox Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2" TabIndex="3" ItemsSource="{Binding BillingProcessCollection, UpdateSourceTrigger=PropertyChanged}" 
+                    <ListBox Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2" IsTabStop="False" ItemsSource="{Binding BillingProcessCollection, UpdateSourceTrigger=PropertyChanged}" 
                         SelectedValue="{Binding SelectedBillingProcesses, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
-                    </xctk:CheckListBox>
-                    <Button x:Name="ButtonReset" Grid.Row="7" Grid.Column="2" ToolTip="Reset the billing selections." TabIndex="4" Margin="0,0,2,0" 
-                        Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" Command="{Binding ResetCommand}">
-                        <StackPanel Orientation="Horizontal">
-                            <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/289.png" Margin="0,1,5,1"/>
-                            <TextBlock Text="Reset" VerticalAlignment="Center"/>
-                        </StackPanel>
-                    </Button>
-                    <Button x:Name="ButtonStart" Grid.Row="7" Grid.Column="3" ToolTip="Cancel the current operation." TabIndex="5" Margin="0,0,2,0" 
-                        Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" IsEnabled="{Binding ValidBillingOptions}" Command="{Binding AcceptCommand}">
+                    </ListBox>
+                    <Button x:Name="ButtonStart" Grid.Row="7" Grid.Column="3" ToolTip="Cancel the current operation." TabIndex="0" 
+                        Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" Command="{Binding AcceptCommand}">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/277.png" Margin="0,1,5,1"/>
                             <TextBlock Text="Accept" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </Grid>
-            </xctk:WizardPage>-->
+            </xctk:WizardPage>
             <xctk:WizardPage x:Name="WizardPage2" ExteriorPanelBackground="White" Title="Billing Wizard" Description="{Binding WizardPageDescription, UpdateSourceTrigger=PropertyChanged}" 
                 CanSelectNextPage="{Binding BillingProcess1Completed}" NextPage="{Binding ElementName=WizardPage3}" PreviousPage="{Binding ElementName=WizardPage1}">
                 <Grid IsEnabled="{Binding CanBillingOptionsChange, UpdateSourceTrigger=PropertyChanged}">
@@ -177,31 +148,9 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="5" />
-                        <ColumnDefinition Width="165" />
-                        <ColumnDefinition Width="3*" />
+                        <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <StackPanel Grid.Row="1" Grid.Column="1" Grid.RowSpan="3" Margin="0,15,15,1">
-                        <Button x:Name="ButtonStart" Grid.Row="7" Grid.Column="3" ToolTip="Start the billing process." TabIndex="1" Margin="0,0,0,10" 
-                            Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" Command="{Binding StartValidationCommand}">
-                            <StackPanel Orientation="Horizontal">
-                                <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/062.png" Margin="0,1,10,1"/>
-                                <TextBlock Text="Start" VerticalAlignment="Center"/>
-                            </StackPanel>
-                        </Button>
-                        <xctk:RichTextBox BorderThickness="0"
-                            FontStyle="Italic" FontFamily="Arial" FontSize="14" FontWeight="Bold" >
-                            <FlowDocument>
-                                <Paragraph>
-                                    <Span FontSize="16">
-                                        <Run Text="{Binding WizardPageInstruction, UpdateSourceTrigger=PropertyChanged}"/>
-                                        <!--<Run Text="Please start the billing validation process to validate all the data rules configured for each data validation group."/>-->
-                                    </Span>
-                                </Paragraph>
-                            </FlowDocument>
-                        </xctk:RichTextBox>
-                    </StackPanel>
-                    <local:ViewDataValidation Grid.Row="2" Grid.Column="2"/>
+                    <local:ViewDataValidation Grid.Row="2" Grid.Column="0"/>
                 </Grid>                
             </xctk:WizardPage>
             <xctk:WizardPage x:Name="Page2" PageType="Blank" Visibility="Collapsed" CanSelectNextPage="False"

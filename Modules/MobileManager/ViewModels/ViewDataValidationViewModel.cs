@@ -505,12 +505,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
                     foreach (ValidationRule rule in ValidationRuleCollection)
                     {
-                        // Validate the data rule and update
-                        // the progress values accodingly
-                        if (await Task.Run(() => _model.ValidateDataRule(rule)))
-                            ValidationDataRulesPassed++;
-                        else
-                            ValidationDataRulesFailed++;
+                        //// Validate the data rule and update
+                        //// the progress values accodingly
+                        //if (await Task.Run(() => _model.ValidateDataRule(rule)))
+                        //    ValidationDataRulesPassed++;
+                        //else
+                        //    ValidationDataRulesFailed++;
 
                         // Update progress values when the
                         // group entity change
