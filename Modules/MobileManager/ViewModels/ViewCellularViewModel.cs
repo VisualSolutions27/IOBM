@@ -851,6 +851,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     _eventAggregator.GetEvent<ReadDevicesEvent>().Publish(SelectedContract.pkContractID);
                     _eventAggregator.GetEvent<ReadInvoicesEvent>().Publish(SelectedClient.pkClientID);
                 }
+
+                // Publish this event to set the admin tab as default tab
+                _eventAggregator.GetEvent<NavigationEvent>().Publish(0);
             }
             catch (Exception ex)
             {

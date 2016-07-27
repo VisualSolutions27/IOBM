@@ -1,11 +1,14 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
+using Gijima.IOBM.Infrastructure.Helpers;
+using Gijima.IOBM.Infrastructure.Structs;
+using Gijima.IOBM.MobileManager.Common.Events;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
 using Prism.Events;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Data.Entity.Infrastructure;
+using System.ComponentModel;
 using System.Linq;
 
 namespace Gijima.IOBM.MobileManager.Model.Models
@@ -15,6 +18,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         #region Properties and Attributes
 
         private IEventAggregator _eventAggregator;
+        private DataCompareHelper _dataComparer;
 
         #endregion
 
@@ -25,6 +29,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         public ValidationRuleModel(IEventAggregator eventAggreagator)
         {
             _eventAggregator = eventAggreagator;
+            _dataComparer = new DataCompareHelper(_eventAggregator);
         }
 
         /// <summary>
@@ -175,6 +180,148 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                         return false;
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                return false;
+            }
+        }
+       
+        /// <summary>
+        /// Update an existing validation rule entity in the database
+        /// </summary>
+        /// <param name="validationRule">The validation rule entity to update.</param>
+        /// <returns>True if successfull</returns>
+        public bool ValidateDataRule(ValidationRule validationRule)
+        {
+            try
+            {
+                switch (((ValidationRuleGroup)validationRule.enValidationRuleGroup))
+                {
+                    case ValidationRuleGroup.Client:
+                        break;
+                    case ValidationRuleGroup.Company:
+                        return ValidateCompanyDataRule(validationRule);
+                }
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Update an existing validation rule entity in the database
+        /// </summary>
+        /// <param name="validationRule">The validation rule entity to update.</param>
+        /// <returns>True if successfull</returns>
+        private bool ValidateCompanyDataRule(ValidationRule validationRule)
+        {
+            try
+            {
+                bool result = true;
+                int clientID = 0;
+                string clientName = string.Empty;
+
+                using (var db = MobileManagerEntities.GetContext())
+                {
+                    // Get all the active clients link to the company
+                    List<Client> companyClients = db.Clients.Where(p => p.fkCompanyID == validationRule.EntityID && p.IsActive).ToList();
+
+                    if (companyClients.Count > 0)
+                    {
+                        // Get the Client table properties (Fields)
+                        PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(Client));
+
+                        foreach (PropertyDescriptor property in properties)
+                        {
+                            // Only validate when the rule's data name
+                            // match the property name
+                            if (validationRule.RuleDataName == property.Name)
+                            {
+                                // Initialise the progress values
+                                _eventAggregator.GetEvent<ProgressBarInfoEvent>().Publish(new ProgressBarInfo()
+                                {
+                                    CurrentValue = 1,
+                                    MaxValue = companyClients.Count,
+                                });
+
+                                // Validate the data rule values for each 
+                                // client linked the the company
+                                foreach (Client client in companyClients)
+                                {
+                                    clientID = client.pkClientID;
+                                    clientName = string.Format("{0} ({1})", client.ClientName, client.PrimaryCellNumber);
+
+                                    switch (((ValidationDataType)Enum.Parse(typeof(ValidationDataType), validationRule.RuleDataTypeName)))
+                                    {
+                                        case ValidationDataType.String:
+                                            result = _dataComparer.CompareStringValues((StringOperator)validationRule.enStringCompareType,
+                                                                                       db.Entry(client).Property(validationRule.RuleDataName).CurrentValue != null ? db.Entry(client).Property(validationRule.RuleDataName).CurrentValue.ToString() : string.Empty,
+                                                                                       validationRule.ValidationDataValue);
+                                            break;
+                                        case ValidationDataType.Date:
+                                            break;
+                                        case ValidationDataType.Integer:
+                                            result = _dataComparer.CompareNumericValues((NumericOperator)validationRule.enStringCompareType, 
+                                                                                        db.Entry(client).Property(validationRule.RuleDataName).CurrentValue.ToString(),
+                                                                                        validationRule.ValidationDataValue);
+                                            break;
+                                        case ValidationDataType.Decimal:
+                                            result = _dataComparer.CompareDecimalValues((NumericOperator)validationRule.enNumericCompareType,
+                                                                                        db.Entry(client).Property(validationRule.RuleDataName).CurrentValue.ToString(),
+                                                                                        validationRule.ValidationDataValue);
+                                            break;
+                                        case ValidationDataType.Bool:
+                                            break;
+                                        default:
+                                            break;
+                                    }
+
+                                    // Update the progress values for each client
+                                    _eventAggregator.GetEvent<ProgressBarInfoEvent>().Publish(new ProgressBarInfo()
+                                    {
+                                        CurrentValue = companyClients.IndexOf(client),
+                                        MaxValue = companyClients.Count,
+                                    });
+
+                                    // Update the validation result values
+                                    if (result)
+                                        _eventAggregator.GetEvent<DataValiationResultEvent>().Publish(new DataValidationResultInfo()
+                                        {
+                                            Result = DataValidationResultInfo.ResultType.Passed,
+                                            ValidationRule = validationRule,
+                                            EntityType = typeof(Client),
+                                            EntityID = client.pkClientID,
+                                            PropertyName = validationRule.RuleDataName,
+                                        });
+                                    else
+                                        _eventAggregator.GetEvent<DataValiationResultEvent>().Publish(new DataValidationResultInfo()
+                                        {
+                                            Result = DataValidationResultInfo.ResultType.Failed,
+                                            ValidationRule = validationRule,
+                                            EntityType = typeof(Client),
+                                            EntityID = client.pkClientID,
+                                            PropertyName = validationRule.RuleDataName,
+                                            Message = string.Format("{0} validation failed for {1} linked to company {2}.", validationRule.RuleDataName.ToUpper(), clientName, validationRule.EntityName)
+                                        });
+                                }
+
+                                // Update the progress values for the last client
+                                _eventAggregator.GetEvent<ProgressBarInfoEvent>().Publish(new ProgressBarInfo()
+                                {
+                                    CurrentValue = companyClients.Count,
+                                    MaxValue = companyClients.Count,
+                                });
+                            }
+                        }
+                    }
+                }
+
+                return result;
             }
             catch (Exception ex)
             {

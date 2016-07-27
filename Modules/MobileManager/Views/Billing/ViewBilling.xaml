@@ -98,8 +98,16 @@
             </Grid>
         </Border>
         <xctk:Wizard x:Name="WizardBilling" Grid.Row="1" Grid.Column="1" FinishButtonClosesWindow="True" HelpButtonVisibility="Collapsed" CancelButtonVisibility="Collapsed" ExteriorPanelMinWidth="0" Margin="0,5,5,5">
+            <i:Interaction.Triggers>
+                <i:EventTrigger EventName="Next">
+                    <i:InvokeCommandAction Command="{Binding NextCommand}" />
+                </i:EventTrigger>
+                <i:EventTrigger EventName="Previous">
+                    <i:InvokeCommandAction Command="{Binding BackCommand}" />
+                </i:EventTrigger>
+            </i:Interaction.Triggers>
             <xctk:WizardPage x:Name="WizardPage1" ExteriorPanelBackground="White" Title="Billing Wizard" Description="This Wizard will walk you through the month-end billing process." 
-                CanSelectNextPage="{Binding BillingRunStarted}" >
+                CanSelectNextPage="{Binding BillingRunStarted}">
                 <Grid IsEnabled="{Binding CanBillingOptionsChange, UpdateSourceTrigger=PropertyChanged}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
@@ -130,7 +138,7 @@
                     <ListBox Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2" IsTabStop="False" ItemsSource="{Binding BillingProcessCollection, UpdateSourceTrigger=PropertyChanged}" 
                         SelectedValue="{Binding SelectedBillingProcesses, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
                     </ListBox>
-                    <Button x:Name="ButtonStart" Grid.Row="7" Grid.Column="3" ToolTip="Cancel the current operation." TabIndex="0" 
+                    <Button x:Name="ButtonStart" Grid.Row="7" Grid.Column="3" ToolTip="Cancel the current operation." TabIndex="0"
                         Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" Command="{Binding AcceptCommand}">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/277.png" Margin="0,1,5,1"/>
@@ -139,7 +147,7 @@
                     </Button>
                 </Grid>
             </xctk:WizardPage>
-            <xctk:WizardPage x:Name="WizardPage2" ExteriorPanelBackground="White" Title="Billing Wizard" Description="{Binding WizardPageDescription, UpdateSourceTrigger=PropertyChanged}" 
+            <xctk:WizardPage x:Name="WizardPage2" ExteriorPanelBackground="White" Title="Billing Wizard" Description="This Wizard page exposes functionality to execute the data validation process and to correct any resulting exceptions." 
                 CanSelectNextPage="{Binding BillingProcess1Completed}" NextPage="{Binding ElementName=WizardPage3}" PreviousPage="{Binding ElementName=WizardPage1}">
                 <Grid IsEnabled="{Binding CanBillingOptionsChange, UpdateSourceTrigger=PropertyChanged}">
                     <Grid.RowDefinitions>
@@ -156,7 +164,6 @@
             <xctk:WizardPage x:Name="Page2" PageType="Blank" Visibility="Collapsed" CanSelectNextPage="False"
                                    Title="Page 2"
                                    Description="This is the second page in the process"/>
-            
             <xctk:WizardPage x:Name="LastPage" PageType="Blank" Visibility="Collapsed"
                                    Title="Last Page"
                                    Description="This is the last page in the process"

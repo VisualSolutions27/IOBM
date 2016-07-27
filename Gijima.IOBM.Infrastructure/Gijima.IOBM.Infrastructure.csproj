@@ -58,11 +58,13 @@
   <ItemGroup>
     <Compile Include="Helpers\DataActivityHelper.cs" />
     <Compile Include="Events\EventHandlers.cs" />
+    <Compile Include="Helpers\DataCompareHelper.cs" />
     <Compile Include="Helpers\UnitConvertionHelper.cs" />
     <Compile Include="Structs\ADUser.cs" />
     <Compile Include="Structs\ApplicationInfo.cs" />
     <Compile Include="Structs\Enumerator.cs" />
     <Compile Include="Structs\IOBMEnvironment.cs" />
+    <Compile Include="Structs\ProgressBarInfo.cs" />
     <Compile Include="Structs\RegionaNames.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

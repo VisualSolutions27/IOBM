@@ -1,4 +1,5 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
+using Gijima.IOBM.MobileManager.Common.Events;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Security;
 using Prism.Commands;
@@ -7,11 +8,6 @@ using Prism.Mvvm;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Controls;
-using System.Windows.Documents;
-using System.Windows.Media;
 
 namespace Gijima.IOBM.MobileManager.ViewModels
 {
@@ -203,6 +199,20 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
         #endregion
 
+        #region Event Handlers
+
+        /// <summary>
+        /// This event gets received when a process gets started
+        /// </summary>
+        /// <param name="sender">The error message.</param>
+        private void BillingProcessNumber_Event(int sender)
+        {
+            BillingProcessProgress++;
+            BillinProcessDescription = string.Format("Executing Process - {0} of {1}", BillingProcessProgress, BillingProcessCount);
+        }
+
+        #endregion
+
         #region Methods
 
         /// <summary>
@@ -225,6 +235,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
             // Initialise the view commands
             AcceptCommand = new DelegateCommand(ExecuteAccept, CanExecuteAccept).ObservesProperty(() => BillingRunStarted);
+            NextCommand = new DelegateCommand(ExecuteNextPage); 
+            BackCommand = new DelegateCommand(ExecutePreviousPage);
+
+            // Subscribe to this event to update the process progress values
+            _eventAggregator.GetEvent<BillingProcessNumberEvent>().Subscribe(BillingProcessNumber_Event, true);
 
             // Load the view data
             ReadBillingProcesses();
@@ -236,7 +251,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private void InitialiseViewControls()
         {
             BillingWizardPageCount = 4;
-            BillingWizardProgress = BillingProcessProgress = 0;
+            BillingWizardProgress = 1;
+            BillingProcessProgress = 0;
             SelectedBillingMonth = DateTime.Now.Month;
             SelectedBillingYear = DateTime.Now.Year;
             BillingWizardDescription = string.Format("Billing step - {0} of {1}", 1, BillingWizardPageCount);
@@ -272,6 +288,24 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         #endregion
 
         #region Command Execution
+        
+        /// <summary>
+        /// Execute when the next command button is clicked 
+        /// </summary>
+        private void ExecuteNextPage()
+        {
+            BillingWizardProgress++;
+            BillingWizardDescription = string.Format("Billing step - {0} of {1}", BillingWizardProgress, BillingWizardPageCount);
+        }
+
+        /// <summary>
+        /// Execute when the back command button is clicked 
+        /// </summary>
+        private void ExecutePreviousPage()
+        {
+            --BillingWizardProgress;
+            BillingWizardDescription = string.Format("Billing step - {0} of {1}", BillingWizardProgress, BillingWizardPageCount);
+        }
 
         /// <summary>
         /// Validate is the accecpt button is avaliable 

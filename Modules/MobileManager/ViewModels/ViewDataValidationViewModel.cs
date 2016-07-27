@@ -1,4 +1,5 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
+using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Common.Events;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
@@ -8,7 +9,6 @@ using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
@@ -24,10 +24,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private ValidationRuleModel _model = null;
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
-
+        private int _clientIDToFix = 0;
+        
         #region Commands
 
         public DelegateCommand StartValidationCommand { get; set; }
+        public DelegateCommand ApplyRuleFixCommand { get; set; }
+        public DelegateCommand ManualFixCommand { get; set; }
 
         #endregion
 
@@ -254,6 +257,30 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private int _validationRuleEntitiesFailed;
 
         /// <summary>
+        /// The selected exceptions
+        /// </summary>
+        public string SelectedExceptions
+        {
+            get { return _selectedExceptions; }
+            set
+            {
+                SetProperty(ref _selectedExceptions, value);
+                ExceptionsToFix = value.Split(',');
+            }
+        }
+        private string _selectedExceptions;
+
+        /// <summary>
+        /// The selected exceptions
+        /// </summary>
+        private string[] ExceptionsToFix
+        {
+            get { return _exceptionsToFix; }
+            set { SetProperty(ref _exceptionsToFix, value); }
+        }
+        private string[] _exceptionsToFix = null;
+
+        /// <summary>
         /// The collection of validation groups from the ValidationRuleGroup enum
         /// </summary>
         public ObservableCollection<string> ValidationGroupCollection
@@ -274,14 +301,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private ObservableCollection<ValidationRule> _validationRuleCollection = null;
 
         /// <summary>
-        /// The collection of validation rules from the database
+        /// The collection of data validation result Info
         /// </summary>
-        public ObservableCollection<string> ValidationErrorCollection
+        public ObservableCollection<DataValidationResultInfo> ValidationErrorCollection
         {
             get { return _validationErrorCollection; }
             set { SetProperty(ref _validationErrorCollection, value); }
         }
-        private ObservableCollection<string> _validationErrorCollection = null;
+        private ObservableCollection<DataValidationResultInfo> _validationErrorCollection = null;
        
         #region View Lookup Data Collections
 
@@ -329,12 +356,21 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         #region Event Handlers
 
         /// <summary>
-        /// This event gets received when data validation failed
+        /// This event gets received to update the progressbar
         /// </summary>
         /// <param name="sender">The error message.</param>
-        private void BillingProgressInfo_Event(object sender)
+        private void ProgressBarInfo_Event(object sender)
         {
-            Application.Current.Dispatcher.Invoke(() => { DisplayDataValidationExceptions(sender); });
+            Application.Current.Dispatcher.Invoke(() => { UpdateProgressBarValues(sender); });
+        }
+
+        /// <summary>
+        /// This event gets received to display the validation result info
+        /// </summary>
+        /// <param name="sender">The error message.</param>
+        private void DataValiationResult_Event(object sender)
+        {
+            Application.Current.Dispatcher.Invoke(() => { DisplayDataValidationResults(sender); });
         }
 
         #endregion
@@ -361,9 +397,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
             // Initialise the view commands
             StartValidationCommand = new DelegateCommand(ExecuteStartValidation, CanStartValidation).ObservesProperty(() => ValidationRuleCollection);
+            ApplyRuleFixCommand = new DelegateCommand(ExecuteApplyRuleFix, CanApplyRuleFix).ObservesProperty(() => ExceptionsToFix);
+            ManualFixCommand = new DelegateCommand(ExecuteManualFix, CanManualFix).ObservesProperty(() => ExceptionsToFix);
+
+            // Subscribe to this event to update the progressbar
+            _eventAggregator.GetEvent<ProgressBarInfoEvent>().Subscribe(ProgressBarInfo_Event, true);
 
             // Subscribe to this event to display the data validation errors
-            _eventAggregator.GetEvent<BillingProgressInfoEvent>().Subscribe(BillingProgressInfo_Event, true);
+            _eventAggregator.GetEvent<DataValiationResultEvent>().Subscribe(DataValiationResult_Event, true);
 
             // Load the view data
             ReadValidationRuleGroups();
@@ -383,7 +424,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             ValidationGroupCount = ValidationEntityCount = ValidationDataRuleCount = ValidationRuleEntityCount = 1;
             ValidationGroupsPassed = ValidationEntitiesPassed = ValidationDataRulesPassed = ValidationRuleEntitiesPassed = 0;
             ValidationGroupsFailed = ValidationEntitiesFailed = ValidationDataRulesFailed = ValidationRuleEntitiesFailed = 0;
-            ValidationErrorCollection = new ObservableCollection<string>();
+            ValidationErrorCollection = new ObservableCollection<DataValidationResultInfo>();
         }
 
         /// <summary>
@@ -426,30 +467,43 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Add the data validation error to the validation exception listview
         /// </summary>
-        /// <param name="billingProgressInfo">The billing progress info.</param>
-        private void DisplayDataValidationExceptions(object billingProgressInfo)
+        /// <param name="resultInfo">The data validation result info.</param>
+        private void DisplayDataValidationResults(object validationResultInfo)
         {
             try
             {
-                BillingProgressInfo progressInfo = (BillingProgressInfo)billingProgressInfo;
+                DataValidationResultInfo resultInfo = (DataValidationResultInfo)validationResultInfo;
 
-                switch (progressInfo.BillingInfoType)
+                switch (resultInfo.Result)
                 {
-                    case BillingProgressInfo.InfoType.Result:
-                        ++ValidationRuleEntitiesPassed;
+                    case DataValidationResultInfo.ResultType.Passed:
+                        ValidationRuleEntitiesPassed++;
                         break;
-                    case BillingProgressInfo.InfoType.EntityCount:
-                        ValidationRuleEntityCount += progressInfo.Count;
-                        break;
-                    case BillingProgressInfo.InfoType.Error:
-                        ValidationErrorCollection.Add(progressInfo.Message);
-                        ++ValidationRuleEntitiesFailed;
+                    default:
+                        ValidationRuleEntitiesFailed++;
+                        ValidationErrorCollection.Add(resultInfo);
                         break;
                 }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+            }
+        }
 
-                ++ValidationRuleEntityProgress;
+        /// <summary>
+        /// Update the progressbar values
+        /// </summary>
+        /// <param name="progressBarInfo">The progressbar info.</param>
+        private void UpdateProgressBarValues(object progressBarInfo)
+        {
+            try
+            {
+                ProgressBarInfo progressInfo = (ProgressBarInfo)progressBarInfo;
+                ValidationRuleEntityCount = progressInfo.MaxValue;
+                ValidationRuleEntityProgress = progressInfo.CurrentValue;
                 ValidationRuleEntityDescription = string.Format("Validating data rule entity - {0} of {1}", ValidationRuleEntityProgress,
-                                                                                                            ValidationRuleEntityCount);
+                                                                                                            progressInfo.MaxValue);
             }
             catch (Exception ex)
             {
@@ -482,6 +536,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             // Set the group progressbar max value
             ValidationGroupCount = ValidationGroupCollection.Count;
 
+            // Update the process progress values on the wizard's Info content
+            _eventAggregator.GetEvent<BillingProcessNumberEvent>().Publish(2);
+
             foreach (string group in ValidationGroupCollection)
             {
                 // Read the validation rules for the specified
@@ -495,7 +552,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                                                                      ValidationGroupCollection.Count);
                 if (ValidationRuleCollection.Count > 0)
                 {
-                    //List<ValidationRule> rules = new List<ValidationRule>(ValidationRuleCollection.);
                     int entityCount = ValidationRuleCollection.GroupBy(p => p.EntityID).Count();                    
                     int entityID = 0;
 
@@ -505,12 +561,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
                     foreach (ValidationRule rule in ValidationRuleCollection)
                     {
-                        //// Validate the data rule and update
-                        //// the progress values accodingly
-                        //if (await Task.Run(() => _model.ValidateDataRule(rule)))
-                        //    ValidationDataRulesPassed++;
-                        //else
-                        //    ValidationDataRulesFailed++;
+                       // entityID = rule.EntityID;
+
+                        // Validate the data rule and update
+                        // the progress values accodingly
+                        if (await Task.Run(() => _model.ValidateDataRule(rule)))
+                            ValidationDataRulesPassed++;
+                        else
+                            ValidationDataRulesFailed++;
 
                         // Update progress values when the
                         // group entity change
@@ -538,13 +596,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                                                                                 ValidationRuleCollection.Count);
                     }
 
-                    // Update the group entity progess
-                    // values for the last entity
-                    if (ValidationDataRulesFailed == 0)
-                        ValidationEntitiesPassed++;
-                    else
-                        ValidationEntitiesFailed++;
-
                     // Update the validation group 
                     // progress values accodingly
                     if (ValidationEntitiesFailed == 0)
@@ -553,6 +604,50 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                         ValidationGroupsFailed++;
                 }
             }
+        }
+
+        /// <summary>
+        /// Set view command buttons enabled/disabled state
+        /// </summary>
+        /// <returns></returns>
+        private bool CanApplyRuleFix()
+        {
+            return ExceptionsToFix != null && ExceptionsToFix.Length > 1 ? true : false;
+        }
+
+        /// <summary>
+        /// Execute when the apply rule command button is clicked 
+        /// </summary>
+        private async void ExecuteApplyRuleFix()
+        {
+            try
+            {
+
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+            }
+        }
+
+        /// <summary>
+        /// Set view command buttons enabled/disabled state
+        /// </summary>
+        /// <returns></returns>
+        private bool CanManualFix()
+        {
+            return ExceptionsToFix != null && !string.IsNullOrEmpty(ExceptionsToFix[0]) && ExceptionsToFix.Length == 1 ? true : false;
+        }
+
+        /// <summary>
+        /// Execute when the manual fix command button is clicked 
+        /// </summary>
+        private void ExecuteManualFix()
+        {
+            DataValidationResultInfo resultInfo = ValidationErrorCollection.Where(p => p.Message == SelectedExceptions).FirstOrDefault();
+
+            if (resultInfo != null)
+                _eventAggregator.GetEvent<SearchResultEvent>().Publish(resultInfo.EntityID);
         }
 
         #endregion

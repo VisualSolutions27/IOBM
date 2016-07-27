@@ -144,8 +144,8 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     {
         None = 0,
         Client = 1,
-        Package,
         Company,
+        Package,
         Status
     }
 

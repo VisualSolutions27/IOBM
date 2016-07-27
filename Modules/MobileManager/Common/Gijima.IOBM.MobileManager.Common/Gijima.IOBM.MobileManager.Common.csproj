@@ -59,7 +59,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Structs\BillingProgressInfo.cs" />
+    <Compile Include="Structs\DataValidationResultInfo.cs" />
     <Compile Include="Structs\Enumerator.cs" />
     <Compile Include="Events\EventHandlers.cs" />
     <Compile Include="Helpers\TransactionHelper.cs" />

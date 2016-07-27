@@ -60,7 +60,7 @@ namespace Gijima.IOBM.MobileManager.Views
                     ReportViewer.Show();
                 }
             }
-            catch (Exception ex)
+            catch (Exception  ex)
             {
 
             }

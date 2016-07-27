@@ -1,4 +1,5 @@
-﻿using Gijima.IOBM.MobileManager.Common.Structs;
+﻿using Gijima.IOBM.MobileManager.Common.Events;
+using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Security;
 using Gijima.IOBM.MobileManager.Views;
 using Prism.Commands;
@@ -45,6 +46,15 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         #endregion
 
         #region Event Handlers
+
+        /// <summary>
+        /// This event navigate to the specified tab
+        /// </summary>
+        /// <param name="sender">The error message.</param>
+        private void Navigation_Event(int sender)
+        {
+            SelectedTab = TabCollection[sender];
+        }
 
         ///// <summary>
         ///// Invoked when the main window is loaded.
@@ -257,135 +267,37 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
         #region Methods
 
-        #region Public Methods
-
-        /// <summary>
-        /// Constructor
-        /// </summary>
-        //public MainWindow()
-        //{
-        //    InitializeComponent();
-        //    BrsMsEnvironment.BusyChanged -= BusyIndicator_BusyChanged;
-        //    BrsMsEnvironment.BusyChanged += BusyIndicator_BusyChanged;
-        //}
-
-        #endregion
-
-        #region Private Methods
-
-        /// <summary>
-        /// Set all the controls on the Master UI
-        /// </summary>
-        private void InitialiseControls()
+        public ViewMobileManagerViewModel(IEventAggregator eventAggreagator)
         {
-            //PropertyTree settings = Gijima.BrsMs.Common.Helper.ConfigurationHelper.DeploymentSettings;
-            //string userName = SecurityHelper.UserFullName == null || SecurityHelper.UserFullName.Length == 0 ? SecurityHelper.UserName : SecurityHelper.UserFullName;
-            //string roleName = "Logged in with role " + _application.UserRoleName;
-            //string serverType = ConfigurationHelper.IsExtractionServer ? "EXTRACTION Server - " : "WAREHOUSE Server - ";
-            //TextBlockLoggedInUser.Text = "Welcome " + userName;
-            //TextBlockLoggedInRole.Text = roleName;
-            //TextBlockDatabase.Text = "DATABASE - " + SecurityHelper.DatabaseName;
-            //TextBlockServer.Text = serverType + SecurityHelper.ServerName;
-
-            //// Determine the user's highest role 
-            //if (SecurityHelper.UserRoles.Count > 0)
-            //{
-            //    foreach (string role in SecurityHelper.UserRoles)
-            //    {
-            //        if (role.ToUpper() == UserRoles.Administrator.ToString().ToUpper())
-            //        {
-            //            _application.UserRoleName = role;
-            //            break;
-            //        }
-            //        else if (role.ToUpper() == UserRoles.Supervisor.ToString().ToUpper())
-            //        {
-            //            _application.UserRoleName = role;
-            //            break;
-            //        }
-            //        else if (role.ToUpper() == UserRoles.SuperUser.ToString().ToUpper())
-            //        {
-            //            _application.UserRoleName = role;
-            //            break;
-            //        }
-            //        else
-            //        {
-            //            _application.UserRoleName = role;
-            //        }
-            //    }
-            //}
-            //else if (SecurityHelper.UserRoles.Count == 0)
-            //    throw new ApplicException("Sorry for you, {0}, you have no roles. Good bye!", userName);
-
-            //else
-            //    _application.UserRoleName = SecurityHelper.UserRoles[0].ToString();
-
-            //TextBlockLoggedInRole.Text = "Logged in with role " + _application.UserRoleName;
-            //BrsMsEnvironment.LoggedInUserFullname = userName;
+            _eventAggregator = eventAggreagator;
+            _securityHelper = new SecurityHelper(eventAggreagator);
+            InitialiseMobileManagerView();
         }
 
         /// <summary>
-        /// Set the user's menu options based on the user's security roles
+        /// Initialise all the view dependencies
         /// </summary>
-        private void SetUserAccess()
+        private void InitialiseMobileManagerView()
         {
-            //// For an administrator or super user
-            //if (SecurityHelper.IsUserInRole(UserRoles.Administrator) || SecurityHelper.IsUserInRole(UserRoles.SuperUser))
-            //{
-            //    StackPanelMenuGroup.Visibility = System.Windows.Visibility.Visible;
-            //    RadioButtonAdmin.IsChecked = true;
-            //    GenerateAdminMenu();
-            //    GenerateCommonMenu();
-            //}
+            InitialiseViewControls();
 
-            //// For a user with too many roles
-            //else if (SecurityHelper.UserRoles.Count >= 10)
-            //{
-            //    StackPanelMenuGroup.Visibility = System.Windows.Visibility.Visible;
-            //    RadioButtonAdmin.Visibility = System.Windows.Visibility.Collapsed;
-            //    if (ConfigurationHelper.IsExtractionServer)
-            //    {
-            //        RadioButtonPreScan.IsChecked = true;
-            //        GeneratePreScanMenu();
-            //        GenerateCommonMenu();
-            //    }
-            //    else
-            //    {
-            //        RadioButtonPostScan.IsChecked = true;
-            //        GeneratePostScanMenu();
-            //        GenerateCommonMenu();
-            //    }
-            //}
+            // Subscribe to this event to navigate to the specified tab
+            _eventAggregator.GetEvent<NavigationEvent>().Subscribe(Navigation_Event, true);
 
-            //// For a user with fewer roles
-            //else
-            //{
-            //    StackPanelMenuGroup.Visibility = System.Windows.Visibility.Collapsed;
-            //    if (ConfigurationHelper.IsExtractionServer)
-            //        RadioButtonPreScan.IsChecked = true;
-            //    else
-            //        RadioButtonPostScan.IsChecked = true;
-
-            //    GeneratePreScanMenu();
-            //    GeneratePostScanMenu();
-            //    GenerateAdminMenu();
-            //    GenerateCommonMenu();
-            //}
+            // Add application functionality based on security roles
+            TabCollection = new ObservableCollection<TabItem>();
+            TabCollection.Add(new TabItem() { Header = "Administration" });
+            TabCollection.Add(new TabItem() { Header = "Accounts" });
+            TabCollection.Add(new TabItem() { Header = "Billing" });
+            if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()) || _securityHelper.IsUserInRole(SecurityRole.Supervisor.Value()))
+                TabCollection.Add(new TabItem() { Header = "Configuration" });
         }
 
         /// <summary>
-        /// Generate menu tabs for common items, based on roles the current user has.
+        /// Set default values to view properties
         /// </summary>
-        protected void GenerateCommonMenu()
+        private void InitialiseViewControls()
         {
-            //bool showAllRoles = SecurityHelper.IsUserInRole(UserRoles.Administrator) || SecurityHelper.IsUserInRole(UserRoles.SuperUser) ? true : false;
-
-            //TabControlMainWindowMenu.Items.Add(new TabItem() { Header = "Search" });
-            //if (showAllRoles || SecurityHelper.IsUserInRole(UserRoles.Supervisor))
-            //{
-            //    //TabControlMainWindowMenu.Items.Add(new TabItem() { Header = "Advanced search" });
-            //}
-            //TabControlMainWindowMenu.Items.Add(new TabItem() { Header = "Reports" });
-            //TabControlMainWindowMenu.SelectedIndex = 0;
         }
 
         /// <summary>
@@ -418,7 +330,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                             case "Configuration":
                                 SelectedTab.Content = new ViewConfig();
                                 break;
-                    }
+                        }
 
                     }
 
@@ -429,25 +341,5 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         }
 
         #endregion
-
-        #endregion
-
-        private readonly IRegionManager  _regionManager;
-
-        public DelegateCommand<string> NavigateCommand { get; set; }
-
-        public ViewMobileManagerViewModel(IEventAggregator eventAggreagator)
-        {
-            _eventAggregator = eventAggreagator;
-            _securityHelper = new SecurityHelper(eventAggreagator);
-
-            // Add application functionality based on security roles
-            TabCollection = new ObservableCollection<TabItem>();
-            TabCollection.Add(new TabItem() { Header = "Administration" });
-            TabCollection.Add(new TabItem() { Header = "Accounts" });
-            TabCollection.Add(new TabItem() { Header = "Billing" });
-            if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()) || _securityHelper.IsUserInRole(SecurityRole.Supervisor.Value()))
-                TabCollection.Add(new TabItem() { Header = "Configuration" });
-        }
     }
 }

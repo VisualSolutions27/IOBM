@@ -77,11 +77,15 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                             case ValidationDataType.String:
                                 SelectedOperator = value != null && value.enStringCompareType > 0 ? ((StringOperator)value.enStringCompareType).ToString() : StringOperator.None.ToString();
                                 break;
-                            case ValidationDataType.Bool:
-                                SelectedOperator = "Equal";
+                            case ValidationDataType.Date:
+                                SelectedOperator = value != null && value.enDateCompareType > 0 ? ((DateCompareValue)value.enDateCompareType).ToString() : DateCompareValue.None.ToString();
+                                break;
+                            case ValidationDataType.Integer:
+                            case ValidationDataType.Decimal:
+                                SelectedOperator = value != null && value.enNumericCompareType > 0 ? ((NumericOperator)value.enStringCompareType).ToString() : StringOperator.None.ToString();
                                 break;
                             default:
-                                SelectedOperator = value != null && value.enNumericCompareType > 0 ? ((NumericOperator)value.enStringCompareType).ToString() : StringOperator.None.ToString();
+                                SelectedOperator = "Equal";
                                 break;
                         }
                     }
