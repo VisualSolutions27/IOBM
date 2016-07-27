@@ -1,6 +1,8 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
 using Gijima.IOBM.MobileManager.Common.Events;
 using Gijima.IOBM.MobileManager.Common.Structs;
+using Gijima.IOBM.MobileManager.Model.Data;
+using Gijima.IOBM.MobileManager.Model.Models;
 using Gijima.IOBM.MobileManager.Security;
 using Prism.Commands;
 using Prism.Events;
@@ -8,6 +10,7 @@ using Prism.Mvvm;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace Gijima.IOBM.MobileManager.ViewModels
 {
@@ -15,7 +18,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
     {
         #region Properties & Attributes
 
-        //private ValidationRuleModel _model = null;
+        private BillingProcessModel _model = null;
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
 
@@ -151,6 +154,26 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private bool _billingRunStarted = false;
 
         /// <summary>
+        /// Indicate if the current billing process completed
+        /// </summary>
+        public bool BillingProcessCompleted
+        {
+            get { return _billingProcessCompleted; }
+            set { SetProperty(ref _billingProcessCompleted, value); }
+        }
+        private bool _billingProcessCompleted = false;
+
+        /// <summary>
+        /// The collection of billing process history from the database
+        /// </summary>
+        public ObservableCollection<BillingProcessHistory> ProcessHistoryCollection
+        {
+            get { return _processHistoryCollection; }
+            set { SetProperty(ref _processHistoryCollection, value); }
+        }
+        private ObservableCollection<BillingProcessHistory> _processHistoryCollection = null;
+
+        /// <summary>
         /// The collection of billing processes from the database
         /// </summary>
         public ObservableCollection<BillingProcess> BillingProcessCollection
@@ -205,10 +228,30 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// This event gets received when a process gets started
         /// </summary>
         /// <param name="sender">The error message.</param>
-        private void BillingProcessNumber_Event(int sender)
+        private void BillingProcess_Event(BillingExecutionState sender)
         {
-            BillingProcessProgress++;
+            BillingProcessProgress = sender.Value();
             BillinProcessDescription = string.Format("Executing Process - {0} of {1}", BillingProcessProgress, BillingProcessCount);
+        }
+
+        /// <summary>
+        /// This event gets received to enable the next button 
+        /// when the process completed
+        /// </summary>
+        /// <param name="sender">The error message.</param>
+        private void BillingProcessCompleted_Event(bool sender)
+        {
+            BillingProcessCompleted = sender;
+        }
+
+        /// <summary>
+        /// This event gets received to update the billing process history
+        /// </summary>
+        /// <param name="sender">Indicate if history was created.</param>
+        private async void BillingProcessHistory_Event(bool sender)
+        {
+            if (sender)
+                await ReadBillingProcessesHistoryAsync();
         }
 
         #endregion
@@ -221,6 +264,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         public ViewBillingViewModel(IEventAggregator eventAggregator)
         {
             _eventAggregator = eventAggregator;
+            _model = new BillingProcessModel(eventAggregator);
             _securityHelper = new SecurityHelper(eventAggregator);
             InitialiseBillingView();
         }
@@ -228,7 +272,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Initialise all the view dependencies
         /// </summary>
-        private void InitialiseBillingView()
+        private async void InitialiseBillingView()
         {
             //_model = new ValidationRuleModel(_eventAggregator);
             InitialiseViewControls();
@@ -239,10 +283,17 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             BackCommand = new DelegateCommand(ExecutePreviousPage);
 
             // Subscribe to this event to update the process progress values
-            _eventAggregator.GetEvent<BillingProcessNumberEvent>().Subscribe(BillingProcessNumber_Event, true);
+            _eventAggregator.GetEvent<BillingProcessEvent>().Subscribe(BillingProcess_Event, true);
+
+            // Subscribe to this event to enable the next button when the process completed
+            _eventAggregator.GetEvent<BillingProcessCompletedEvent>().Subscribe(BillingProcessCompleted_Event, true);
+
+            // Subscribe to this event to update the billing process history on the wizard's Info content
+            _eventAggregator.GetEvent<BillingProcessHistoryEvent>().Subscribe(BillingProcessHistory_Event, true);
 
             // Load the view data
-            ReadBillingProcesses();
+            await ReadBillingProcessesHistoryAsync();
+            await ReadBillingProcessesAsync();
         }
 
         /// <summary>
@@ -260,20 +311,28 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         }
 
         /// <summary>
-        /// Load all the billing processes from the  
-        /// billing process enum's
+        /// Load all the billing process history from the database
         /// </summary>
-        private void ReadBillingProcesses()
+        private async Task ReadBillingProcessesHistoryAsync()
         {
             try
             {
-                BillingProcessCollection = new ObservableCollection<BillingProcess>();
+                ProcessHistoryCollection = await Task.Run(() => _model.ReadBillingProcessHistory());
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+            }
+        }
 
-                foreach (BillingProcess process in Enum.GetValues(typeof(BillingProcess)))
-                {
-                    BillingProcessCollection.Add(process);
-                }
-
+        /// <summary>
+        /// Load all the billing processes from the database
+        /// </summary>
+        private async Task ReadBillingProcessesAsync()
+        {
+            try
+            {
+                BillingProcessCollection = await Task.Run(() => _model.ReadBillingProcesses());
                 BillingProcessCount = BillingProcessCollection.Count;
                 BillinProcessDescription = string.Format("Executing Process - {0} of {1}", 0, BillingProcessCount);
             }

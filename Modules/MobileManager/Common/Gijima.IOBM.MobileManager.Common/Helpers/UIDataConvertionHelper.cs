@@ -2,6 +2,7 @@
 using Gijima.IOBM.MobileManager.Common.Structs;
 using System;
 using System.Windows.Data;
+using System.Windows.Media;
 
 namespace Gijima.IOBM.MobileManager.Common.Helpers
 {
@@ -71,6 +72,17 @@ namespace Gijima.IOBM.MobileManager.Common.Helpers
             if (direction == "BoolToYesNo")
             {
                 return val == "1" ? "Yes" : "No";
+            }
+
+            if (direction == "Foreground")
+            {
+                return val == "1" ? Brushes.Green : Brushes.Black;
+            }
+
+            if (direction == "ProcessResult")
+            {
+                if (val.Length > 0)
+                    return val == "1" ? "Passed" : "Failed";
             }
 
             return null;

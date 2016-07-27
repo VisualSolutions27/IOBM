@@ -66,6 +66,12 @@
     <Compile Include="Data\BillingLevel.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="Data\BillingProcess.cs">
+      <DependentUpon>MobileManagerEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\BillingProcessHistory.cs">
+      <DependentUpon>MobileManagerEntities.tt</DependentUpon>
+    </Compile>
     <Compile Include="Data\City.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
@@ -167,6 +173,7 @@
     </Compile>
     <Compile Include="Models\ActivityLogModel.cs" />
     <Compile Include="Models\BillingLevelModel.cs" />
+    <Compile Include="Models\BillingProcessModel.cs" />
     <Compile Include="Models\CityModel.cs" />
     <Compile Include="Models\ClientBillingModel.cs" />
     <Compile Include="Models\ClientLocationModel.cs" />
@@ -193,6 +200,10 @@
     <ProjectReference Include="..\..\..\..\Gijima.IOBM.Infrastructure\Gijima.IOBM.Infrastructure.csproj">
       <Project>{55b7d4d2-9f8d-4c92-9fea-97f5f58ded4a}</Project>
       <Name>Gijima.IOBM.Infrastructure</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\..\..\Gijima.IOBM.Security\Gijima.IOBM.Security.csproj">
+      <Project>{0423C0AE-6F7C-491F-B918-E46E9AEC6FC6}</Project>
+      <Name>Gijima.IOBM.Security</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Common\Gijima.IOBM.MobileManager.Common\Gijima.IOBM.MobileManager.Common.csproj">
       <Project>{c8918bb0-9efb-4158-809b-4b374509f66b}</Project>

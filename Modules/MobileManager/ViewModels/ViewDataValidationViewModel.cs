@@ -24,8 +24,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private ValidationRuleModel _model = null;
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
-        private int _clientIDToFix = 0;
-        
+        private bool _processCompleted = false;
+
         #region Commands
 
         public DelegateCommand StartValidationCommand { get; set; }
@@ -265,20 +265,30 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set
             {
                 SetProperty(ref _selectedExceptions, value);
-                ExceptionsToFix = value.Split(',');
+                PopulateSelectedExceptions(value);
             }
         }
         private string _selectedExceptions;
 
         /// <summary>
-        /// The selected exceptions
+        /// The current selected exception
         /// </summary>
-        private string[] ExceptionsToFix
+        private DataValidationResultInfo SelectedException
+        {
+            get { return _selectedException; }
+            set { SetProperty(ref _selectedException, value); }
+        }
+        private DataValidationResultInfo _selectedException = null;
+
+        /// <summary>
+        /// The selected exceptions to fix
+        /// </summary>
+        private ObservableCollection<DataValidationResultInfo> ExceptionsToFix
         {
             get { return _exceptionsToFix; }
             set { SetProperty(ref _exceptionsToFix, value); }
         }
-        private string[] _exceptionsToFix = null;
+        private ObservableCollection<DataValidationResultInfo> _exceptionsToFix = null;
 
         /// <summary>
         /// The collection of validation groups from the ValidationRuleGroup enum
@@ -511,6 +521,86 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
         }
 
+        /// <summary>
+        /// Populate the selected exceptions to fix collection
+        /// </summary>
+        /// <param name="selectedExceptions">The Xceed CheckListBox selected items string.</param>
+        private void PopulateSelectedExceptions(string selectedExceptions)
+        {
+            try
+            {
+                ObservableCollection<DataValidationResultInfo> resultInfosCollection= new ObservableCollection<DataValidationResultInfo>();
+                DataValidationResultInfo resultInfo = null;
+
+                // The Xceed CheckListBox return all the selected items in
+                // a comma delimeted string, so get the number of selected 
+                // items we need to split the string
+                string[] exceptionsToFix = selectedExceptions.Split(',');
+
+                // Find the last selected exception based on the exception message
+                SelectedException = ValidationErrorCollection.Where(p => p.Message == exceptionsToFix.Last()).FirstOrDefault();
+
+                // Convert all the string values to DataValidationResultInfo
+                // and populate the ValidationErrorCollection
+                foreach (string exception in exceptionsToFix)
+                {
+                    resultInfo = ValidationErrorCollection.Where(p => p.Message == exception).FirstOrDefault();
+
+                    if (resultInfo != null)
+                    {
+                        resultInfosCollection.Add(resultInfo);
+                    }
+                }
+
+                ExceptionsToFix = new ObservableCollection<DataValidationResultInfo>(resultInfosCollection);
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+            }
+        }
+
+        /// <summary>
+        /// Create a new billing process history entry
+        /// </summary>
+        private async Task CreateBillingProcessHistoryAsync()
+        {
+            try
+            {
+                bool result = await Task.Run(() => new BillingProcessModel(_eventAggregator).CreateBillingProcessHistory(BillingExecutionState.DataValidation));
+
+                // Publish this event to update the billing process history on the wizard's Info content
+                _eventAggregator.GetEvent<BillingProcessHistoryEvent>().Publish(result);
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+            }
+        }
+
+        /// <summary>
+        /// Create a new billing process history entry
+        /// </summary>
+        private async Task CompleteBillingProcessHistoryAsync()
+        {
+            try
+            {
+                bool result = await Task.Run(() => new BillingProcessModel(_eventAggregator).CompleteBillingProcessHistory(BillingExecutionState.DataValidation, true));
+
+                // Publish this event to update the billing process history on the wizard's Info content
+                _eventAggregator.GetEvent<BillingProcessHistoryEvent>().Publish(result);
+
+                // Publish this event to enable the next button when the process completed
+                _eventAggregator.GetEvent<BillingProcessCompletedEvent>().Publish(true);
+
+                _processCompleted = true;
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+            }
+        }
+
         #region Lookup Data Loading
 
         #endregion
@@ -523,7 +613,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns></returns>
         private bool CanStartValidation()
         {
-            return ValidationGroupCollection != null && ValidationGroupCollection.Count > 0 ? true : false;
+            return ValidationGroupCollection != null && ValidationGroupCollection.Count > 0  && _processCompleted == false ? true : false;
         }
 
         /// <summary>
@@ -532,12 +622,19 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private async void ExecuteStartValidation()
         {
             InitialiseViewControls();
+            _processCompleted = false;
+
+            // Create a new history entry everytime the process get started
+            await CreateBillingProcessHistoryAsync();
 
             // Set the group progressbar max value
             ValidationGroupCount = ValidationGroupCollection.Count;
 
             // Update the process progress values on the wizard's Info content
-            _eventAggregator.GetEvent<BillingProcessNumberEvent>().Publish(2);
+            _eventAggregator.GetEvent<BillingProcessEvent>().Publish(BillingExecutionState.DataValidation);
+
+            // Disable the next buttton when the process gets started
+            _eventAggregator.GetEvent<BillingProcessCompletedEvent>().Publish(false);
 
             foreach (string group in ValidationGroupCollection)
             {
@@ -602,6 +699,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                         ValidationGroupsPassed++;
                     else
                         ValidationGroupsFailed++;
+
+                    // Update the current history entry as completed
+                    if (ValidationErrorCollection.Count == 0)
+                        await CompleteBillingProcessHistoryAsync();
                 }
             }
         }
@@ -612,7 +713,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns></returns>
         private bool CanApplyRuleFix()
         {
-            return ExceptionsToFix != null && ExceptionsToFix.Length > 1 ? true : false;
+            return ExceptionsToFix != null && ExceptionsToFix.Any(p => p.CanApplyRule == true) && !ExceptionsToFix.Any(p => p.CanApplyRule == false);
         }
 
         /// <summary>
@@ -622,7 +723,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             try
             {
-
+                // Apply the data rule to each exception and remove the fixed
+                // exceptions to the exceptions collection                  
+                foreach (DataValidationResultInfo exception in ExceptionsToFix)
+                {
+                    if (await Task.Run(() => _model.ApplyDataRule(exception)))
+                        ValidationErrorCollection.Remove(exception);
+                }
             }
             catch (Exception ex)
             {
@@ -636,7 +743,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns></returns>
         private bool CanManualFix()
         {
-            return ExceptionsToFix != null && !string.IsNullOrEmpty(ExceptionsToFix[0]) && ExceptionsToFix.Length == 1 ? true : false;
+            return ExceptionsToFix != null && ExceptionsToFix.Count == 1 && !ExceptionsToFix.Any(p => p.CanApplyRule == true);
         }
 
         /// <summary>
@@ -644,10 +751,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void ExecuteManualFix()
         {
-            DataValidationResultInfo resultInfo = ValidationErrorCollection.Where(p => p.Message == SelectedExceptions).FirstOrDefault();
-
-            if (resultInfo != null)
-                _eventAggregator.GetEvent<SearchResultEvent>().Publish(resultInfo.EntityID);
+            if (_selectedException != null)
+                _eventAggregator.GetEvent<SearchResultEvent>().Publish(_selectedException.EntityID);
         }
 
         #endregion

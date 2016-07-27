@@ -15,5 +15,6 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         public int EntityID { get; set; }
         public string PropertyName { get; set; }
         public string Message { get; set; }
+        public bool CanApplyRule { get; set; }
     }
 }

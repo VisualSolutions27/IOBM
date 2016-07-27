@@ -130,7 +130,7 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     /// The <see cref="BillingProcess"/> enumeration a list of 
     /// billing processes.
     /// </summary>
-    public enum BillingProcess
+    public enum BillingExecutionState
     {
         DataValidation = 1,
         DataImport
@@ -192,6 +192,10 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
             return Convert.ToInt16(type);
         }
         public static short Value(this ValidationDataType type)
+        {
+            return Convert.ToInt16(type);
+        }
+        public static short Value(this BillingExecutionState type)
         {
             return Convert.ToInt16(type);
         }

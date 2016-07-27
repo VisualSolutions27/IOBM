@@ -64,6 +64,9 @@
         <AssociationConnector Association="MobileManagerModel.FK_Contract_Status" />
         <AssociationConnector Association="MobileManagerModel.FK_Device_Contract" />
         <AssociationConnector Association="MobileManagerModel.FK_SimmCard_Contract" />
+        <EntityTypeShape EntityType="MobileManagerModel.BillingProcess" Width="1.5" PointX="8.5" PointY="3.5" IsExpanded="false" />
+        <EntityTypeShape EntityType="MobileManagerModel.BillingProcessHistory" Width="1.5" PointX="10.5" PointY="3.5" IsExpanded="false" />
+        <AssociationConnector Association="MobileManagerModel.FK_BillingProcessHistory_BillingProcess" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

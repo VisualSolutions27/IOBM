@@ -5,10 +5,15 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
              xmlns:local="clr-namespace:Gijima.IOBM.MobileManager.Views"
+             xmlns:mm="clr-namespace:Gijima.IOBM.MobileManager.Common.Helpers;assembly=Gijima.IOBM.MobileManager.Common"            
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"                   
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="800">
+
+    <UserControl.Resources>
+        <mm:UIDataConvertionHelper x:Key="UIDataConvertionHelper"/>
+    </UserControl.Resources>
     
     <Grid x:Name="LayoutControl">
         <Grid.RowDefinitions>
@@ -46,14 +51,14 @@
             <Button x:Name="ButtonApplyRule" ToolTip="Apply the data rule to fix the exceptions." TabIndex="3" Margin="0,0,0,10" 
                 Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" Command="{Binding ApplyRuleFixCommand}">
                 <StackPanel Orientation="Horizontal" Width="118">
-                    <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/062.png" Margin="0,2,10,2"/>
+                    <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/T (263).ico" Margin="0,1,10,1"/>
                     <TextBlock Text="Apply Data Rule" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>
             <Button x:Name="ButtonFixManually" ToolTip="Fix the selected exception manually." TabIndex="4" 
                 Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" Command="{Binding ManualFixCommand}">
                 <StackPanel Orientation="Horizontal" Width="118">
-                    <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/062.png" Margin="0,2,10,2"/>
+                    <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/T (264).ico" Margin="0,1,10,1"/>
                     <TextBlock Text="Fix Manually" VerticalAlignment="Center"/>
                 </StackPanel>
             </Button>
@@ -115,8 +120,13 @@
             <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Height="1" VerticalAlignment="Bottom" Background="Gray" Margin="0,5,0,0"></Border>
         </Grid>
         <TextBlock Grid.Row="8" Grid.Column="2" Text="Data Validation Exceptions" Style="{StaticResource UXLabelTextStyle}" VerticalAlignment="Bottom" ></TextBlock>
-        <xctk:CheckListBox x:Name="ListBoxExceptions" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="3" Background="WhiteSmoke" TabIndex="2" DisplayMemberPath="Message" ValueMemberPath="Message"
+        <xctk:CheckListBox x:Name="ListBoxExceptions" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="3" Background="WhiteSmoke" TabIndex="2" ValueMemberPath="Message"
             ItemsSource="{Binding ValidationErrorCollection, UpdateSourceTrigger=PropertyChanged}" SelectedValue="{Binding SelectedExceptions, UpdateSourceTrigger=PropertyChanged}">
+            <xctk:CheckListBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" Foreground="{Binding CanApplyRule, Converter={StaticResource UIDataConvertionHelper},  ConverterParameter='Foreground'}"/>
+                </DataTemplate>
+            </xctk:CheckListBox.ItemTemplate>
         </xctk:CheckListBox>
     </Grid>
 </UserControl>

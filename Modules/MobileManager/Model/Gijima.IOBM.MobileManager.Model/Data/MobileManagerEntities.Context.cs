@@ -55,6 +55,8 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public virtual DbSet<Package> Packages { get; set; }
         public virtual DbSet<Contract> Contracts { get; set; }
         public virtual DbSet<PackageSetup> PackageSetups { get; set; }
+        public virtual DbSet<BillingProcess> BillingProcesses { get; set; }
+        public virtual DbSet<BillingProcessHistory> BillingProcessHistories { get; set; }
     
         public virtual ObjectResult<sp_report_Invoice_Result> sp_report_Invoice(Nullable<int> invoiceID)
         {

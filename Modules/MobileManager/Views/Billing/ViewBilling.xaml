@@ -38,7 +38,7 @@
             </Grid>
         </Border>
         <Border Grid.Row="1" Grid.Column="0" Background="#FFF2E9C1" Margin="5,5,0,5" BorderBrush="Silver" BorderThickness="1,1,0,1">
-            <Grid Margin="5,5,5,10">
+            <Grid Margin="10,10,15,10">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="5" />
@@ -56,31 +56,21 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="1" Text="Billing Period" HorizontalAlignment="Center" Style="{StaticResource ClientHeaderTextStyle}"></TextBlock>
                 <TextBlock Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" Style="{StaticResource UXLabelTextStyle}" FontSize="14" FontWeight="Bold"
                     Text="{Binding SelectedBillingPeriod, UpdateSourceTrigger=PropertyChanged}">
                 </TextBlock>
                 <TextBlock Grid.Row="4" Grid.Column="1" Text="Billing Status" HorizontalAlignment="Center" Style="{StaticResource ClientHeaderTextStyle}"></TextBlock>
-                <DataGrid x:Name="DataGridStatus" Grid.Row="6" Grid.Column="1" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserSortColumns="True" 
-                    IsReadOnly="True" TabIndex="4" Style="{StaticResource DataGridStyle}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}" 
-                    ItemsSource="{Binding StatusCollection}" SelectedItem="{Binding SelectedStatus}">
+                <DataGrid x:Name="DataGridStatus" Grid.Row="6" Grid.Column="1" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserSortColumns="False" 
+                    IsReadOnly="True" TabIndex="1" Style="{StaticResource DataGridStyle}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}" 
+                    ItemsSource="{Binding ProcessHistoryCollection}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Process" Binding="{Binding StatusDescription}" Width="Auto" />
-                        <DataGridTextColumn Header="Start Date"  Width="Auto" />
-                        <DataGridTextColumn Header="End Date"  Width="Auto" />
-                        <DataGridTextColumn Header="Duration"  Width="Auto" />
-                        <DataGridTemplateColumn Header="Result" Width="50">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Image Height="15" Width="15" Margin="0,2,2,0"
-                                        Source="{Binding enStatusLink, Converter={StaticResource UIDataConvertionHelper},  ConverterParameter='StatusLink'}">
-                                    </Image>
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                        <DataGridTextColumn Header="Process" Binding="{Binding BillingProcess.ProcessDescription}" Width="*"/>
+                        <DataGridTextColumn Header="Start Date" Binding="{Binding ProcessStartDate}" Width="Auto" />
+                        <DataGridTextColumn Header="End Date" Binding="{Binding ProcessEndDate}" Width="Auto" />
+                        <DataGridTextColumn Header="Result" Binding="{Binding ProcessResult, Converter={StaticResource UIDataConvertionHelper},  ConverterParameter='ProcessResult'}" Width="50"/>
+                        <DataGridTextColumn Header="Duration" Binding="{Binding ProcessDuration}" Width="Auto" />
                     </DataGrid.Columns>
                 </DataGrid>
                 <TextBlock x:Name="TextBlockWizardPages" Grid.Row="8" Grid.Column="1" Style="{StaticResource UXLabelTextStyle}"
@@ -136,9 +126,9 @@
                     <TextBox Grid.Row="2" Grid.Column="3" IsTabStop="False" IsReadOnly="True" HorizontalContentAlignment="Center" Text="{Binding SelectedBillingYear, UpdateSourceTrigger=PropertyChanged}"/>
                     <TextBlock Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="2" Text="Billing processes:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
                     <ListBox Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2" IsTabStop="False" ItemsSource="{Binding BillingProcessCollection, UpdateSourceTrigger=PropertyChanged}" 
-                        SelectedValue="{Binding SelectedBillingProcesses, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                        DisplayMemberPath="ProcessDescription" SelectedValue="{Binding SelectedBillingProcesses, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
                     </ListBox>
-                    <Button x:Name="ButtonStart" Grid.Row="7" Grid.Column="3" ToolTip="Cancel the current operation." TabIndex="0"
+                    <Button x:Name="ButtonStart" Grid.Row="7" Grid.Column="3" ToolTip="Cancel the current operation." TabIndex="1"
                         Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" Command="{Binding AcceptCommand}">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/277.png" Margin="0,1,5,1"/>
@@ -148,7 +138,7 @@
                 </Grid>
             </xctk:WizardPage>
             <xctk:WizardPage x:Name="WizardPage2" ExteriorPanelBackground="White" Title="Billing Wizard" Description="This Wizard page exposes functionality to execute the data validation process and to correct any resulting exceptions." 
-                CanSelectNextPage="{Binding BillingProcess1Completed}" NextPage="{Binding ElementName=WizardPage3}" PreviousPage="{Binding ElementName=WizardPage1}">
+                CanSelectNextPage="{Binding BillingProcessCompleted}" NextPage="{Binding ElementName=WizardPage3}" PreviousPage="{Binding ElementName=WizardPage1}">
                 <Grid IsEnabled="{Binding CanBillingOptionsChange, UpdateSourceTrigger=PropertyChanged}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="10" />

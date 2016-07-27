@@ -131,15 +131,15 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         }
         private string _entityLabel = "Entity:";
 
-        /// <summary>
-        /// The selected billing process
-        /// </summary>
-        public BillingProcess SelectedBillingProcess
-        {
-            get { return _selectedBillingProcess; }
-            set { SetProperty(ref _selectedBillingProcess, value); }
-        }
-        private BillingProcess _selectedBillingProcess = BillingProcess.DataValidation;
+        ///// <summary>
+        ///// The selected billing process
+        ///// </summary>
+        //public BillingProcess SelectedBillingProcess
+        //{
+        //    get { return _selectedBillingProcess; }
+        //    set { SetProperty(ref _selectedBillingProcess, value); }
+        //}
+        //private BillingProcess _selectedBillingProcess = BillingProcess.DataValidation;
 
         /// <summary>
         /// The collection of validation rules from the database

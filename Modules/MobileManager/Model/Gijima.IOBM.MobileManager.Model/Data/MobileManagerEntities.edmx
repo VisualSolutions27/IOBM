@@ -27,6 +27,29 @@
           <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
         </EntityType>
+        <EntityType Name="BillingProcess">
+          <Key>
+            <PropertyRef Name="pkBillingProcessID" />
+          </Key>
+          <Property Name="pkBillingProcessID" Type="int" Nullable="false" />
+          <Property Name="ProcessDescription" Type="varchar" MaxLength="50" Nullable="false" />
+        </EntityType>
+        <EntityType Name="BillingProcessHistory">
+          <Key>
+            <PropertyRef Name="pkBillingProcessHistoryID" />
+          </Key>
+          <Property Name="pkBillingProcessHistoryID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="fkBillingProcessID" Type="int" Nullable="false" />
+          <Property Name="BillingPeriod" Type="varchar" MaxLength="6" Nullable="false" />
+          <Property Name="ProcessStartDate" Type="datetime" Nullable="false" />
+          <Property Name="ProcessEndDate" Type="datetime" />
+          <Property Name="ProcessStatus" Type="bit" Nullable="false" />
+          <Property Name="ProcessResult" Type="bit" />
+          <Property Name="ProcessDuration" Type="float" />
+          <Property Name="BillingComment" Type="varbinary" MaxLength="255" />
+          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="DateModified" Type="datetime" Nullable="false" />
+        </EntityType>
         <EntityType Name="City">
           <Key>
             <PropertyRef Name="pkCityID" />
@@ -53,7 +76,7 @@
           <Property Name="CostCode" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="WBSNumber" Type="varchar" MaxLength="50" />
           <Property Name="AdminFee" Type="decimal" Precision="18" Scale="2" Nullable="false" />
-          <Property Name="IPAddress" Type="nchar" MaxLength="12" />
+          <Property Name="IPAddress" Type="varchar" MaxLength="15" />
           <Property Name="fkCompanyID" Type="int" Nullable="false" />
           <Property Name="fkClientLocationID" Type="int" Nullable="false" />
           <Property Name="fkContractID" Type="int" Nullable="false" />
@@ -107,7 +130,7 @@
           <Property Name="WBSNumber" Type="varchar" MaxLength="25" />
           <Property Name="CostCode" Type="varchar" MaxLength="30" />
           <Property Name="AdminFee" Type="decimal" Precision="18" Scale="2" Nullable="false" />
-          <Property Name="IPAddress" Type="varchar" MaxLength="20" />
+          <Property Name="IPAddress" Type="varchar" MaxLength="15" />
           <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
@@ -392,6 +415,18 @@
           <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
         </EntityType>
+        <Association Name="FK_BillingProcessHistory_BillingProcess">
+          <End Role="BillingProcess" Type="Self.BillingProcess" Multiplicity="1" />
+          <End Role="BillingProcessHistory" Type="Self.BillingProcessHistory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BillingProcess">
+              <PropertyRef Name="pkBillingProcessID" />
+            </Principal>
+            <Dependent Role="BillingProcessHistory">
+              <PropertyRef Name="fkBillingProcessID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_BillingValidationRule_BillingRulesData">
           <End Role="ValidationRulesData" Type="Self.ValidationRulesData" Multiplicity="1" />
           <End Role="ValidationRule" Type="Self.ValidationRule" Multiplicity="*" />
@@ -770,6 +805,8 @@
         <EntityContainer Name="MobileManagerModelStoreContainer">
           <EntitySet Name="ActivityLog" EntityType="Self.ActivityLog" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="BillingLevel" EntityType="Self.BillingLevel" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="BillingProcess" EntityType="Self.BillingProcess" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="BillingProcessHistory" EntityType="Self.BillingProcessHistory" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="City" EntityType="Self.City" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Client" EntityType="Self.Client" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ClientBilling" EntityType="Self.ClientBilling" Schema="dbo" store:Type="Tables" />
@@ -796,6 +833,10 @@
           <EntitySet Name="UserInRole" EntityType="Self.UserInRole" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ValidationRule" EntityType="Self.ValidationRule" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ValidationRulesData" EntityType="Self.ValidationRulesData" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK_BillingProcessHistory_BillingProcess" Association="Self.FK_BillingProcessHistory_BillingProcess">
+            <End Role="BillingProcess" EntitySet="BillingProcess" />
+            <End Role="BillingProcessHistory" EntitySet="BillingProcessHistory" />
+          </AssociationSet>
           <AssociationSet Name="FK_BillingValidationRule_BillingRulesData" Association="Self.FK_BillingValidationRule_BillingRulesData">
             <End Role="ValidationRulesData" EntitySet="ValidationRulesData" />
             <End Role="ValidationRule" EntitySet="ValidationRule" />
@@ -1338,6 +1379,12 @@
             <End Role="Contract" EntitySet="Contracts" />
             <End Role="SimmCard" EntitySet="SimmCards" />
           </AssociationSet>
+          <EntitySet Name="BillingProcesses" EntityType="MobileManagerModel.BillingProcess" />
+          <EntitySet Name="BillingProcessHistories" EntityType="MobileManagerModel.BillingProcessHistory" />
+          <AssociationSet Name="FK_BillingProcessHistory_BillingProcess" Association="MobileManagerModel.FK_BillingProcessHistory_BillingProcess">
+            <End Role="BillingProcess" EntitySet="BillingProcesses" />
+            <End Role="BillingProcessHistory" EntitySet="BillingProcessHistories" />
+          </AssociationSet>
           </EntityContainer>
         <EntityType Name="Role">
           <Key>
@@ -1653,7 +1700,7 @@
           <Property Name="CostCode" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="WBSNumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="AdminFee" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
-          <Property Name="IPAddress" Type="String" MaxLength="12" FixedLength="true" Unicode="true" />
+          <Property Name="IPAddress" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
           <Property Name="fkCompanyID" Type="Int32" Nullable="false" />
           <Property Name="fkClientLocationID" Type="Int32" Nullable="false" />
           <Property Name="fkContractID" Type="Int32" Nullable="false" />
@@ -1680,7 +1727,7 @@
           <Property Name="WBSNumber" Type="String" MaxLength="25" FixedLength="false" Unicode="false" />
           <Property Name="CostCode" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
           <Property Name="AdminFee" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
-          <Property Name="IPAddress" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="IPAddress" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
           <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
@@ -1918,6 +1965,43 @@
             </Principal>
             <Dependent Role="SimmCard">
               <PropertyRef Name="fkContractID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="BillingProcess">
+          <Key>
+            <PropertyRef Name="pkBillingProcessID" />
+          </Key>
+          <Property Name="pkBillingProcessID" Type="Int32" Nullable="false" />
+          <Property Name="ProcessDescription" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="BillingProcessHistories" Relationship="MobileManagerModel.FK_BillingProcessHistory_BillingProcess" FromRole="BillingProcess" ToRole="BillingProcessHistory" />
+        </EntityType>
+        <EntityType Name="BillingProcessHistory">
+          <Key>
+            <PropertyRef Name="pkBillingProcessHistoryID" />
+          </Key>
+          <Property Name="pkBillingProcessHistoryID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="fkBillingProcessID" Type="Int32" Nullable="false" />
+          <Property Name="BillingPeriod" Type="String" Nullable="false" MaxLength="6" FixedLength="false" Unicode="false" />
+          <Property Name="ProcessStartDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ProcessEndDate" Type="DateTime" Precision="3" />
+          <Property Name="ProcessStatus" Type="Boolean" Nullable="false" />
+          <Property Name="ProcessResult" Type="Boolean" />
+          <Property Name="ProcessDuration" Type="Double" />
+          <Property Name="BillingComment" Type="Binary" MaxLength="255" FixedLength="false" />
+          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DateModified" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="BillingProcess" Relationship="MobileManagerModel.FK_BillingProcessHistory_BillingProcess" FromRole="BillingProcessHistory" ToRole="BillingProcess" />
+        </EntityType>
+        <Association Name="FK_BillingProcessHistory_BillingProcess">
+          <End Type="MobileManagerModel.BillingProcess" Role="BillingProcess" Multiplicity="1" />
+          <End Type="MobileManagerModel.BillingProcessHistory" Role="BillingProcessHistory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BillingProcess">
+              <PropertyRef Name="pkBillingProcessID" />
+            </Principal>
+            <Dependent Role="BillingProcessHistory">
+              <PropertyRef Name="fkBillingProcessID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -2361,6 +2445,31 @@
                 <ScalarProperty Name="MBData" ColumnName="MBData" />
                 <ScalarProperty Name="Cost" ColumnName="Cost" />
                 <ScalarProperty Name="pkPackageSetupID" ColumnName="pkPackageSetupID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BillingProcesses">
+            <EntityTypeMapping TypeName="MobileManagerModel.BillingProcess">
+              <MappingFragment StoreEntitySet="BillingProcess">
+                <ScalarProperty Name="ProcessDescription" ColumnName="ProcessDescription" />
+                <ScalarProperty Name="pkBillingProcessID" ColumnName="pkBillingProcessID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BillingProcessHistories">
+            <EntityTypeMapping TypeName="MobileManagerModel.BillingProcessHistory">
+              <MappingFragment StoreEntitySet="BillingProcessHistory">
+                <ScalarProperty Name="DateModified" ColumnName="DateModified" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="BillingComment" ColumnName="BillingComment" />
+                <ScalarProperty Name="ProcessDuration" ColumnName="ProcessDuration" />
+                <ScalarProperty Name="ProcessResult" ColumnName="ProcessResult" />
+                <ScalarProperty Name="ProcessStatus" ColumnName="ProcessStatus" />
+                <ScalarProperty Name="ProcessEndDate" ColumnName="ProcessEndDate" />
+                <ScalarProperty Name="ProcessStartDate" ColumnName="ProcessStartDate" />
+                <ScalarProperty Name="BillingPeriod" ColumnName="BillingPeriod" />
+                <ScalarProperty Name="fkBillingProcessID" ColumnName="fkBillingProcessID" />
+                <ScalarProperty Name="pkBillingProcessHistoryID" ColumnName="pkBillingProcessHistoryID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
