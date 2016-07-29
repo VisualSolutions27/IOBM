@@ -42,20 +42,22 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 using (var db = MobileManagerEntities.GetContext())
                 {
                     BillingProcessHistory currentHistory = db.BillingProcessHistories.Where(p => p.BillingPeriod == billingPeriod &&    
-                                                                                                 p.ProcessStatus == true).FirstOrDefault();
+                                                                                                 p.ProcessCurrent == true).FirstOrDefault();
 
                     // If a current process history entity
                     // found make it not current
                     if (currentHistory != null && currentHistory.ProcessEndDate == null && currentHistory.ProcessResult == null)
                     {
-                        currentHistory.ProcessStatus = false;
+                        currentHistory.ProcessCurrent = false;
                         currentHistory.ProcessEndDate = DateTime.Now;
                         TimeSpan duration = currentHistory.ProcessEndDate.Value - currentHistory.ProcessStartDate;
                         currentHistory.ProcessDuration = Math.Round(duration.TotalMinutes, 2);
                         
-                        // if the process is the same then fail the current process
+                        // If the process is the same then fail the current process
                         if (currentHistory.fkBillingProcessID == billingProcess.Value())
                             currentHistory.ProcessResult = false;
+                        else
+                            currentHistory.ProcessResult = true;
                     }
 
                     // Add the new current process history entity
@@ -63,7 +65,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     processHistory.fkBillingProcessID = billingProcess.Value();
                     processHistory.BillingPeriod = billingPeriod;
                     processHistory.ProcessStartDate = DateTime.Now;
-                    processHistory.ProcessStatus = true;
+                    processHistory.ProcessCurrent = true;
                     processHistory.ModifiedBy = SecurityHelper.LoggedInDomainName;
                     processHistory.DateModified = DateTime.Now;
 
@@ -78,6 +80,58 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 return false;
             }
         }
+
+        ///// <summary>
+        ///// Create a new data validation exception entity in the database
+        ///// </summary>
+        ///// <param name="validationException">The data validation exception.</param>
+        //public void CreateBillingProcessException(DataValidationResultInfo validationException)
+        //{
+        //    try
+        //    {
+        //        string billingPeriod = string.Format("{0}{1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year);
+
+        //        using (var db = MobileManagerEntities.GetContext())
+        //        {
+        //            BillingProcessHistory currentHistory = db.BillingProcessHistories.Where(p => p.BillingPeriod == billingPeriod &&
+        //                                                                                         p.ProcessCurrent == true).FirstOrDefault();
+
+        //            // If a current process history entity
+        //            // found make it not current
+        //            if (currentHistory != null && currentHistory.ProcessEndDate == null && currentHistory.ProcessResult == null)
+        //            {
+        //                currentHistory.ProcessCurrent = false;
+        //                currentHistory.ProcessEndDate = DateTime.Now;
+        //                TimeSpan duration = currentHistory.ProcessEndDate.Value - currentHistory.ProcessStartDate;
+        //                currentHistory.ProcessDuration = Math.Round(duration.TotalMinutes, 2);
+
+        //                // If the process is the same then fail the current process
+        //                if (currentHistory.fkBillingProcessID == billingProcess.Value())
+        //                    currentHistory.ProcessResult = false;
+        //                else
+        //                    currentHistory.ProcessResult = true;
+        //            }
+
+        //            // Add the new current process history entity
+        //            BillingProcessHistory processHistory = new BillingProcessHistory();
+        //            processHistory.fkBillingProcessID = billingProcess.Value();
+        //            processHistory.BillingPeriod = billingPeriod;
+        //            processHistory.ProcessStartDate = DateTime.Now;
+        //            processHistory.ProcessCurrent = true;
+        //            processHistory.ModifiedBy = SecurityHelper.LoggedInDomainName;
+        //            processHistory.DateModified = DateTime.Now;
+
+        //            db.BillingProcessHistories.Add(processHistory);
+        //            db.SaveChanges();
+        //            return true;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+        //        return false;
+        //    }
+        //}
 
         /// <summary>
         /// Read billing processes from the database
@@ -134,9 +188,29 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         }
 
         /// <summary>
+        /// Read the current billing process history from the database
+        /// </summary>
+        /// <returns>BillingProcessHistory</returns>
+        public BillingProcessHistory ReadBillingProcessCurrentHistory()
+        {
+            try
+            {
+                using (var db = MobileManagerEntities.GetContext())
+                {
+                    return db.BillingProcessHistories.Where(p => p.ProcessCurrent == true).FirstOrDefault();
+                }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Set a billing history entity for the specified process as completed in the database
         /// </summary>
-        /// <param name="billingProcess">The billing process to create history for.</param>
+        /// <param name="billingProcess">The billing process to complete.</param>
         /// <param name="processResult">The process result.</param>
         /// <returns>True if successfull</returns>
         public bool CompleteBillingProcessHistory(BillingExecutionState billingProcess, bool processResult)
@@ -148,7 +222,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 using (var db = MobileManagerEntities.GetContext())
                 {
                     BillingProcessHistory currentHistory = db.BillingProcessHistories.Where(p => p.BillingPeriod == billingPeriod &&
-                                                                                                 p.ProcessStatus == true).FirstOrDefault();
+                                                                                                 p.ProcessCurrent == true).FirstOrDefault();
 
                     // If a current process history entity
                     // found set it as complete

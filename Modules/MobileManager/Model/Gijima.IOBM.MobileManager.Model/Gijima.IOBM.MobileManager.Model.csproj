@@ -168,6 +168,9 @@
     <Compile Include="Data\ValidationRule.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="Data\ValidationRuleException.cs">
+      <DependentUpon>MobileManagerEntities.tt</DependentUpon>
+    </Compile>
     <Compile Include="Data\ValidationRulesData.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>

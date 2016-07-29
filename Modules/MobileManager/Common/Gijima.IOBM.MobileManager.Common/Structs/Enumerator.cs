@@ -132,8 +132,9 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     /// </summary>
     public enum BillingExecutionState
     {
-        DataValidation = 1,
-        DataImport
+        Started = 1,
+        DataValidation = 2,
+        DataImport = 3
     }
 
     /// <summary>
@@ -144,9 +145,11 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     {
         None = 0,
         Client = 1,
-        Company,
-        Package,
-        Status
+        Company = 2,
+        Package = 3,
+        Device = 4,
+        SimmCard = 5,
+        Status = 6
     }
 
     /// <summary>
@@ -157,10 +160,21 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     {
         None = 0,
         String = 1,
-        Integer,
-        Decimal,
-        Date,
-        Bool
+        Integer = 2,
+        Decimal = 3,
+        Date = 4,
+        Bool = 5
+    }
+
+    /// <summary>
+    /// The <see cref="DataValidationEntity"/> enumeration a list of 
+    /// data entity options to validate on.
+    /// </summary>
+    public enum DataValidationEntity
+    {
+        None = 0,
+        Client = 1,
+        Company = 2
     }
 
     /// <summary>
@@ -196,6 +210,10 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
             return Convert.ToInt16(type);
         }
         public static short Value(this BillingExecutionState type)
+        {
+            return Convert.ToInt16(type);
+        }
+        public static short Value(this DataValidationEntity type)
         {
             return Convert.ToInt16(type);
         }

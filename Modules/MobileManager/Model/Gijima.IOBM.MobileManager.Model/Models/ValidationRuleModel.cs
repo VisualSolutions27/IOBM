@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 
 namespace Gijima.IOBM.MobileManager.Model.Models
@@ -212,59 +213,66 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 return false;
             }
         }
-
         /// <summary>
         /// Update the relevant enetity based on the validation result info
         /// </summary>
-        /// <param name="validationResultInfo">The validation result info to apply.</param>
+        /// <param name="validationExceptionInfo">The validation exception info to apply.</param>
         /// <returns>True if successfull</returns>
-        public bool ApplyDataRule(DataValidationResultInfo validationResultInfo)
+        public bool ApplyDataRule(ValidationRuleException validationExceptionInfo)
         {
             try
             {
                 bool result = false;
-                ValidationRule rule = (ValidationRule)validationResultInfo.ValidationRule;
 
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    if (validationResultInfo.EntityType == typeof(Client))
+                    ValidationRule rule = ((DbQuery<ValidationRule>)(from validationRule in db.ValidationRules
+                                                                     where validationRule.pkValidationRuleID == validationExceptionInfo.fkValidationRuleID
+                                                                     select validationRule)).Include("ValidationRulesData").FirstOrDefault();
+
+                    if (rule != null)
                     {
-                        Client clientToUpdate = db.Clients.Where(p => p.pkClientID == validationResultInfo.EntityID).FirstOrDefault();
-
-                        if (clientToUpdate != null)
+                        switch ((DataValidationEntity)validationExceptionInfo.enValidationEntity)
                         {
-                            // Get the client table properties (Fields)
-                            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(Client));
+                            case DataValidationEntity.Client:
+                                Client clientToUpdate = db.Clients.Where(p => p.pkClientID == validationExceptionInfo.EntityID).FirstOrDefault();
 
-                            foreach (PropertyDescriptor property in properties)
-                            {
-                                // Find the data column (property) to update
-                                if (validationResultInfo.PropertyName == property.Name)
+                                if (clientToUpdate != null)
                                 {
-                                    // Update the property value based on the data type
-                                    switch (((ValidationDataType)Enum.Parse(typeof(ValidationDataType), rule.RuleDataTypeName)))
-                                    {
-                                        case ValidationDataType.Date:
-                                            property.SetValue(clientToUpdate, Convert.ToDateTime(rule.ValidationDataValue));
-                                            break;
-                                        case ValidationDataType.Integer:
-                                            property.SetValue(clientToUpdate, Convert.ToInt32(rule.ValidationDataValue));
-                                            break;
-                                        case ValidationDataType.Decimal:
-                                            property.SetValue(clientToUpdate, Convert.ToDecimal(rule.ValidationDataValue));
-                                            break;
-                                        case ValidationDataType.Bool:
-                                            property.SetValue(clientToUpdate, Convert.ToBoolean(rule.ValidationDataValue));
-                                            break;
-                                        default:
-                                            property.SetValue(clientToUpdate, rule.ValidationDataValue);
-                                            break;
-                                    }
+                                    // Get the client table properties (Fields)
+                                    PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(Client));
 
-                                    db.SaveChanges();
-                                    result = true;
+                                    foreach (PropertyDescriptor property in properties)
+                                    {
+                                        // Find the data column (property) to update
+                                        if (rule.ValidationRulesData.ValidationDataName == property.Name)
+                                        {
+                                            // Update the property value based on the data type
+                                            switch ((ValidationDataType)rule.ValidationRulesData.enValidationDataType)
+                                            {
+                                                case ValidationDataType.Date:
+                                                    property.SetValue(clientToUpdate, Convert.ToDateTime(rule.ValidationRulesData.ValidationDataName));
+                                                    break;
+                                                case ValidationDataType.Integer:
+                                                    property.SetValue(clientToUpdate, Convert.ToInt32(rule.ValidationRulesData.ValidationDataName));
+                                                    break;
+                                                case ValidationDataType.Decimal:
+                                                    property.SetValue(clientToUpdate, Convert.ToDecimal(rule.ValidationRulesData.ValidationDataName));
+                                                    break;
+                                                case ValidationDataType.Bool:
+                                                    property.SetValue(clientToUpdate, Convert.ToBoolean(rule.ValidationRulesData.ValidationDataName));
+                                                    break;
+                                                default:
+                                                    property.SetValue(clientToUpdate, rule.ValidationRulesData.ValidationDataName);
+                                                    break;
+                                            }
+
+                                            db.SaveChanges();
+                                            result = true;
+                                        }
+                                    }
                                 }
-                            }
+                                break;
                         }
                     }
                 }
@@ -287,10 +295,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         {
             try
             {
-                bool result = true;
-                int clientID = 0;
-                string clientName = string.Empty;
+                int entityID = 0;
+                string entityName = string.Empty;
+                string entityValue = string.Empty;
+                string ruleValue = string.Empty;
                 bool canApplyRule = false;
+                bool result = true;
 
                 using (var db = MobileManagerEntities.GetContext())
                 {
@@ -315,39 +325,56 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                     MaxValue = companyClients.Count,
                                 });
 
-                                // Validate the data rule values for each 
+                                // Validate the data rule values for each           
                                 // client linked the the company
                                 foreach (Client client in companyClients)
                                 {
-                                    clientID = client.pkClientID;
-                                    clientName = string.Format("{0} ({1})", client.ClientName, client.PrimaryCellNumber);
+                                    entityID = client.pkClientID;
+                                    entityName = string.Format("{0} ({1})", client.ClientName, client.PrimaryCellNumber);
+                                    entityValue = db.Entry(client).Property(validationRule.RuleDataName).CurrentValue != null ? 
+                                                  db.Entry(client).Property(validationRule.RuleDataName).CurrentValue.ToString() : string.Empty;
 
                                     switch (((ValidationDataType)Enum.Parse(typeof(ValidationDataType), validationRule.RuleDataTypeName)))
                                     {
                                         case ValidationDataType.String:
+                                            ruleValue = string.Format("{0} {1} {2}", validationRule.RuleDataName.ToUpper(),
+                                                                                     ((StringOperator)validationRule.enStringCompareType).ToString(),
+                                                                                     validationRule.ValidationDataValue);
                                             result = _dataComparer.CompareStringValues((StringOperator)validationRule.enStringCompareType,
-                                                                                       db.Entry(client).Property(validationRule.RuleDataName).CurrentValue != null ? db.Entry(client).Property(validationRule.RuleDataName).CurrentValue.ToString() : string.Empty,
+                                                                                       entityValue,
                                                                                        validationRule.ValidationDataValue);
                                             // If the operator is 'Equal' the the rule can be auto applied to fixed failures
                                             canApplyRule = (StringOperator)validationRule.enStringCompareType == StringOperator.Equal ? true : false;
                                             break;
                                         case ValidationDataType.Date:
+                                            ruleValue = string.Format("{0} {1} {2}", validationRule.RuleDataName.ToUpper(),
+                                                                                     ((StringOperator)validationRule.enStringCompareType).ToString(),
+                                                                                     validationRule.ValidationDataValue);
                                             break;
                                         case ValidationDataType.Integer:
-                                            result = _dataComparer.CompareNumericValues((NumericOperator)validationRule.enNumericCompareType, 
-                                                                                        db.Entry(client).Property(validationRule.RuleDataName).CurrentValue.ToString(),
+                                            ruleValue = string.Format("{0} {1} {2}", validationRule.RuleDataName.ToUpper(),
+                                                                                     ((StringOperator)validationRule.enStringCompareType).ToString(),
+                                                                                     validationRule.ValidationDataValue);
+                                            result = _dataComparer.CompareNumericValues((NumericOperator)validationRule.enNumericCompareType,
+                                                                                        entityValue,
                                                                                         validationRule.ValidationDataValue);
                                             // If the operator is 'Equal' the the rule can be auto applied to fixed failures
                                             canApplyRule = (NumericOperator)validationRule.enNumericCompareType == NumericOperator.Equal ? true : false;
                                             break;
                                         case ValidationDataType.Decimal:
+                                            ruleValue = string.Format("{0} {1} {2}", validationRule.RuleDataName.ToUpper(),
+                                                                                     ((StringOperator)validationRule.enStringCompareType).ToString(),
+                                                                                     validationRule.ValidationDataValue);
                                             result = _dataComparer.CompareDecimalValues((NumericOperator)validationRule.enNumericCompareType,
-                                                                                        db.Entry(client).Property(validationRule.RuleDataName).CurrentValue.ToString(),
+                                                                                        entityValue,
                                                                                         validationRule.ValidationDataValue);
                                             // If the operator is 'Equal' the the rule can be auto applied to fixed failures
                                             canApplyRule = (NumericOperator)validationRule.enNumericCompareType == NumericOperator.Equal ? true : false;
                                             break;
                                         case ValidationDataType.Bool:
+                                            ruleValue = string.Format("{0} {1} {2}", validationRule.RuleDataName.ToUpper(),
+                                                                                     ((StringOperator)validationRule.enStringCompareType).ToString(),
+                                                                                     validationRule.ValidationDataValue);
                                             break;
                                         default:
                                             break;
@@ -362,25 +389,31 @@ namespace Gijima.IOBM.MobileManager.Model.Models
 
                                     // Update the validation result values
                                     if (result)
-                                        _eventAggregator.GetEvent<DataValiationResultEvent>().Publish(new DataValidationResultInfo()
+                                        _eventAggregator.GetEvent<DataValiationResultEvent>().Publish(new ValidationRuleException()
                                         {
-                                            Result = DataValidationResultInfo.ResultType.Passed,
-                                            ValidationRule = validationRule,
-                                            EntityType = typeof(Client),
+                                            fkBillingProcessID = BillingExecutionState.DataValidation.Value(),
+                                            fkValidationRuleID = validationRule.pkValidationRuleID,
+                                            BillingPeriod = string.Format("{0} {1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year),
+                                            enValidationEntity = DataValidationEntity.Client.Value(),
                                             EntityID = client.pkClientID,
-                                            PropertyName = validationRule.RuleDataName,
+                                            Result = true
                                         });
                                     else
-                                        _eventAggregator.GetEvent<DataValiationResultEvent>().Publish(new DataValidationResultInfo()
+                                    {
+                                        _eventAggregator.GetEvent<DataValiationResultEvent>().Publish(new ValidationRuleException()
                                         {
-                                            Result = DataValidationResultInfo.ResultType.Failed,
-                                            ValidationRule = validationRule,
-                                            EntityType = typeof(Client),
+                                            fkBillingProcessID = BillingExecutionState.DataValidation.Value(),
+                                            fkValidationRuleID = validationRule.pkValidationRuleID,
+                                            BillingPeriod = string.Format("{0} {1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year),
+                                            enValidationEntity = DataValidationEntity.Client.Value(),
                                             EntityID = client.pkClientID,
-                                            PropertyName = validationRule.RuleDataName,
                                             CanApplyRule = canApplyRule,
-                                            Message = string.Format("{0} validation failed for {1} linked to company {2}.", validationRule.RuleDataName.ToUpper(), clientName, validationRule.EntityName)
+                                            Message = string.Format("{0} failed for {1} linked to company {2} - current value ({3}) - expected ({4}).",
+                                                                    validationRule.RuleDataName.ToUpper(), entityName, validationRule.EntityName,
+                                                                    entityValue, ruleValue),
+                                            Result = false
                                         });
+                                    }
                                 }
 
                                 // Update the progress values for the last client

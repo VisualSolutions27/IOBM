@@ -43,7 +43,7 @@
           <Property Name="BillingPeriod" Type="varchar" MaxLength="6" Nullable="false" />
           <Property Name="ProcessStartDate" Type="datetime" Nullable="false" />
           <Property Name="ProcessEndDate" Type="datetime" />
-          <Property Name="ProcessStatus" Type="bit" Nullable="false" />
+          <Property Name="ProcessCurrent" Type="bit" Nullable="false" />
           <Property Name="ProcessResult" Type="bit" />
           <Property Name="ProcessDuration" Type="float" />
           <Property Name="BillingComment" Type="varbinary" MaxLength="255" />
@@ -402,6 +402,20 @@
           <Property Name="enDateCompareType" Type="smallint" Nullable="false" />
           <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="ValidationRuleException">
+          <Key>
+            <PropertyRef Name="pkValidationRuleExceptionID" />
+          </Key>
+          <Property Name="pkValidationRuleExceptionID" Type="int" Nullable="false" />
+          <Property Name="fkBillingProcessID" Type="int" Nullable="false" />
+          <Property Name="fkValidationRuleID" Type="int" Nullable="false" />
+          <Property Name="BillingPeriod" Type="varchar" MaxLength="6" Nullable="false" />
+          <Property Name="enValidationEntity" Type="smallint" Nullable="false" />
+          <Property Name="EntityID" Type="int" Nullable="false" />
+          <Property Name="Message" Type="varchar" MaxLength="255" />
+          <Property Name="CanApplyRule" Type="bit" />
+          <Property Name="Result" Type="bit" />
         </EntityType>
         <EntityType Name="ValidationRulesData">
           <Key>
@@ -799,6 +813,30 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_ValidationRuleException_BillingProcess">
+          <End Role="BillingProcess" Type="Self.BillingProcess" Multiplicity="1" />
+          <End Role="ValidationRuleException" Type="Self.ValidationRuleException" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BillingProcess">
+              <PropertyRef Name="pkBillingProcessID" />
+            </Principal>
+            <Dependent Role="ValidationRuleException">
+              <PropertyRef Name="fkBillingProcessID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ValidationRuleException_ValidationRule">
+          <End Role="ValidationRule" Type="Self.ValidationRule" Multiplicity="1" />
+          <End Role="ValidationRuleException" Type="Self.ValidationRuleException" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ValidationRule">
+              <PropertyRef Name="pkValidationRuleID" />
+            </Principal>
+            <Dependent Role="ValidationRuleException">
+              <PropertyRef Name="fkValidationRuleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Function Name="sp_report_Invoice" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="invoiceID" Type="int" Mode="In" />
         </Function>
@@ -832,6 +870,7 @@
           <EntitySet Name="UserInCompany" EntityType="Self.UserInCompany" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UserInRole" EntityType="Self.UserInRole" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ValidationRule" EntityType="Self.ValidationRule" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ValidationRuleException" EntityType="Self.ValidationRuleException" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ValidationRulesData" EntityType="Self.ValidationRulesData" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK_BillingProcessHistory_BillingProcess" Association="Self.FK_BillingProcessHistory_BillingProcess">
             <End Role="BillingProcess" EntitySet="BillingProcess" />
@@ -960,6 +999,14 @@
           <AssociationSet Name="FK_UserInRole_User" Association="Self.FK_UserInRole_User">
             <End Role="User" EntitySet="User" />
             <End Role="UserInRole" EntitySet="UserInRole" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ValidationRuleException_BillingProcess" Association="Self.FK_ValidationRuleException_BillingProcess">
+            <End Role="BillingProcess" EntitySet="BillingProcess" />
+            <End Role="ValidationRuleException" EntitySet="ValidationRuleException" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ValidationRuleException_ValidationRule" Association="Self.FK_ValidationRuleException_ValidationRule">
+            <End Role="ValidationRule" EntitySet="ValidationRule" />
+            <End Role="ValidationRuleException" EntitySet="ValidationRuleException" />
           </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
@@ -1291,8 +1338,8 @@
           <EntitySet Name="Services" EntityType="MobileManagerModel.Service" />
           <EntitySet Name="Invoices" EntityType="MobileManagerModel.Invoice" />
           <AssociationSet Name="FK_Invoice_Service" Association="MobileManagerModel.FK_Invoice_Service">
-            <End Role="Service" EntitySet="Services" />
-            <End Role="Invoice" EntitySet="Invoices" />
+            <End EntitySet="Services" Role="Service" />
+            <End EntitySet="Invoices" Role="Invoice" />
           </AssociationSet>
           <AssociationSet Name="FK_InvoiceDetail_Invoice" Association="MobileManagerModel.FK_InvoiceDetail_Invoice">
             <End Role="Invoice" EntitySet="Invoices" />
@@ -1384,6 +1431,15 @@
           <AssociationSet Name="FK_BillingProcessHistory_BillingProcess" Association="MobileManagerModel.FK_BillingProcessHistory_BillingProcess">
             <End Role="BillingProcess" EntitySet="BillingProcesses" />
             <End Role="BillingProcessHistory" EntitySet="BillingProcessHistories" />
+          </AssociationSet>
+          <EntitySet Name="ValidationRuleExceptions" EntityType="MobileManagerModel.ValidationRuleException" />
+          <AssociationSet Name="FK_ValidationRuleException_BillingProcess" Association="MobileManagerModel.FK_ValidationRuleException_BillingProcess">
+            <End Role="BillingProcess" EntitySet="BillingProcesses" />
+            <End Role="ValidationRuleException" EntitySet="ValidationRuleExceptions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ValidationRuleException_ValidationRule" Association="MobileManagerModel.FK_ValidationRuleException_ValidationRule">
+            <End Role="ValidationRule" EntitySet="ValidationRules" />
+            <End Role="ValidationRuleException" EntitySet="ValidationRuleExceptions" />
           </AssociationSet>
           </EntityContainer>
         <EntityType Name="Role">
@@ -1495,12 +1551,12 @@
           <Key>
             <PropertyRef Name="pkServiceID" />
           </Key>
-          <Property Name="pkServiceID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="ServicePreFix" Type="String" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" />
-          <Property Name="ServiceDescription" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="pkServiceID" Nullable="false" annotation:StoreGeneratedPattern="Identity" Type="Int32" />
+          <Property Name="ServicePreFix" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="ServiceDescription" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="ModifiedBy" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" Type="String" />
+          <Property Name="ModifiedDate" Nullable="false" Precision="3" Type="DateTime" />
+          <Property Name="IsActive" Nullable="false" Type="Boolean" />
           <NavigationProperty Name="Invoices" Relationship="MobileManagerModel.FK_Invoice_Service" FromRole="Service" ToRole="Invoice" />
         </EntityType>
         <EntityType Name="Invoice">
@@ -1529,8 +1585,8 @@
           <NavigationProperty Name="Client" Relationship="MobileManagerModel.FK_Invoice_Client" FromRole="Invoice" ToRole="Client" />
         </EntityType>
         <Association Name="FK_Invoice_Service">
-          <End Type="MobileManagerModel.Service" Role="Service" Multiplicity="0..1" />
-          <End Type="MobileManagerModel.Invoice" Role="Invoice" Multiplicity="*" />
+          <End Type="MobileManagerModel.Service" Multiplicity="0..1" Role="Service" />
+          <End Type="MobileManagerModel.Invoice" Multiplicity="*" Role="Invoice" />
           <ReferentialConstraint>
             <Principal Role="Service">
               <PropertyRef Name="pkServiceID" />
@@ -1672,6 +1728,7 @@
           <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
           <NavigationProperty Name="ValidationRulesData" Relationship="MobileManagerModel.FK_BillingValidationRule_BillingRulesData" FromRole="ValidationRule" ToRole="ValidationRulesData" />
+          <NavigationProperty Name="ValidationRuleExceptions" Relationship="MobileManagerModel.FK_ValidationRuleException_ValidationRule" FromRole="ValidationRule" ToRole="ValidationRuleException" />
         </EntityType>
         <Association Name="FK_BillingValidationRule_BillingRulesData">
           <End Type="MobileManagerModel.ValidationRulesData" Role="ValidationRulesData" Multiplicity="1" />
@@ -1975,6 +2032,7 @@
           <Property Name="pkBillingProcessID" Type="Int32" Nullable="false" />
           <Property Name="ProcessDescription" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="BillingProcessHistories" Relationship="MobileManagerModel.FK_BillingProcessHistory_BillingProcess" FromRole="BillingProcess" ToRole="BillingProcessHistory" />
+          <NavigationProperty Name="ValidationRuleExceptions" Relationship="MobileManagerModel.FK_ValidationRuleException_BillingProcess" FromRole="BillingProcess" ToRole="ValidationRuleException" />
         </EntityType>
         <EntityType Name="BillingProcessHistory">
           <Key>
@@ -1985,7 +2043,7 @@
           <Property Name="BillingPeriod" Type="String" Nullable="false" MaxLength="6" FixedLength="false" Unicode="false" />
           <Property Name="ProcessStartDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="ProcessEndDate" Type="DateTime" Precision="3" />
-          <Property Name="ProcessStatus" Type="Boolean" Nullable="false" />
+          <Property Name="ProcessCurrent" Type="Boolean" Nullable="false" />
           <Property Name="ProcessResult" Type="Boolean" />
           <Property Name="ProcessDuration" Type="Double" />
           <Property Name="BillingComment" Type="Binary" MaxLength="255" FixedLength="false" />
@@ -2002,6 +2060,46 @@
             </Principal>
             <Dependent Role="BillingProcessHistory">
               <PropertyRef Name="fkBillingProcessID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="ValidationRuleException">
+          <Key>
+            <PropertyRef Name="pkValidationRuleExceptionID" />
+          </Key>
+          <Property Name="pkValidationRuleExceptionID" Type="Int32" Nullable="false" />
+          <Property Name="fkBillingProcessID" Type="Int32" Nullable="false" />
+          <Property Name="fkValidationRuleID" Type="Int32" Nullable="false" />
+          <Property Name="BillingPeriod" Type="String" Nullable="false" MaxLength="6" FixedLength="false" Unicode="false" />
+          <Property Name="enValidationEntity" Type="Int16" Nullable="false" />
+          <Property Name="EntityID" Type="Int32" Nullable="false" />
+          <Property Name="Message" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="CanApplyRule" Type="Boolean" />
+          <Property Name="Result" Type="Boolean" />
+          <NavigationProperty Name="BillingProcess" Relationship="MobileManagerModel.FK_ValidationRuleException_BillingProcess" FromRole="ValidationRuleException" ToRole="BillingProcess" />
+          <NavigationProperty Name="ValidationRule" Relationship="MobileManagerModel.FK_ValidationRuleException_ValidationRule" FromRole="ValidationRuleException" ToRole="ValidationRule" />
+        </EntityType>
+        <Association Name="FK_ValidationRuleException_BillingProcess">
+          <End Type="MobileManagerModel.BillingProcess" Role="BillingProcess" Multiplicity="1" />
+          <End Type="MobileManagerModel.ValidationRuleException" Role="ValidationRuleException" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BillingProcess">
+              <PropertyRef Name="pkBillingProcessID" />
+            </Principal>
+            <Dependent Role="ValidationRuleException">
+              <PropertyRef Name="fkBillingProcessID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_ValidationRuleException_ValidationRule">
+          <End Type="MobileManagerModel.ValidationRule" Role="ValidationRule" Multiplicity="1" />
+          <End Type="MobileManagerModel.ValidationRuleException" Role="ValidationRuleException" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ValidationRule">
+              <PropertyRef Name="pkValidationRuleID" />
+            </Principal>
+            <Dependent Role="ValidationRuleException">
+              <PropertyRef Name="fkValidationRuleID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -2464,12 +2562,27 @@
                 <ScalarProperty Name="BillingComment" ColumnName="BillingComment" />
                 <ScalarProperty Name="ProcessDuration" ColumnName="ProcessDuration" />
                 <ScalarProperty Name="ProcessResult" ColumnName="ProcessResult" />
-                <ScalarProperty Name="ProcessStatus" ColumnName="ProcessStatus" />
+                <ScalarProperty Name="ProcessCurrent" ColumnName="ProcessCurrent" />
                 <ScalarProperty Name="ProcessEndDate" ColumnName="ProcessEndDate" />
                 <ScalarProperty Name="ProcessStartDate" ColumnName="ProcessStartDate" />
                 <ScalarProperty Name="BillingPeriod" ColumnName="BillingPeriod" />
                 <ScalarProperty Name="fkBillingProcessID" ColumnName="fkBillingProcessID" />
                 <ScalarProperty Name="pkBillingProcessHistoryID" ColumnName="pkBillingProcessHistoryID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ValidationRuleExceptions">
+            <EntityTypeMapping TypeName="MobileManagerModel.ValidationRuleException">
+              <MappingFragment StoreEntitySet="ValidationRuleException">
+                <ScalarProperty Name="Result" ColumnName="Result" />
+                <ScalarProperty Name="CanApplyRule" ColumnName="CanApplyRule" />
+                <ScalarProperty Name="Message" ColumnName="Message" />
+                <ScalarProperty Name="EntityID" ColumnName="EntityID" />
+                <ScalarProperty Name="enValidationEntity" ColumnName="enValidationEntity" />
+                <ScalarProperty Name="BillingPeriod" ColumnName="BillingPeriod" />
+                <ScalarProperty Name="fkValidationRuleID" ColumnName="fkValidationRuleID" />
+                <ScalarProperty Name="fkBillingProcessID" ColumnName="fkBillingProcessID" />
+                <ScalarProperty Name="pkValidationRuleExceptionID" ColumnName="pkValidationRuleExceptionID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

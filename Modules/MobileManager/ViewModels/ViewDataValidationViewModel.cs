@@ -24,7 +24,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private ValidationRuleModel _model = null;
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
-        private bool _processCompleted = false;
 
         #region Commands
 
@@ -273,22 +272,32 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// The current selected exception
         /// </summary>
-        private DataValidationResultInfo SelectedException
+        private ValidationRuleException SelectedException
         {
             get { return _selectedException; }
             set { SetProperty(ref _selectedException, value); }
         }
-        private DataValidationResultInfo _selectedException = null;
+        private ValidationRuleException _selectedException = null;
+
+        /// <summary>
+        /// Indicate if the current billing process completed
+        /// </summary>
+        public bool BillingProcessCompleted
+        {
+            get { return _billingProcessCompleted; }
+            set { SetProperty(ref _billingProcessCompleted, value); }
+        }
+        private bool _billingProcessCompleted = false;
 
         /// <summary>
         /// The selected exceptions to fix
         /// </summary>
-        private ObservableCollection<DataValidationResultInfo> ExceptionsToFix
+        private ObservableCollection<ValidationRuleException> ExceptionsToFix
         {
             get { return _exceptionsToFix; }
             set { SetProperty(ref _exceptionsToFix, value); }
         }
-        private ObservableCollection<DataValidationResultInfo> _exceptionsToFix = null;
+        private ObservableCollection<ValidationRuleException> _exceptionsToFix = null;
 
         /// <summary>
         /// The collection of validation groups from the ValidationRuleGroup enum
@@ -311,14 +320,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private ObservableCollection<ValidationRule> _validationRuleCollection = null;
 
         /// <summary>
-        /// The collection of data validation result Info
+        /// The collection of data validation exception Info
         /// </summary>
-        public ObservableCollection<DataValidationResultInfo> ValidationErrorCollection
+        public ObservableCollection<ValidationRuleException> ValidationErrorCollection
         {
             get { return _validationErrorCollection; }
             set { SetProperty(ref _validationErrorCollection, value); }
         }
-        private ObservableCollection<DataValidationResultInfo> _validationErrorCollection = null;
+        private ObservableCollection<ValidationRuleException> _validationErrorCollection = null;
        
         #region View Lookup Data Collections
 
@@ -383,6 +392,17 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             Application.Current.Dispatcher.Invoke(() => { DisplayDataValidationResults(sender); });
         }
 
+        /// <summary>
+        /// This event gets received to enable the next button 
+        /// when the process completed
+        /// </summary>
+        /// <param name="sender">The error message.</param>
+        private void BillingProcessCompleted_Event(BillingExecutionState sender)
+        {
+            if (sender == BillingExecutionState.DataValidation)
+                BillingProcessCompleted = true;
+        }
+
         #endregion
 
         #region Methods
@@ -406,7 +426,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             InitialiseViewControls();
 
             // Initialise the view commands
-            StartValidationCommand = new DelegateCommand(ExecuteStartValidation, CanStartValidation).ObservesProperty(() => ValidationRuleCollection);
+            StartValidationCommand = new DelegateCommand(ExecuteStartValidation, CanStartValidation).ObservesProperty(() => ValidationRuleCollection)
+                                                                                                    .ObservesProperty(() => BillingProcessCompleted);
             ApplyRuleFixCommand = new DelegateCommand(ExecuteApplyRuleFix, CanApplyRuleFix).ObservesProperty(() => ExceptionsToFix);
             ManualFixCommand = new DelegateCommand(ExecuteManualFix, CanManualFix).ObservesProperty(() => ExceptionsToFix);
 
@@ -415,6 +436,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
             // Subscribe to this event to display the data validation errors
             _eventAggregator.GetEvent<DataValiationResultEvent>().Subscribe(DataValiationResult_Event, true);
+
+            // Subscribe to this event to lock the completed process
+            // and enable functionality to move to the process completed
+            _eventAggregator.GetEvent<BillingProcessCompletedEvent>().Subscribe(BillingProcessCompleted_Event, true);
 
             // Load the view data
             ReadValidationRuleGroups();
@@ -434,7 +459,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             ValidationGroupCount = ValidationEntityCount = ValidationDataRuleCount = ValidationRuleEntityCount = 1;
             ValidationGroupsPassed = ValidationEntitiesPassed = ValidationDataRulesPassed = ValidationRuleEntitiesPassed = 0;
             ValidationGroupsFailed = ValidationEntitiesFailed = ValidationDataRulesFailed = ValidationRuleEntitiesFailed = 0;
-            ValidationErrorCollection = new ObservableCollection<DataValidationResultInfo>();
         }
 
         /// <summary>
@@ -482,17 +506,19 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             try
             {
-                DataValidationResultInfo resultInfo = (DataValidationResultInfo)validationResultInfo;
+                if (ValidationErrorCollection == null)
+                    ValidationErrorCollection = new ObservableCollection<ValidationRuleException>();
 
-                switch (resultInfo.Result)
+                ValidationRuleException resultInfo = (ValidationRuleException)validationResultInfo;
+
+                if (resultInfo.Result == true)
                 {
-                    case DataValidationResultInfo.ResultType.Passed:
-                        ValidationRuleEntitiesPassed++;
-                        break;
-                    default:
-                        ValidationRuleEntitiesFailed++;
-                        ValidationErrorCollection.Add(resultInfo);
-                        break;
+                    ValidationRuleEntitiesPassed++;
+                }
+                else
+                { 
+                    ValidationRuleEntitiesFailed++;
+                    ValidationErrorCollection.Add(resultInfo);
                 }
             }
             catch (Exception ex)
@@ -529,8 +555,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             try
             {
-                ObservableCollection<DataValidationResultInfo> resultInfosCollection= new ObservableCollection<DataValidationResultInfo>();
-                DataValidationResultInfo resultInfo = null;
+                ObservableCollection<ValidationRuleException> resultInfosCollection= new ObservableCollection<ValidationRuleException>();
+                ValidationRuleException resultInfo = null;
 
                 // The Xceed CheckListBox return all the selected items in
                 // a comma delimeted string, so get the number of selected 
@@ -552,7 +578,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     }
                 }
 
-                ExceptionsToFix = new ObservableCollection<DataValidationResultInfo>(resultInfosCollection);
+                ExceptionsToFix = new ObservableCollection<ValidationRuleException>(resultInfosCollection);
             }
             catch (Exception ex)
             {
@@ -581,19 +607,19 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Create a new billing process history entry
         /// </summary>
-        private async Task CompleteBillingProcessHistoryAsync()
+        /// <param name="billingProcess">The billing process to complete.</param>/// 
+        private async Task CompleteBillingProcessHistoryAsync(BillingExecutionState billingProcess)
         {
             try
             {
-                bool result = await Task.Run(() => new BillingProcessModel(_eventAggregator).CompleteBillingProcessHistory(BillingExecutionState.DataValidation, true));
+                bool result = await Task.Run(() => new BillingProcessModel(_eventAggregator).CompleteBillingProcessHistory(billingProcess, true));
 
                 // Publish this event to update the billing process history on the wizard's Info content
                 _eventAggregator.GetEvent<BillingProcessHistoryEvent>().Publish(result);
 
-                // Publish this event to enable the next button when the process completed
-                _eventAggregator.GetEvent<BillingProcessCompletedEvent>().Publish(true);
-
-                _processCompleted = true;
+                // Publish this event to lock the completed process and enable 
+                // functinality to move to the next process
+                _eventAggregator.GetEvent<BillingProcessCompletedEvent>().Publish(BillingExecutionState.DataValidation);
             }
             catch (Exception ex)
             {
@@ -613,7 +639,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns></returns>
         private bool CanStartValidation()
         {
-            return ValidationGroupCollection != null && ValidationGroupCollection.Count > 0  && _processCompleted == false ? true : false;
+            return ValidationGroupCollection != null && ValidationGroupCollection.Count > 0  && BillingProcessCompleted == false ? true : false;
         }
 
         /// <summary>
@@ -622,7 +648,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private async void ExecuteStartValidation()
         {
             InitialiseViewControls();
-            _processCompleted = false;
 
             // Create a new history entry everytime the process get started
             await CreateBillingProcessHistoryAsync();
@@ -634,7 +659,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             _eventAggregator.GetEvent<BillingProcessEvent>().Publish(BillingExecutionState.DataValidation);
 
             // Disable the next buttton when the process gets started
-            _eventAggregator.GetEvent<BillingProcessCompletedEvent>().Publish(false);
+            _eventAggregator.GetEvent<BillingProcessStartedEvent>().Publish(BillingExecutionState.DataValidation);
 
             foreach (string group in ValidationGroupCollection)
             {
@@ -700,9 +725,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     else
                         ValidationGroupsFailed++;
 
-                    // Update the current history entry as completed
+                    // if NO validations exceptions found the set 
+                    // the data validation process as complete
+                    // else save the exceptions to the database
                     if (ValidationErrorCollection.Count == 0)
-                        await CompleteBillingProcessHistoryAsync();
+                        await CompleteBillingProcessHistoryAsync(BillingExecutionState.DataValidation);
+                    //else
+
+
                 }
             }
         }
@@ -725,7 +755,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 // Apply the data rule to each exception and remove the fixed
                 // exceptions to the exceptions collection                  
-                foreach (DataValidationResultInfo exception in ExceptionsToFix)
+                foreach (ValidationRuleException exception in ExceptionsToFix)
                 {
                     if (await Task.Run(() => _model.ApplyDataRule(exception)))
                         ValidationErrorCollection.Remove(exception);

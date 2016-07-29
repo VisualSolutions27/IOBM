@@ -97,8 +97,8 @@
                 </i:EventTrigger>
             </i:Interaction.Triggers>
             <xctk:WizardPage x:Name="WizardPage1" ExteriorPanelBackground="White" Title="Billing Wizard" Description="This Wizard will walk you through the month-end billing process." 
-                CanSelectNextPage="{Binding BillingRunStarted}">
-                <Grid IsEnabled="{Binding CanBillingOptionsChange, UpdateSourceTrigger=PropertyChanged}">
+                CanSelectNextPage="{Binding BillingRunStarted, UpdateSourceTrigger=PropertyChanged}">
+                <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
@@ -125,9 +125,7 @@
                     <TextBox Grid.Row="2" Grid.Column="2" IsTabStop="False" IsReadOnly="True" HorizontalContentAlignment="Center" Text="{Binding SelectedBillingMonth, UpdateSourceTrigger=PropertyChanged}"/>
                     <TextBox Grid.Row="2" Grid.Column="3" IsTabStop="False" IsReadOnly="True" HorizontalContentAlignment="Center" Text="{Binding SelectedBillingYear, UpdateSourceTrigger=PropertyChanged}"/>
                     <TextBlock Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="2" Text="Billing processes:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-                    <ListBox Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2" IsTabStop="False" ItemsSource="{Binding BillingProcessCollection, UpdateSourceTrigger=PropertyChanged}" 
-                        DisplayMemberPath="ProcessDescription" SelectedValue="{Binding SelectedBillingProcesses, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
-                    </ListBox>
+                    <ListBox Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="2" IsTabStop="False" DisplayMemberPath="ProcessDescription" ItemsSource="{Binding BillingProcessCollection, UpdateSourceTrigger=PropertyChanged}"/>
                     <Button x:Name="ButtonStart" Grid.Row="7" Grid.Column="3" ToolTip="Cancel the current operation." TabIndex="1"
                         Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" Command="{Binding AcceptCommand}">
                         <StackPanel Orientation="Horizontal">
@@ -138,8 +136,8 @@
                 </Grid>
             </xctk:WizardPage>
             <xctk:WizardPage x:Name="WizardPage2" ExteriorPanelBackground="White" Title="Billing Wizard" Description="This Wizard page exposes functionality to execute the data validation process and to correct any resulting exceptions." 
-                CanSelectNextPage="{Binding BillingProcessCompleted}" NextPage="{Binding ElementName=WizardPage3}" PreviousPage="{Binding ElementName=WizardPage1}">
-                <Grid IsEnabled="{Binding CanBillingOptionsChange, UpdateSourceTrigger=PropertyChanged}">
+                CanSelectNextPage="{Binding DataValidationProcessCompleted, UpdateSourceTrigger=PropertyChanged}" NextPage="{Binding ElementName=WizardPage3}" PreviousPage="{Binding ElementName=WizardPage1}">
+                <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="10" />
                         <RowDefinition Height="Auto" />

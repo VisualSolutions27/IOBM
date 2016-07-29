@@ -82,8 +82,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     SelectedCostType = value.Contract != null ? ((CostType)value.Contract.enCostType).ToString() : "NONE";
                     SelectedPackageType = SelectedPackage != null ? ((PackageType)SelectedPackage.enPackageType).ToString() : "NONE";
                     SelectedContractAccNumber = value.Contract != null ? value.Contract.AccountNumber : null;
-                    SelectedContractStartDate = value.Contract != null ? value.Contract.ContractStartDate.Value : DateTime.MinValue;
-                    SelectedContractEndDate = value.Contract != null ? value.Contract.ContractEndDate.Value : DateTime.MinValue;
+                    SelectedContractStartDate = value.Contract != null && value.Contract.ContractStartDate != null ? value.Contract.ContractStartDate.Value : DateTime.MinValue;
+                    SelectedContractEndDate = value.Contract != null && value.Contract.ContractEndDate.Value != null ? value.Contract.ContractEndDate.Value : DateTime.MinValue;
 
                     MobileManagerEnvironment.SelectedClientID = value.pkClientID;
                     MobileManagerEnvironment.ClientCompanyID = value.fkCompanyID;
