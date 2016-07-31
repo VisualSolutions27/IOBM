@@ -24,6 +24,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private ValidationRuleModel _model = null;
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
+        private string _billingPeriod = string.Format("{0}{1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year);
 
         #region Commands
 
@@ -420,7 +421,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Initialise all the view dependencies
         /// </summary>
-        private void InitialiseBillingView()
+        private async void InitialiseBillingView()
         {
             _model = new ValidationRuleModel(_eventAggregator);
             InitialiseViewControls();
@@ -443,6 +444,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
             // Load the view data
             ReadValidationRuleGroups();
+            await ReadValidationRuleExceptionsAsync();
         }
 
         /// <summary>
@@ -459,6 +461,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             ValidationGroupCount = ValidationEntityCount = ValidationDataRuleCount = ValidationRuleEntityCount = 1;
             ValidationGroupsPassed = ValidationEntitiesPassed = ValidationDataRulesPassed = ValidationRuleEntitiesPassed = 0;
             ValidationGroupsFailed = ValidationEntitiesFailed = ValidationDataRulesFailed = ValidationRuleEntitiesFailed = 0;
+            ValidationErrorCollection = null;
         }
 
         /// <summary>
@@ -491,6 +494,21 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             try
             {
                 ValidationRuleCollection = await Task.Run(() => _model.ReadValidationRules((ValidationRuleGroup)Enum.Parse(typeof(ValidationRuleGroup), validationGroup)));
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+            }
+        }
+
+        /// <summary>
+        /// Load all the validation rule exceptions if any from the database
+        /// </summary>
+        private async Task ReadValidationRuleExceptionsAsync()
+        {
+            try
+            {
+                ValidationErrorCollection = await Task.Run(() => new ValidationRuleExceptionModel(_eventAggregator).ReadValidationRuleExceptions(_billingPeriod));
             }
             catch (Exception ex)
             {
@@ -614,12 +632,31 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 bool result = await Task.Run(() => new BillingProcessModel(_eventAggregator).CompleteBillingProcessHistory(billingProcess, true));
 
-                // Publish this event to update the billing process history on the wizard's Info content
-                _eventAggregator.GetEvent<BillingProcessHistoryEvent>().Publish(result);
+                if (result)
+                {
+                    // Publish this event to update the billing process history on the wizard's Info content
+                    _eventAggregator.GetEvent<BillingProcessHistoryEvent>().Publish(result);
 
-                // Publish this event to lock the completed process and enable 
-                // functinality to move to the next process
-                _eventAggregator.GetEvent<BillingProcessCompletedEvent>().Publish(BillingExecutionState.DataValidation);
+                    // Publish this event to lock the completed process and enable 
+                    // functinality to move to the next process
+                    if (billingProcess == BillingExecutionState.DataValidation)
+                        _eventAggregator.GetEvent<BillingProcessCompletedEvent>().Publish(BillingExecutionState.DataValidation);
+                }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+            }
+        }       
+
+        /// <summary>
+        /// Save all the data rule exceptions to the database
+        /// </summary>
+        private async Task CreateValidationRuleExceptionsAsync()
+        {
+            try
+            {               
+                bool result = await Task.Run(() => new ValidationRuleExceptionModel(_eventAggregator).CreateValidationRuleExceptions(ValidationErrorCollection));
             }
             catch (Exception ex)
             {
@@ -648,6 +685,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private async void ExecuteStartValidation()
         {
             InitialiseViewControls();
+
+            // Set the previous data validation process as complete
+            await CompleteBillingProcessHistoryAsync(BillingExecutionState.Started);
 
             // Create a new history entry everytime the process get started
             await CreateBillingProcessHistoryAsync();
@@ -714,8 +754,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                         // Set the data rule progresssbar description
                         ++ValidationDataRuleProgress;
                         ValidationDataRuleDescription = string.Format("Validating data rule {0} - {1} of {2}", rule.RuleDataName.ToUpper(),
-                                                                                                                ValidationDataRuleProgress,
-                                                                                                                ValidationRuleCollection.Count);
+                                                                                                               ValidationDataRuleProgress,
+                                                                                                               ValidationRuleCollection.Count);
                     }
 
                     // Update the validation group 
@@ -730,7 +770,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     // else save the exceptions to the database
                     if (ValidationErrorCollection.Count == 0)
                         await CompleteBillingProcessHistoryAsync(BillingExecutionState.DataValidation);
-                    //else
+                    else
+                        await CreateValidationRuleExceptionsAsync();
 
 
                 }

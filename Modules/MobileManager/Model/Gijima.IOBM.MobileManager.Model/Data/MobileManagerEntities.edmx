@@ -407,7 +407,7 @@
           <Key>
             <PropertyRef Name="pkValidationRuleExceptionID" />
           </Key>
-          <Property Name="pkValidationRuleExceptionID" Type="int" Nullable="false" />
+          <Property Name="pkValidationRuleExceptionID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="fkBillingProcessID" Type="int" Nullable="false" />
           <Property Name="fkValidationRuleID" Type="int" Nullable="false" />
           <Property Name="BillingPeriod" Type="varchar" MaxLength="6" Nullable="false" />
@@ -2067,7 +2067,7 @@
           <Key>
             <PropertyRef Name="pkValidationRuleExceptionID" />
           </Key>
-          <Property Name="pkValidationRuleExceptionID" Type="Int32" Nullable="false" />
+          <Property Name="pkValidationRuleExceptionID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="fkBillingProcessID" Type="Int32" Nullable="false" />
           <Property Name="fkValidationRuleID" Type="Int32" Nullable="false" />
           <Property Name="BillingPeriod" Type="String" Nullable="false" MaxLength="6" FixedLength="false" Unicode="false" />

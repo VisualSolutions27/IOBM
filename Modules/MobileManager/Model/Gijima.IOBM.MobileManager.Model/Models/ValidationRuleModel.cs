@@ -393,7 +393,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                         {
                                             fkBillingProcessID = BillingExecutionState.DataValidation.Value(),
                                             fkValidationRuleID = validationRule.pkValidationRuleID,
-                                            BillingPeriod = string.Format("{0} {1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year),
+                                            BillingPeriod = string.Format("{0}{1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year),
                                             enValidationEntity = DataValidationEntity.Client.Value(),
                                             EntityID = client.pkClientID,
                                             Result = true
@@ -404,7 +404,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                         {
                                             fkBillingProcessID = BillingExecutionState.DataValidation.Value(),
                                             fkValidationRuleID = validationRule.pkValidationRuleID,
-                                            BillingPeriod = string.Format("{0} {1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year),
+                                            BillingPeriod = string.Format("{0}{1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year),
                                             enValidationEntity = DataValidationEntity.Client.Value(),
                                             EntityID = client.pkClientID,
                                             CanApplyRule = canApplyRule,

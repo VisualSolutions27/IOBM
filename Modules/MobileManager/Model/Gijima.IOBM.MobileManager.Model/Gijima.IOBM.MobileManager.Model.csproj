@@ -195,6 +195,7 @@
     <Compile Include="Models\SimmCardModel.cs" />
     <Compile Include="Models\StatusModel.cs" />
     <Compile Include="Models\SuburbModel.cs" />
+    <Compile Include="Models\ValidationRuleExceptionModel.cs" />
     <Compile Include="Models\ValidationRulesDataModel.cs" />
     <Compile Include="Models\ValidationRuleModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
