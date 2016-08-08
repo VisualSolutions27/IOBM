@@ -214,6 +214,17 @@
           <Property Name="ModfiedDate" Type="datetime" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
         </EntityType>
+        <EntityType Name="ImportRuleData">
+          <Key>
+            <PropertyRef Name="pkImportRuleDataID" />
+          </Key>
+          <Property Name="pkImportRuleDataID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="enImportSource" Type="smallint" Nullable="false" />
+          <Property Name="enImportDestination" Type="smallint" Nullable="false" />
+          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="DateModified" Type="datetime" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+        </EntityType>
         <EntityType Name="Invoice">
           <Key>
             <PropertyRef Name="pkInvoiceID" />
@@ -855,6 +866,7 @@
           <EntitySet Name="Device" EntityType="Self.Device" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DeviceMake" EntityType="Self.DeviceMake" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DeviceModel" EntityType="Self.DeviceModel" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="ImportRuleData" EntityType="Self.ImportRuleData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Invoice" EntityType="Self.Invoice" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="InvoiceDetail" EntityType="Self.InvoiceDetail" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Package" EntityType="Self.Package" Schema="dbo" store:Type="Tables" />
@@ -1441,6 +1453,7 @@
             <End Role="ValidationRule" EntitySet="ValidationRules" />
             <End Role="ValidationRuleException" EntitySet="ValidationRuleExceptions" />
           </AssociationSet>
+          <EntitySet Name="ImportRuleDatas" EntityType="MobileManagerModel.ImportRuleData" />
           </EntityContainer>
         <EntityType Name="Role">
           <Key>
@@ -2103,6 +2116,17 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="ImportRuleData">
+          <Key>
+            <PropertyRef Name="pkImportRuleDataID" />
+          </Key>
+          <Property Name="pkImportRuleDataID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="enImportSource" Type="Int16" Nullable="false" />
+          <Property Name="enImportDestination" Type="Int16" Nullable="false" />
+          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DateModified" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+        </EntityType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -2583,6 +2607,18 @@
                 <ScalarProperty Name="fkValidationRuleID" ColumnName="fkValidationRuleID" />
                 <ScalarProperty Name="fkBillingProcessID" ColumnName="fkBillingProcessID" />
                 <ScalarProperty Name="pkValidationRuleExceptionID" ColumnName="pkValidationRuleExceptionID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ImportRuleDatas">
+            <EntityTypeMapping TypeName="MobileManagerModel.ImportRuleData">
+              <MappingFragment StoreEntitySet="ImportRuleData">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="DateModified" ColumnName="DateModified" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="enImportDestination" ColumnName="enImportDestination" />
+                <ScalarProperty Name="enImportSource" ColumnName="enImportSource" />
+                <ScalarProperty Name="pkImportRuleDataID" ColumnName="pkImportRuleDataID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace Gijima.IOBM.MobileManager.Common.Structs
 {
@@ -178,6 +179,82 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     }
 
     /// <summary>
+    /// The <see cref="DataImportColumns"/> enumeration a list of 
+    /// data import column options.
+    /// </summary>
+    public enum DataImportColumns
+    {
+        [Description("-- Please Select --")]
+        None = 0,
+        [Description("Employee Number")]
+        EmployeeNumber = 1,
+        [Description("Cost Code")]
+        CostCode = 2,
+        [Description("Client Name")]
+        ClientName = 3,
+        [Description("Client Land Line")]
+        LandLine = 4,
+        [Description("Client ID Number")]
+        IDNumber = 5,
+        [Description("Client EMail")]
+        Email = 6,
+        [Description("WBS Number")]
+        WBSNumber = 7,
+        [Description("IPAddress")]
+        IPAddress = 8,
+        [Description("Client Billable")]
+        IsBillable = 9,
+        [Description("Client Voice Allowance")]
+        VoiceAllowance = 10,
+        [Description("Supplier Limit")]
+        SPLimit = 11,
+        [Description("Stop Billing Period")]
+        StopBilling = 12,
+        [Description("Company Name")]
+        CompanyName = 13,
+        [Description("Admin Fee")]
+        AdminFee = 14,
+        [Description("Company Billing Level")]
+        CompanyBillingLevel = 15,
+        [Description("Contract Payment Cancel Date")]
+        PaymentCancelDate = 16,
+        [Description("Package Name")]
+        PackageName = 17,
+        [Description("Package Cost")]
+        Cost = 18,
+        [Description("Package MB Data")]
+        MBData = 19,
+        [Description("Package Talk Time")]
+        TalkTimeMinutes = 20,
+        [Description("Package Rand Value")]
+        RandValue = 21,
+        [Description("Package SPUL Value")]
+        SPULValue = 22
+    }
+
+    /// <summary>
+    /// The <see cref="DataImportEntities"/> enumeration a list of 
+    /// data import entities options.
+    /// </summary>
+    public enum DataImportEntities
+    {
+        [Description("-- Please Select --")]
+        None = 0,
+        [Description("Client Data")]
+        Client = 1,
+        [Description("Company Data")]
+        Company = 2,
+        [Description("Client Billing Data")]
+        ClientBilling = 3,
+        [Description("Billing Level Data")]
+        CompanyBillingLevel = 4,
+        [Description("Cantract Data")]
+        Contract = 5,
+        [Description("Package Data")]
+        Package = 6
+    }
+
+    /// <summary>
     /// The below extension class can be used for all Enum types defined herein.
     /// Please not that you'll have to define each extension method per Enum type
     /// to handle the correct return type.
@@ -214,6 +291,14 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
             return Convert.ToInt16(type);
         }
         public static short Value(this DataValidationEntity type)
+        {
+            return Convert.ToInt16(type);
+        }
+        public static short Value(this DataImportColumns type)
+        {
+            return Convert.ToInt16(type);
+        }
+        public static short Value(this DataImportEntities type)
         {
             return Convert.ToInt16(type);
         }

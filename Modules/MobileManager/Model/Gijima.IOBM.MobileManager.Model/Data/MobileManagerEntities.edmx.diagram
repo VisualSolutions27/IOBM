@@ -70,6 +70,7 @@
         <EntityTypeShape EntityType="MobileManagerModel.ValidationRuleException" Width="1.5" PointX="10.5" PointY="3.5" IsExpanded="false" />
         <AssociationConnector Association="MobileManagerModel.FK_ValidationRuleException_BillingProcess" />
         <AssociationConnector Association="MobileManagerModel.FK_ValidationRuleException_ValidationRule" />
+        <EntityTypeShape EntityType="MobileManagerModel.ImportRuleData" Width="1.5" PointX="0.5" PointY="4.25" IsExpanded="false" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

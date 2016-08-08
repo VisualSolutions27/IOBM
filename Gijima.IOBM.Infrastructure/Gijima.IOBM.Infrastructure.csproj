@@ -42,6 +42,8 @@
       <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="Prism">
       <HintPath>..\Assemblies\Prism\Prism.dll</HintPath>
     </Reference>
@@ -56,9 +58,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\ImageConvertHelper.cs" />
     <Compile Include="Helpers\DataActivityHelper.cs" />
     <Compile Include="Events\EventHandlers.cs" />
     <Compile Include="Helpers\DataCompareHelper.cs" />
+    <Compile Include="Helpers\EnumHelper.cs" />
     <Compile Include="Helpers\UnitConvertionHelper.cs" />
     <Compile Include="Structs\ADUser.cs" />
     <Compile Include="Structs\ApplicationInfo.cs" />

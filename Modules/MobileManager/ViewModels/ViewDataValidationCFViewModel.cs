@@ -16,7 +16,7 @@ using System.Windows.Media;
 
 namespace Gijima.IOBM.MobileManager.ViewModels
 {
-    public class ViewBillingCFViewModel : BindableBase, IDataErrorInfo
+    public class ViewDataValidationCFViewModel : BindableBase, IDataErrorInfo
     {
         #region Properties & Attributes
 
@@ -392,7 +392,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Constructor
         /// </summary>
-        public ViewBillingCFViewModel(IEventAggregator eventAggregator)
+        public ViewDataValidationCFViewModel(IEventAggregator eventAggregator)
         {
             _eventAggregator = eventAggregator;
             _securityHelper = new SecurityHelper(eventAggregator);

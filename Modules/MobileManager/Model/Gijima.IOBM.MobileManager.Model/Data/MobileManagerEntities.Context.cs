@@ -58,6 +58,7 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public virtual DbSet<BillingProcess> BillingProcesses { get; set; }
         public virtual DbSet<BillingProcessHistory> BillingProcessHistories { get; set; }
         public virtual DbSet<ValidationRuleException> ValidationRuleExceptions { get; set; }
+        public virtual DbSet<ImportRuleData> ImportRuleDatas { get; set; }
     
         public virtual ObjectResult<sp_report_Invoice_Result> sp_report_Invoice(Nullable<int> invoiceID)
         {

@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Gijima.IOBM.MobileManager.Views.ViewBillingCF"
+﻿<UserControl x:Class="Gijima.IOBM.MobileManager.Views.ViewDataValidationCF"
              xmlns:local="clr-namespace:Gijima.IOBM.MobileManager.Views"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

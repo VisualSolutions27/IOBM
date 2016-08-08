@@ -8,7 +8,7 @@ using System.Windows.Controls;
 
 namespace Gijima.IOBM.MobileManager.ViewModels
 {
-    public class ViewConfigViewModel : BindableBase
+    public class ViewSystemToolsViewModel : BindableBase
     {
         #region Properties and Attributes
 
@@ -42,7 +42,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
         #endregion
 
-        public ViewConfigViewModel(IEventAggregator eventAggreagator)
+        public ViewSystemToolsViewModel(IEventAggregator eventAggreagator)
         {
             _eventAggregator = eventAggreagator;
             _securityHelper = new SecurityHelper(eventAggreagator);
@@ -51,11 +51,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             TabCollection = new ObservableCollection<TabItem>();
             if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()))
             {
-                TabCollection.Add(new TabItem() { Header = "Security Configuration" });
-                TabCollection.Add(new TabItem() { Header = "Billing Configuration" });
-                TabCollection.Add(new TabItem() { Header = "System Configuration" });
+                TabCollection.Add(new TabItem() { Header = "Data Import" });
+                TabCollection.Add(new TabItem() { Header = "Data Validation" });
             }
-            TabCollection.Add(new TabItem() { Header = "Reference Data" });
         }
 
         /// <summary>
@@ -75,17 +73,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 switch (tabItem.Header.ToString())
                 {
-                    case "Security Configuration":
-                        SelectedTab.Content = new ViewSecurityCF(_eventAggregator);
+                    case "Data Import":
+                        SelectedTab.Content = new ViewDataImport();
                         break;
-                    case "Billing Configuration":
-                        SelectedTab.Content = new ViewDataValidationCF();
-                        break;
-                    case "System Configuration":
-                        //SelectedTab.Content = new ViewAccount(_eventAggregator);
-                        break;
-                    case "Reference Data":
-                        //SelectedTab.Content = new ViewConfig();
+                    case "Data Validation":
+                        //SelectedTab.Content = new ViewBillingCF();
                         break;
                 }
 

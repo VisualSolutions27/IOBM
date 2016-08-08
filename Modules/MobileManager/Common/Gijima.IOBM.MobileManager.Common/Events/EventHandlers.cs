@@ -19,4 +19,5 @@ namespace Gijima.IOBM.MobileManager.Common.Events
     public class BillingProcessStartedEvent : PubSubEvent<BillingExecutionState> { }
     public class BillingProcessCompletedEvent : PubSubEvent<BillingExecutionState> { }
     public class DataValiationResultEvent : PubSubEvent<object> {}
+    public class DataImportUpdateResultEvent : PubSubEvent<object> { }
 }

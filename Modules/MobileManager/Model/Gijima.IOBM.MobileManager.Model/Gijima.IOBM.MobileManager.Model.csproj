@@ -104,6 +104,9 @@
     </Compile>
     <Compile Include="Data\Extentions\CompanyExt.cs" />
     <Compile Include="Data\Extentions\ValidationRuleExt.cs" />
+    <Compile Include="Data\ImportRuleData.cs">
+      <DependentUpon>MobileManagerEntities.tt</DependentUpon>
+    </Compile>
     <Compile Include="Data\Invoice.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
@@ -186,6 +189,7 @@
     <Compile Include="Models\DevicesMakeModel.cs" />
     <Compile Include="Models\DevicesModel.cs" />
     <Compile Include="Models\DevicesModelModel.cs" />
+    <Compile Include="Models\ImportRuleDataModel.cs" />
     <Compile Include="Models\InvoiceModel.cs" />
     <Compile Include="Models\PackageModel.cs" />
     <Compile Include="Models\ProvinceModel.cs" />

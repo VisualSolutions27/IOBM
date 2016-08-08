@@ -42,6 +42,10 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DocumentFormat.OpenXml, Version=2.0.5022.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\DocumentFormat.OpenXml.1.0\lib\DocumentFormat.OpenXml.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="EntityFramework, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Gijima.Controls.WPF\bin\Debug\EntityFramework.dll</HintPath>
@@ -116,7 +120,8 @@
     <Compile Include="ViewModels\ViewCityViewModel.cs" />
     <Compile Include="ViewModels\ViewClientSiteViewModel.cs" />
     <Compile Include="ViewModels\ViewCompanyBillingLevelViewModel.cs" />
-    <Compile Include="ViewModels\ViewBillingCFViewModel.cs" />
+    <Compile Include="ViewModels\ViewDataImportViewModel.cs" />
+    <Compile Include="ViewModels\ViewDataValidationCFViewModel.cs" />
     <Compile Include="ViewModels\ViewCompanyViewModel.cs" />
     <Compile Include="ViewModels\ViewConfigViewModel.cs" />
     <Compile Include="ViewModels\ViewDataValidationViewModel.cs" />
@@ -135,17 +140,24 @@
     <Compile Include="ViewModels\ViewSimmCardViewModel.cs" />
     <Compile Include="ViewModels\ViewStatusViewModel.cs" />
     <Compile Include="ViewModels\ViewSuburbViewModel.cs" />
+    <Compile Include="ViewModels\ViewSystemToolsViewModel.cs" />
     <Compile Include="Views\Billing\ViewBilling.xaml.cs">
       <DependentUpon>ViewBilling.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Billing\ViewDataValidation.xaml.cs">
       <DependentUpon>ViewDataValidation.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\Billing\ViewSupplierDataImport.xaml.cs">
+      <DependentUpon>ViewSupplierDataImport.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\Common\ViewActivityLog.xaml.cs">
       <DependentUpon>ViewActivityLog.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Configuration\ViewBillingCF.xaml.cs">
-      <DependentUpon>ViewBillingCF.xaml</DependentUpon>
+    <Compile Include="Views\Configuration\ViewDataValidationCF.xaml.cs">
+      <DependentUpon>ViewDataValidationCF.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Configuration\ViewDataImportCF.xaml.cs">
+      <DependentUpon>ViewDataImportCF.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Maintenance\ViewCity.xaml.cs">
       <DependentUpon>ViewCity.xaml</DependentUpon>
@@ -185,6 +197,12 @@
     </Compile>
     <Compile Include="Views\Maintenance\ViewCompanyBillingLevel.xaml.cs">
       <DependentUpon>ViewCompanyBillingLevel.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SystemTools\ViewSystemTools.xaml.cs">
+      <DependentUpon>ViewSystemTools.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SystemTools\ViewDataImport.xaml.cs">
+      <DependentUpon>ViewDataImport.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ViewMobileManager.xaml.cs">
       <DependentUpon>ViewMobileManager.xaml</DependentUpon>
@@ -226,11 +244,19 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="Views\Billing\ViewSupplierDataImport.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\Common\ViewActivityLog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Configuration\ViewBillingCF.xaml">
+    <Page Include="Views\Configuration\ViewDataValidationCF.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Configuration\ViewDataImportCF.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -283,6 +309,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Maintenance\ViewCompanyBillingLevel.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SystemTools\ViewSystemTools.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\SystemTools\ViewDataImport.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -389,6 +423,10 @@
       <Project>{b0a5bfe3-ec00-490c-a6a7-8691c9d5af1b}</Project>
       <Name>Gijima.Controls.WPF</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Gijima.DataImport.MSOffice\Gijima.DataImport.MSOffice.csproj">
+      <Project>{757a257e-1e48-431b-b0c9-f5f0a93a2b07}</Project>
+      <Name>Gijima.DataImport.MSOffice</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\Gijima.IOBM.Infrastructure\Gijima.IOBM.Infrastructure.csproj">
       <Project>{55b7d4d2-9f8d-4c92-9fea-97f5f58ded4a}</Project>
       <Name>Gijima.IOBM.Infrastructure</Name>
@@ -425,6 +463,10 @@
   <ItemGroup>
     <Resource Include="Assets\Images\T %28263%29.ico" />
     <Resource Include="Assets\Images\T %28264%29.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Images\374.png" />
+    <Resource Include="Assets\Images\FI %28145%29.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

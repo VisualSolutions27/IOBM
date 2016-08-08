@@ -3,11 +3,11 @@
 namespace Gijima.IOBM.MobileManager.Views
 {
     /// <summary>
-    /// Interaction logic for ViewBillingCF.xaml
+    /// Interaction logic for ViewConfig.xaml
     /// </summary>
-    public partial class ViewBillingCF : UserControl
+    public partial class ViewSystemTools : UserControl
     {
-        public ViewBillingCF()
+        public ViewSystemTools()
         {
             InitializeComponent();
         }

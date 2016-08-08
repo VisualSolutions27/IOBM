@@ -289,6 +289,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             TabCollection.Add(new TabItem() { Header = "Administration" });
             TabCollection.Add(new TabItem() { Header = "Accounts" });
             TabCollection.Add(new TabItem() { Header = "Billing" });
+            TabCollection.Add(new TabItem() { Header = "Activity Log" });
+            TabCollection.Add(new TabItem() { Header = "System Tools" });
             if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()) || _securityHelper.IsUserInRole(SecurityRole.Supervisor.Value()))
                 TabCollection.Add(new TabItem() { Header = "Configuration" });
         }
@@ -327,7 +329,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                             case "Billing":
                                 SelectedTab.Content = new ViewBilling();
                                 break;
-                            case "Configuration":
+                            case "Activity Log":
+                                SelectedTab.Content = new ViewActivityLog();
+                        break;
+                    case "System Tools":
+                        SelectedTab.Content = new ViewSystemTools();
+                        break;
+                    case "Configuration":
                                 SelectedTab.Content = new ViewConfig();
                                 break;
                         }
