@@ -8,6 +8,7 @@ using System.Data.Entity.Core.Metadata.Edm;
 using System.Data.Entity.Core.EntityClient;
 using Gijima.IOBM.Infrastructure.Events;
 using System.Data.Entity.Infrastructure;
+using Gijima.IOBM.Infrastructure.Structs;
 
 namespace Gijima.IOBM.Infrastructure.Helpers
 {
@@ -35,31 +36,31 @@ namespace Gijima.IOBM.Infrastructure.Helpers
         /// <param name="originalData">The entity prior to changes,</param>
         /// <param name="currentData">The entity post changes.</param>
         /// <param name="context">The database context.</param>
-        /// <returns>A list of activity strings</returns>
-        public IEnumerable<string> GetDataChangeActivities<T>(object originalData, object currentData, DbContext context)
+        /// <returns>A list of DataActivityLog</returns>
+        public IEnumerable<DataActivityLog> GetDataChangeActivities<T>(object originalData, object currentData, DbContext context)
         {
             try
             { 
                 PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(T));
-                List<string> changedProperties = new List<string>();
+                List<DataActivityLog> changedProperties = new List<DataActivityLog>();
                 string modifiedBy = context.Entry(currentData).Property("ModifiedBy").CurrentValue.ToString();
 
                 foreach (PropertyDescriptor property in properties)
                 {
                     var originalValue = property.GetValue(originalData);
                     var currentValue = property.GetValue(currentData);
-                    string activity = string.Empty;
+                    DataActivityLog activity = new DataActivityLog();
 
                     if (property.Name != "ModifiedBy" && property.Name != "ModifiedDate")
                         if (originalValue != null && currentValue != null && !originalValue.Equals(currentValue))
                         {
-                            activity = string.Format("{0} changed from {1} to {2} by {3} on {4}.", property.Name.ToUpper(),
-                                                                                                   originalValue.ToString().ToUpper(),
-                                                                                                   currentValue.ToString().ToUpper(),
-                                                                                                   modifiedBy.ToUpper(), DateTime.Now.ToString());
+                            activity.ActivityDescription = string.Format("{0} changed from {1} to {2} by {3} on {4}.", property.Name.ToUpper(),
+                                                                                                                       originalValue.ToString().ToUpper(),
+                                                                                                                       currentValue.ToString().ToUpper(),
+                                                                                                                       modifiedBy.ToUpper(), DateTime.Now.ToString());
                             // Prevent changes to Enities to be logged
                             // Only data changes must be logged
-                            if (!activity.Contains("GIJIMA.IOBM"))
+                            if (!activity.ActivityDescription.Contains("GIJIMA.IOBM"))
                                 changedProperties.Add(activity);
                         }
                 }

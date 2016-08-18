@@ -12,19 +12,19 @@ namespace Gijima.IOBM.MobileManager.Model.Data
     using System;
     using System.Collections.Generic;
     
-    public partial class ValidationRuleException
+    public partial class DataValidationException
     {
-        public int pkValidationRuleExceptionID { get; set; }
-        public int fkBillingProcessID { get; set; }
-        public int fkValidationRuleID { get; set; }
+        public int pkDataValidationExceptionID { get; set; }
         public string BillingPeriod { get; set; }
-        public short enValidationEntity { get; set; }
-        public int EntityID { get; set; }
+        public int fkBillingProcessID { get; set; }
+        public int fkDataValidationPropertyID { get; set; }
+        public short enDataValidationEntity { get; set; }
+        public int DataValidationEntityID { get; set; }
         public string Message { get; set; }
         public Nullable<bool> CanApplyRule { get; set; }
         public Nullable<bool> Result { get; set; }
     
         public virtual BillingProcess BillingProcess { get; set; }
-        public virtual ValidationRule ValidationRule { get; set; }
+        public virtual DataValidationProperty DataValidationProperty { get; set; }
     }
 }

@@ -6,12 +6,10 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Gijima.IOBM.MobileManager.Model.Models
 {
-    public class ValidationRuleExceptionModel
+    public class DataValidationExceptionModel
     {
         #region Properties and Attributes
 
@@ -23,17 +21,17 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// Constructure
         /// </summary>
         /// <param name="eventAggreagator"></param>
-        public ValidationRuleExceptionModel(IEventAggregator eventAggreagator)
+        public DataValidationExceptionModel(IEventAggregator eventAggreagator)
         {
             _eventAggregator = eventAggreagator;
         }
 
         /// <summary>
-        /// Save all the data rule exceptions to the database
+        /// Save all the data validation exceptions to the database
         /// </summary>
-        /// <param name="validationRuleExceptions">List of validation rule exceptions to save.</param>
+        /// <param name="validationRuleExceptions">List of data validation exceptions to save.</param>
         /// <returns>True if successfull</returns>
-        public bool CreateValidationRuleExceptions(IEnumerable<ValidationRuleException> validationRuleExceptions)
+        public bool CreateDataValidationExceptions(IEnumerable<DataValidationException> validationRuleExceptions)
         {
             try
             {
@@ -41,7 +39,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 {
                     string billingPeriod = validationRuleExceptions.First().BillingPeriod;
 
-                    IEnumerable<ValidationRuleException> exceptionsToDelete = db.ValidationRuleExceptions.Where(p => p.BillingPeriod == billingPeriod).ToList();
+                    IEnumerable<DataValidationException> exceptionsToDelete = db.DataValidationExceptions.Where(p => p.BillingPeriod == billingPeriod).ToList();
 
                     // First delete all the current exceptions 
                     // for this billing period
@@ -49,18 +47,17 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     // one billing process for the same billing period 
                     if (exceptionsToDelete.Count() > 0)
                     {
-                        foreach (ValidationRuleException exception in exceptionsToDelete)
+                        foreach (DataValidationException exception in exceptionsToDelete)
                         {
-                            db.ValidationRuleExceptions.Remove(exception);
+                            db.DataValidationExceptions.Remove(exception);
                         }
                         db.SaveChanges();
                     }
 
                     // Add the new exceptions for the billing period
-                    foreach (ValidationRuleException exception in validationRuleExceptions)
+                    foreach (DataValidationException exception in validationRuleExceptions)
                     {
-                        db.ValidationRuleExceptions.Add(exception);
-                        //db.SaveChanges();
+                        db.DataValidationExceptions.Add(exception);
                     }
                     db.SaveChanges();
 
@@ -78,20 +75,20 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// Read all the validation rule exceptions for the specified billing period from the database
         /// </summary>
         /// <param name="billingPeriod">The billing period to read exceptions for.</param>
-        /// <returns>Collection of ValidationRuleException</returns>
-        public ObservableCollection<ValidationRuleException> ReadValidationRuleExceptions(string billingPeriod)
+        /// <returns>Collection of DataValidationExceptions</returns>
+        public ObservableCollection<DataValidationException> ReadDataValidationExceptions(string billingPeriod)
         {
             try
             {
-                IEnumerable<ValidationRuleException> validationRuleExceptions = null;
+                IEnumerable<DataValidationException> validationRuleExceptions = null;
 
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    validationRuleExceptions = ((DbQuery<ValidationRuleException>)(from ruleException in db.ValidationRuleExceptions
+                    validationRuleExceptions = ((DbQuery<DataValidationException>)(from ruleException in db.DataValidationExceptions
                                                                                    where ruleException.BillingPeriod == billingPeriod
                                                                                    select ruleException)).ToList();
 
-                    return new ObservableCollection<ValidationRuleException>(validationRuleExceptions);
+                    return new ObservableCollection<DataValidationException>(validationRuleExceptions);
                 }
             }
             catch (Exception ex)

@@ -330,7 +330,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                 SelectedTab.Content = new ViewBilling();
                                 break;
                             case "Activity Log":
-                                SelectedTab.Content = new ViewActivityLog();
+                                SelectedTab.Content = new ViewAuditLog();
                         break;
                     case "System Tools":
                         SelectedTab.Content = new ViewSystemTools();

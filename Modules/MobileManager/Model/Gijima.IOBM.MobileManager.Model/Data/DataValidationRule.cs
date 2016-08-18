@@ -12,14 +12,18 @@ namespace Gijima.IOBM.MobileManager.Model.Data
     using System;
     using System.Collections.Generic;
     
-    public partial class ActivityLog
+    public partial class DataValidationRule
     {
-        public int pkActivityLogID { get; set; }
-        public string ActivityGroup { get; set; }
-        public string ActivityDescription { get; set; }
-        public string ActivityComment { get; set; }
+        public int pkDataValidationRuleID { get; set; }
+        public short enValidationProcess { get; set; }
+        public short enDataValidationEntity { get; set; }
+        public int DataValidationEntityID { get; set; }
+        public int fkDataValidationPropertyID { get; set; }
+        public short enDataValidationOperator { get; set; }
+        public string DataValidationValue { get; set; }
         public string ModifiedBy { get; set; }
         public System.DateTime ModifiedDate { get; set; }
-        public System.DateTime ActivityDate { get; set; }
+    
+        public virtual DataValidationProperty DataValidationProperty { get; set; }
     }
 }

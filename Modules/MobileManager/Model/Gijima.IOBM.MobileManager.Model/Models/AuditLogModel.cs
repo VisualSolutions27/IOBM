@@ -1,5 +1,7 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
+using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
+using Gijima.IOBM.Security;
 using Prism.Events;
 using System;
 using System.Collections.Generic;
@@ -9,7 +11,7 @@ using System.Linq;
 
 namespace Gijima.IOBM.MobileManager.Model.Models
 {
-    public class ActivityLogModel
+    public class AuditLogModel
     {
         #region Properties and Attributes
 
@@ -21,7 +23,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// Constructure
         /// </summary>
         /// <param name="eventAggreagator"></param>
-        public ActivityLogModel(IEventAggregator eventAggreagator)
+        public AuditLogModel(IEventAggregator eventAggreagator)
         {
             _eventAggregator = eventAggreagator;
         }
@@ -31,26 +33,27 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// the changes been saved to the database
         /// </summary>
         /// <typeparam name="T">The entity to log changes for.</typeparam>
-        /// <param name="activityLogEntries">The activity entries to log.</param>
-        /// <param name="userName">The user name performing the action.</param>
+        /// <param name="auditLogEntries">The activity entries to log.</param>
         /// <returns>True if successfull</returns>
-        public bool CreateDataChangeActivities<T>(IEnumerable<string> activityLogEntries, string userName)
+        public bool CreateDataChangeAudits<T>(IEnumerable<DataActivityLog> auditLogEntries)
         {
             try
             {
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    ActivityLog activityLog = null;
+                    AuditLog auditLog = null;
 
-                    foreach (string activity in activityLogEntries)
+                    foreach (DataActivityLog activity in auditLogEntries)
                     {
-                        activityLog = new ActivityLog();
-                        activityLog.ActivityGroup = typeof(T).Name.ToUpper();
-                        activityLog.ActivityDescription = activity;
-                        activityLog.ActivityDate = DateTime.Now;
-                        activityLog.ModifiedBy = userName;
-                        activityLog.ModifiedDate = DateTime.Now;
-                        db.ActivityLogs.Add(activityLog);
+                        auditLog = new AuditLog();
+                        auditLog.AuditGroup = typeof(T).Name.ToUpper();
+                        auditLog.AuditDescription = activity.ActivityDescription;
+                        auditLog.EntityID = activity.EntityID;
+                        auditLog.ChangedValue = activity.ChangedValue;
+                        auditLog.AuditDate = DateTime.Now;
+                        auditLog.ModifiedBy = SecurityHelper.LoggedInFullName;
+                        auditLog.ModifiedDate = DateTime.Now;
+                        db.AuditLogs.Add(auditLog);
                     }
 
                     db.SaveChanges();
@@ -65,24 +68,24 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         }
 
         /// <summary>
-        /// Read all activity logs for specified filter from the database
+        /// Read all audit logs for specified filter from the database
         /// </summary>
         /// <param name="activityFilter">The filter the activities are linked to.</param>
-        /// <returns>Collection of ActivityLogs</returns>
-        public ObservableCollection<ActivityLog> ReadActivityLogs(string activityFilter)
+        /// <returns>Collection of AuditLogs</returns>
+        public ObservableCollection<AuditLog> ReadAuditLogs(string activityFilter)
         {
             try
             {
                 string filter = activityFilter.ToUpper();
-                IEnumerable<ActivityLog> logs = null;
+                IEnumerable<AuditLog> logs = null;
 
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    logs = ((DbQuery<ActivityLog>)(from activityLog in db.ActivityLogs
-                                                   where filter != "NONE" ? activityLog.ActivityGroup == filter : true
-                                                   select activityLog)).OrderByDescending(p => p.ActivityDate).ToList();
+                    logs = ((DbQuery<AuditLog>)(from AuditLog in db.AuditLogs
+                                                where filter != "NONE" ? AuditLog.AuditGroup == filter : true
+                                                select AuditLog)).OrderByDescending(p => p.AuditDate).ToList();
 
-                    return new ObservableCollection<ActivityLog>(logs);
+                    return new ObservableCollection<AuditLog>(logs);
                 }
             }
             catch (Exception ex)
@@ -95,16 +98,16 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// <summary>
         /// Update an existing activity log entity in the database
         /// </summary>
-        /// <param name="activityLog">The activity log entity to update.</param>
+        /// <param name="auditLog">The activity log entity to update.</param>
         /// <returns>True if successfull</returns>
-        public bool UpdateActivityLog(ActivityLog activityLog)
+        public bool UpdateAuditLog(AuditLog auditLog)
         {
             try
             {
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    db.ActivityLogs.Attach(activityLog);
-                    db.Entry(activityLog).State = System.Data.Entity.EntityState.Modified;
+                    db.AuditLogs.Attach(auditLog);
+                    db.Entry(auditLog).State = System.Data.Entity.EntityState.Modified;
                     db.SaveChanges();
                     return true;
                 }

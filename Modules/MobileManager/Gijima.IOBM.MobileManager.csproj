@@ -113,7 +113,7 @@
     <Compile Include="MobileManagerController.cs" />
     <Compile Include="MobileManagerModule.cs" />
     <Compile Include="ViewModels\ViewAccountViewModel.cs" />
-    <Compile Include="ViewModels\ViewActivityLogViewModel.cs" />
+    <Compile Include="ViewModels\ViewAuditLogViewModel.cs" />
     <Compile Include="ViewModels\ViewBasicSearchViewModel.cs" />
     <Compile Include="ViewModels\ViewBillingLevelViewModel.cs" />
     <Compile Include="ViewModels\ViewBillingViewModel.cs" />
@@ -140,6 +140,7 @@
     <Compile Include="ViewModels\ViewSimmCardViewModel.cs" />
     <Compile Include="ViewModels\ViewStatusViewModel.cs" />
     <Compile Include="ViewModels\ViewSuburbViewModel.cs" />
+    <Compile Include="ViewModels\ViewSupplierDataImportViewModel.cs" />
     <Compile Include="ViewModels\ViewSystemToolsViewModel.cs" />
     <Compile Include="Views\Billing\ViewBilling.xaml.cs">
       <DependentUpon>ViewBilling.xaml</DependentUpon>
@@ -150,8 +151,8 @@
     <Compile Include="Views\Billing\ViewSupplierDataImport.xaml.cs">
       <DependentUpon>ViewSupplierDataImport.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Common\ViewActivityLog.xaml.cs">
-      <DependentUpon>ViewActivityLog.xaml</DependentUpon>
+    <Compile Include="Views\Common\ViewAuditLog.xaml.cs">
+      <DependentUpon>ViewAuditLog.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Configuration\ViewDataValidationCF.xaml.cs">
       <DependentUpon>ViewDataValidationCF.xaml</DependentUpon>
@@ -248,7 +249,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Common\ViewActivityLog.xaml">
+    <Page Include="Views\Common\ViewAuditLog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

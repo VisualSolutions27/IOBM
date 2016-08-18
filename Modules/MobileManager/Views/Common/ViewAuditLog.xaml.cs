@@ -3,11 +3,11 @@
 namespace Gijima.IOBM.MobileManager.Views
 {
     /// <summary>
-    /// Interaction logic for ViewActivityLog.xaml
+    /// Interaction logic for ViewAuditLog.xaml
     /// </summary>
-    public partial class ViewActivityLog : UserControl
+    public partial class ViewAuditLog : UserControl
     {
-        public ViewActivityLog()
+        public ViewAuditLog()
         {
             InitializeComponent();
         }

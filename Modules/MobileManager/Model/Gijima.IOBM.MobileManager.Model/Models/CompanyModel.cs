@@ -94,6 +94,34 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         }
 
         /// <summary>
+        /// Read all or active only company groups from the database
+        /// </summary>
+        /// <param name="activeOnly">Flag to load all or active only entities.</param>
+        /// <returns>Collection of Company Groups</returns>
+        public ObservableCollection<CompanyGroup> ReadCompanyGroups(bool activeOnly)
+        {
+            try
+            {
+                IEnumerable<CompanyGroup> companyGroups = null;
+
+                using (var db = MobileManagerEntities.GetContext())
+                {
+                    companyGroups = db.CompanyGroups.OrderBy(p => p.GroupName);
+
+                    if (activeOnly)
+                        companyGroups = companyGroups.Where(p => p.IsActive);
+
+                    return new ObservableCollection<CompanyGroup>(companyGroups);
+                }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Update an existing company entity in the database
         /// </summary>
         /// <param name="company">The company entity to update.</param>

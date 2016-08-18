@@ -5,15 +5,17 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
     <Schema Namespace="MobileManagerModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2005" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
-        <EntityType Name="ActivityLog">
+        <EntityType Name="AuditLog">
           <Key>
-            <PropertyRef Name="pkActivityLogID" />
+            <PropertyRef Name="pkAuditLogID" />
           </Key>
-          <Property Name="pkActivityLogID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="ActivityGroup" Type="varchar" MaxLength="50" Nullable="false" />
-          <Property Name="ActivityDescription" Type="varchar" MaxLength="255" Nullable="false" />
-          <Property Name="ActivityComment" Type="varchar" MaxLength="255" />
-          <Property Name="ActivityDate" Type="datetime" Nullable="false" />
+          <Property Name="pkAuditLogID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="AuditGroup" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="AuditDescription" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="AuditComment" Type="varchar" MaxLength="255" />
+          <Property Name="EntityID" Type="int" />
+          <Property Name="ChangedValue" Type="varchar" MaxLength="100" />
+          <Property Name="AuditDate" Type="datetime" Nullable="false" />
           <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
         </EntityType>
@@ -126,7 +128,8 @@
             <PropertyRef Name="pkCompanyID" />
           </Key>
           <Property Name="pkCompanyID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="CompanyName" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="fkCompanyGroupID" Type="int" Nullable="false" />
+          <Property Name="CompanyName" Type="varchar" MaxLength="50" />
           <Property Name="WBSNumber" Type="varchar" MaxLength="25" />
           <Property Name="CostCode" Type="varchar" MaxLength="30" />
           <Property Name="AdminFee" Type="decimal" Precision="18" Scale="2" Nullable="false" />
@@ -145,6 +148,16 @@
           <Property Name="Amount" Type="decimal" Precision="18" Scale="2" Nullable="false" />
           <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="CompanyGroup">
+          <Key>
+            <PropertyRef Name="pkCompanyGroupID" />
+          </Key>
+          <Property Name="pkCompanyGroupID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="GroupName" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="Contract">
           <Key>
@@ -168,6 +181,46 @@
           <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DataValidationException">
+          <Key>
+            <PropertyRef Name="pkDataValidationExceptionID" />
+          </Key>
+          <Property Name="pkDataValidationExceptionID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="BillingPeriod" Type="varchar" MaxLength="6" Nullable="false" />
+          <Property Name="fkBillingProcessID" Type="int" Nullable="false" />
+          <Property Name="fkDataValidationPropertyID" Type="int" Nullable="false" />
+          <Property Name="enDataValidationEntity" Type="smallint" Nullable="false" />
+          <Property Name="DataValidationEntityID" Type="int" Nullable="false" />
+          <Property Name="Message" Type="varchar" MaxLength="255" />
+          <Property Name="CanApplyRule" Type="bit" />
+          <Property Name="Result" Type="bit" />
+        </EntityType>
+        <EntityType Name="DataValidationProperty">
+          <Key>
+            <PropertyRef Name="pkDataValidationPropertyID" />
+          </Key>
+          <Property Name="pkDataValidationPropertyID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="enDataValidationEntity" Type="smallint" Nullable="false" />
+          <Property Name="enDataValidationProperty" Type="smallint" Nullable="false" />
+          <Property Name="enDataType" Type="smallint" Nullable="false" />
+          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DataValidationRule">
+          <Key>
+            <PropertyRef Name="pkDataValidationRuleID" />
+          </Key>
+          <Property Name="pkDataValidationRuleID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="enValidationProcess" Type="smallint" Nullable="false" />
+          <Property Name="enDataValidationEntity" Type="smallint" Nullable="false" />
+          <Property Name="DataValidationEntityID" Type="int" Nullable="false" />
+          <Property Name="fkDataValidationPropertyID" Type="int" Nullable="false" />
+          <Property Name="enDataValidationOperator" Type="smallint" Nullable="false" />
+          <Property Name="DataValidationValue" Type="varchar" MaxLength="50" />
+          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
         </EntityType>
         <EntityType Name="Device">
           <Key>
@@ -219,8 +272,9 @@
             <PropertyRef Name="pkImportRuleDataID" />
           </Key>
           <Property Name="pkImportRuleDataID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="enImportSource" Type="smallint" Nullable="false" />
-          <Property Name="enImportDestination" Type="smallint" Nullable="false" />
+          <Property Name="enDataImportColumn" Type="smallint" Nullable="false" />
+          <Property Name="enDataImportEntity" Type="smallint" Nullable="false" />
+          <Property Name="SearchEntities" Type="varchar" MaxLength="250" />
           <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="DateModified" Type="datetime" Nullable="false" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
@@ -399,47 +453,6 @@
           <Property Name="fkUserID" Type="int" Nullable="false" />
           <Property Name="fkRoleID" Type="int" Nullable="false" />
         </EntityType>
-        <EntityType Name="ValidationRule">
-          <Key>
-            <PropertyRef Name="pkValidationRuleID" />
-          </Key>
-          <Property Name="pkValidationRuleID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="enValidationRuleGroup" Type="smallint" Nullable="false" />
-          <Property Name="fkValidationRulesDataID" Type="int" Nullable="false" />
-          <Property Name="EntityID" Type="int" Nullable="false" />
-          <Property Name="ValidationDataValue" Type="varchar" MaxLength="50" />
-          <Property Name="enStringCompareType" Type="smallint" Nullable="false" />
-          <Property Name="enNumericCompareType" Type="smallint" Nullable="false" />
-          <Property Name="enDateCompareType" Type="smallint" Nullable="false" />
-          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
-          <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
-        </EntityType>
-        <EntityType Name="ValidationRuleException">
-          <Key>
-            <PropertyRef Name="pkValidationRuleExceptionID" />
-          </Key>
-          <Property Name="pkValidationRuleExceptionID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="fkBillingProcessID" Type="int" Nullable="false" />
-          <Property Name="fkValidationRuleID" Type="int" Nullable="false" />
-          <Property Name="BillingPeriod" Type="varchar" MaxLength="6" Nullable="false" />
-          <Property Name="enValidationEntity" Type="smallint" Nullable="false" />
-          <Property Name="EntityID" Type="int" Nullable="false" />
-          <Property Name="Message" Type="varchar" MaxLength="255" />
-          <Property Name="CanApplyRule" Type="bit" />
-          <Property Name="Result" Type="bit" />
-        </EntityType>
-        <EntityType Name="ValidationRulesData">
-          <Key>
-            <PropertyRef Name="pkValidationRulesDataID" />
-          </Key>
-          <Property Name="pkValidationRulesDataID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="enValidationRuleGroup" Type="smallint" Nullable="false" />
-          <Property Name="ValidationDataName" Type="varchar" MaxLength="50" Nullable="false" />
-          <Property Name="enValidationDataType" Type="smallint" Nullable="false" />
-          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
-          <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
-          <Property Name="IsActive" Type="bit" Nullable="false" />
-        </EntityType>
         <Association Name="FK_BillingProcessHistory_BillingProcess">
           <End Role="BillingProcess" Type="Self.BillingProcess" Multiplicity="1" />
           <End Role="BillingProcessHistory" Type="Self.BillingProcessHistory" Multiplicity="*" />
@@ -449,18 +462,6 @@
             </Principal>
             <Dependent Role="BillingProcessHistory">
               <PropertyRef Name="fkBillingProcessID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_BillingValidationRule_BillingRulesData">
-          <End Role="ValidationRulesData" Type="Self.ValidationRulesData" Multiplicity="1" />
-          <End Role="ValidationRule" Type="Self.ValidationRule" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="ValidationRulesData">
-              <PropertyRef Name="pkValidationRulesDataID" />
-            </Principal>
-            <Dependent Role="ValidationRule">
-              <PropertyRef Name="fkValidationRulesDataID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -548,6 +549,18 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_Company_CompanyGroup">
+          <End Role="CompanyGroup" Type="Self.CompanyGroup" Multiplicity="1" />
+          <End Role="Company" Type="Self.Company" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CompanyGroup">
+              <PropertyRef Name="pkCompanyGroupID" />
+            </Principal>
+            <Dependent Role="Company">
+              <PropertyRef Name="fkCompanyGroupID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_CompanyBillingLevel_BillingLevel">
           <End Role="BillingLevel" Type="Self.BillingLevel" Multiplicity="1" />
           <End Role="CompanyBillingLevel" Type="Self.CompanyBillingLevel" Multiplicity="*" />
@@ -605,6 +618,42 @@
             </Principal>
             <Dependent Role="Contract">
               <PropertyRef Name="fkStatusID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_DataValidationException_BillingProcess1">
+          <End Role="BillingProcess" Type="Self.BillingProcess" Multiplicity="1" />
+          <End Role="DataValidationException" Type="Self.DataValidationException" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BillingProcess">
+              <PropertyRef Name="pkBillingProcessID" />
+            </Principal>
+            <Dependent Role="DataValidationException">
+              <PropertyRef Name="fkBillingProcessID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_DataValidationException_DataValidationProperty">
+          <End Role="DataValidationProperty" Type="Self.DataValidationProperty" Multiplicity="1" />
+          <End Role="DataValidationException" Type="Self.DataValidationException" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DataValidationProperty">
+              <PropertyRef Name="pkDataValidationPropertyID" />
+            </Principal>
+            <Dependent Role="DataValidationException">
+              <PropertyRef Name="fkDataValidationPropertyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_DataValidationRule_DataValidationProperty">
+          <End Role="DataValidationProperty" Type="Self.DataValidationProperty" Multiplicity="1" />
+          <End Role="DataValidationRule" Type="Self.DataValidationRule" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DataValidationProperty">
+              <PropertyRef Name="pkDataValidationPropertyID" />
+            </Principal>
+            <Dependent Role="DataValidationRule">
+              <PropertyRef Name="fkDataValidationPropertyID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -824,35 +873,11 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_ValidationRuleException_BillingProcess">
-          <End Role="BillingProcess" Type="Self.BillingProcess" Multiplicity="1" />
-          <End Role="ValidationRuleException" Type="Self.ValidationRuleException" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="BillingProcess">
-              <PropertyRef Name="pkBillingProcessID" />
-            </Principal>
-            <Dependent Role="ValidationRuleException">
-              <PropertyRef Name="fkBillingProcessID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_ValidationRuleException_ValidationRule">
-          <End Role="ValidationRule" Type="Self.ValidationRule" Multiplicity="1" />
-          <End Role="ValidationRuleException" Type="Self.ValidationRuleException" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="ValidationRule">
-              <PropertyRef Name="pkValidationRuleID" />
-            </Principal>
-            <Dependent Role="ValidationRuleException">
-              <PropertyRef Name="fkValidationRuleID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Function Name="sp_report_Invoice" Aggregate="false" BuiltIn="false" NiladicFunction="false" IsComposable="false" ParameterTypeSemantics="AllowImplicitConversion" Schema="dbo">
           <Parameter Name="invoiceID" Type="int" Mode="In" />
         </Function>
         <EntityContainer Name="MobileManagerModelStoreContainer">
-          <EntitySet Name="ActivityLog" EntityType="Self.ActivityLog" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="AuditLog" EntityType="Self.AuditLog" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="BillingLevel" EntityType="Self.BillingLevel" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="BillingProcess" EntityType="Self.BillingProcess" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="BillingProcessHistory" EntityType="Self.BillingProcessHistory" Schema="dbo" store:Type="Tables" />
@@ -862,7 +887,11 @@
           <EntitySet Name="ClientLocation" EntityType="Self.ClientLocation" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Company" EntityType="Self.Company" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CompanyBillingLevel" EntityType="Self.CompanyBillingLevel" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CompanyGroup" EntityType="Self.CompanyGroup" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Contract" EntityType="Self.Contract" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DataValidationException" EntityType="Self.DataValidationException" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DataValidationProperty" EntityType="Self.DataValidationProperty" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DataValidationRule" EntityType="Self.DataValidationRule" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Device" EntityType="Self.Device" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DeviceMake" EntityType="Self.DeviceMake" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DeviceModel" EntityType="Self.DeviceModel" Schema="dbo" store:Type="Tables" />
@@ -881,16 +910,9 @@
           <EntitySet Name="User" EntityType="Self.User" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UserInCompany" EntityType="Self.UserInCompany" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UserInRole" EntityType="Self.UserInRole" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="ValidationRule" EntityType="Self.ValidationRule" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="ValidationRuleException" EntityType="Self.ValidationRuleException" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="ValidationRulesData" EntityType="Self.ValidationRulesData" Schema="dbo" store:Type="Tables" />
           <AssociationSet Name="FK_BillingProcessHistory_BillingProcess" Association="Self.FK_BillingProcessHistory_BillingProcess">
             <End Role="BillingProcess" EntitySet="BillingProcess" />
             <End Role="BillingProcessHistory" EntitySet="BillingProcessHistory" />
-          </AssociationSet>
-          <AssociationSet Name="FK_BillingValidationRule_BillingRulesData" Association="Self.FK_BillingValidationRule_BillingRulesData">
-            <End Role="ValidationRulesData" EntitySet="ValidationRulesData" />
-            <End Role="ValidationRule" EntitySet="ValidationRule" />
           </AssociationSet>
           <AssociationSet Name="FK_City_Province" Association="Self.FK_City_Province">
             <End Role="Province" EntitySet="Province" />
@@ -920,6 +942,10 @@
             <End Role="CompanyBillingLevel" EntitySet="CompanyBillingLevel" />
             <End Role="ClientBilling" EntitySet="ClientBilling" />
           </AssociationSet>
+          <AssociationSet Name="FK_Company_CompanyGroup" Association="Self.FK_Company_CompanyGroup">
+            <End Role="CompanyGroup" EntitySet="CompanyGroup" />
+            <End Role="Company" EntitySet="Company" />
+          </AssociationSet>
           <AssociationSet Name="FK_CompanyBillingLevel_BillingLevel" Association="Self.FK_CompanyBillingLevel_BillingLevel">
             <End Role="BillingLevel" EntitySet="BillingLevel" />
             <End Role="CompanyBillingLevel" EntitySet="CompanyBillingLevel" />
@@ -939,6 +965,18 @@
           <AssociationSet Name="FK_Contract_Status" Association="Self.FK_Contract_Status">
             <End Role="Status" EntitySet="Status" />
             <End Role="Contract" EntitySet="Contract" />
+          </AssociationSet>
+          <AssociationSet Name="FK_DataValidationException_BillingProcess1" Association="Self.FK_DataValidationException_BillingProcess1">
+            <End Role="BillingProcess" EntitySet="BillingProcess" />
+            <End Role="DataValidationException" EntitySet="DataValidationException" />
+          </AssociationSet>
+          <AssociationSet Name="FK_DataValidationException_DataValidationProperty" Association="Self.FK_DataValidationException_DataValidationProperty">
+            <End Role="DataValidationProperty" EntitySet="DataValidationProperty" />
+            <End Role="DataValidationException" EntitySet="DataValidationException" />
+          </AssociationSet>
+          <AssociationSet Name="FK_DataValidationRule_DataValidationProperty" Association="Self.FK_DataValidationRule_DataValidationProperty">
+            <End Role="DataValidationProperty" EntitySet="DataValidationProperty" />
+            <End Role="DataValidationRule" EntitySet="DataValidationRule" />
           </AssociationSet>
           <AssociationSet Name="FK_Device_Contract" Association="Self.FK_Device_Contract">
             <End Role="Contract" EntitySet="Contract" />
@@ -1012,31 +1050,11 @@
             <End Role="User" EntitySet="User" />
             <End Role="UserInRole" EntitySet="UserInRole" />
           </AssociationSet>
-          <AssociationSet Name="FK_ValidationRuleException_BillingProcess" Association="Self.FK_ValidationRuleException_BillingProcess">
-            <End Role="BillingProcess" EntitySet="BillingProcess" />
-            <End Role="ValidationRuleException" EntitySet="ValidationRuleException" />
-          </AssociationSet>
-          <AssociationSet Name="FK_ValidationRuleException_ValidationRule" Association="Self.FK_ValidationRuleException_ValidationRule">
-            <End Role="ValidationRule" EntitySet="ValidationRule" />
-            <End Role="ValidationRuleException" EntitySet="ValidationRuleException" />
-          </AssociationSet>
         </EntityContainer>
       </Schema></edmx:StorageModels>
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="MobileManagerModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
-        <EntityType Name="ActivityLog">
-          <Key>
-            <PropertyRef Name="pkActivityLogID" />
-          </Key>
-          <Property Name="pkActivityLogID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="ActivityGroup" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="ActivityDescription" Type="String" MaxLength="255" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="ActivityComment" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="ActivityDate" Type="DateTime" Nullable="false" Precision="3" />
-        </EntityType>
         <EntityType Name="City">
           <Key>
             <PropertyRef Name="pkCityID" />
@@ -1283,7 +1301,6 @@
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="MobileManagerEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="ActivityLogs" EntityType="Self.ActivityLog" />
           <EntitySet Name="Cities" EntityType="Self.City" />
           <EntitySet Name="ClientLocations" EntityType="Self.ClientLocation" />
           <EntitySet Name="Devices" EntityType="Self.Device" />
@@ -1371,14 +1388,7 @@
             <End Role="CompanyBillingLevel" EntitySet="CompanyBillingLevels" />
             <End Role="ClientBilling" EntitySet="ClientBillings" />
           </AssociationSet>
-          <EntitySet Name="ValidationRulesDatas" EntityType="MobileManagerModel.ValidationRulesData" />
-          <EntitySet Name="ValidationRules" EntityType="MobileManagerModel.ValidationRule" />
-          <AssociationSet Name="FK_BillingValidationRule_BillingRulesData" Association="MobileManagerModel.FK_BillingValidationRule_BillingRulesData">
-            <End Role="ValidationRulesData" EntitySet="ValidationRulesDatas" />
-            <End Role="ValidationRule" EntitySet="ValidationRules" />
-          </AssociationSet>
           <EntitySet Name="Clients" EntityType="MobileManagerModel.Client" />
-          <EntitySet Name="Companies" EntityType="MobileManagerModel.Company" />
           <EntitySet Name="Packages" EntityType="MobileManagerModel.Package" />
           <AssociationSet Name="FK_Client_ClientBilling" Association="MobileManagerModel.FK_Client_ClientBilling">
             <End Role="ClientBilling" EntitySet="ClientBillings" />
@@ -1388,10 +1398,6 @@
             <End Role="ClientLocation" EntitySet="ClientLocations" />
             <End Role="Client" EntitySet="Clients" />
           </AssociationSet>
-          <AssociationSet Name="FK_Client_Company" Association="MobileManagerModel.FK_Client_Company">
-            <End Role="Company" EntitySet="Companies" />
-            <End Role="Client" EntitySet="Clients" />
-          </AssociationSet>
           <AssociationSet Name="FK_Client_Suburb" Association="MobileManagerModel.FK_Client_Suburb">
             <End Role="Suburb" EntitySet="Suburbs" />
             <End Role="Client" EntitySet="Clients" />
@@ -1399,14 +1405,6 @@
           <AssociationSet Name="FK_Invoice_Client" Association="MobileManagerModel.FK_Invoice_Client">
             <End Role="Client" EntitySet="Clients" />
             <End Role="Invoice" EntitySet="Invoices" />
-          </AssociationSet>
-          <AssociationSet Name="FK_CompanyBillingLevel_Company" Association="MobileManagerModel.FK_CompanyBillingLevel_Company">
-            <End Role="Company" EntitySet="Companies" />
-            <End Role="CompanyBillingLevel" EntitySet="CompanyBillingLevels" />
-          </AssociationSet>
-          <AssociationSet Name="FK_UserInCompany_UserInCompany" Association="MobileManagerModel.FK_UserInCompany_UserInCompany">
-            <End Role="Company" EntitySet="Companies" />
-            <End Role="UserInCompany" EntitySet="UserInCompanies" />
           </AssociationSet>
           <AssociationSet Name="FK_Package_ServiceProvider" Association="MobileManagerModel.FK_Package_ServiceProvider">
             <End Role="ServiceProvider" EntitySet="ServiceProviders" />
@@ -1444,16 +1442,41 @@
             <End Role="BillingProcess" EntitySet="BillingProcesses" />
             <End Role="BillingProcessHistory" EntitySet="BillingProcessHistories" />
           </AssociationSet>
-          <EntitySet Name="ValidationRuleExceptions" EntityType="MobileManagerModel.ValidationRuleException" />
-          <AssociationSet Name="FK_ValidationRuleException_BillingProcess" Association="MobileManagerModel.FK_ValidationRuleException_BillingProcess">
-            <End Role="BillingProcess" EntitySet="BillingProcesses" />
-            <End Role="ValidationRuleException" EntitySet="ValidationRuleExceptions" />
+          <EntitySet Name="AuditLogs" EntityType="MobileManagerModel.AuditLog" />
+          <EntitySet Name="CompanyGroups" EntityType="MobileManagerModel.CompanyGroup" />
+          <EntitySet Name="Companies" EntityType="MobileManagerModel.Company" />
+          <AssociationSet Name="FK_Client_Company" Association="MobileManagerModel.FK_Client_Company">
+            <End Role="Company" EntitySet="Companies" />
+            <End Role="Client" EntitySet="Clients" />
           </AssociationSet>
-          <AssociationSet Name="FK_ValidationRuleException_ValidationRule" Association="MobileManagerModel.FK_ValidationRuleException_ValidationRule">
-            <End Role="ValidationRule" EntitySet="ValidationRules" />
-            <End Role="ValidationRuleException" EntitySet="ValidationRuleExceptions" />
+          <AssociationSet Name="FK_Company_CompanyGroup" Association="MobileManagerModel.FK_Company_CompanyGroup">
+            <End Role="CompanyGroup" EntitySet="CompanyGroups" />
+            <End Role="Company" EntitySet="Companies" />
           </AssociationSet>
+          <AssociationSet Name="FK_CompanyBillingLevel_Company" Association="MobileManagerModel.FK_CompanyBillingLevel_Company">
+            <End Role="Company" EntitySet="Companies" />
+            <End Role="CompanyBillingLevel" EntitySet="CompanyBillingLevels" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UserInCompany_UserInCompany" Association="MobileManagerModel.FK_UserInCompany_UserInCompany">
+            <End Role="Company" EntitySet="Companies" />
+            <End Role="UserInCompany" EntitySet="UserInCompanies" />
+          </AssociationSet>
+          <EntitySet Name="DataValidationExceptions" EntityType="MobileManagerModel.DataValidationException" />
+          <EntitySet Name="DataValidationProperties" EntityType="MobileManagerModel.DataValidationProperty" />
+          <EntitySet Name="DataValidationRules" EntityType="MobileManagerModel.DataValidationRule" />
           <EntitySet Name="ImportRuleDatas" EntityType="MobileManagerModel.ImportRuleData" />
+          <AssociationSet Name="FK_DataValidationException_BillingProcess1" Association="MobileManagerModel.FK_DataValidationException_BillingProcess1">
+            <End Role="BillingProcess" EntitySet="BillingProcesses" />
+            <End Role="DataValidationException" EntitySet="DataValidationExceptions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_DataValidationException_DataValidationProperty" Association="MobileManagerModel.FK_DataValidationException_DataValidationProperty">
+            <End Role="DataValidationProperty" EntitySet="DataValidationProperties" />
+            <End Role="DataValidationException" EntitySet="DataValidationExceptions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_DataValidationRule_DataValidationProperty" Association="MobileManagerModel.FK_DataValidationRule_DataValidationProperty">
+            <End Role="DataValidationProperty" EntitySet="DataValidationProperties" />
+            <End Role="DataValidationRule" EntitySet="DataValidationRules" />
+          </AssociationSet>
           </EntityContainer>
         <EntityType Name="Role">
           <Key>
@@ -1713,48 +1736,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="ValidationRulesData">
-          <Key>
-            <PropertyRef Name="pkValidationRulesDataID" />
-          </Key>
-          <Property Name="pkValidationRulesDataID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="enValidationRuleGroup" Type="Int16" Nullable="false" />
-          <Property Name="ValidationDataName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="enValidationDataType" Type="Int16" Nullable="false" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="ValidationRules" Relationship="MobileManagerModel.FK_BillingValidationRule_BillingRulesData" FromRole="ValidationRulesData" ToRole="ValidationRule" />
-        </EntityType>
-        <EntityType Name="ValidationRule">
-          <Key>
-            <PropertyRef Name="pkValidationRuleID" />
-          </Key>
-          <Property Name="pkValidationRuleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="enValidationRuleGroup" Type="Int16" Nullable="false" />
-          <Property Name="fkValidationRulesDataID" Type="Int32" Nullable="false" />
-          <Property Name="EntityID" Type="Int32" Nullable="false" />
-          <Property Name="ValidationDataValue" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="enStringCompareType" Type="Int16" Nullable="false" />
-          <Property Name="enNumericCompareType" Type="Int16" Nullable="false" />
-          <Property Name="enDateCompareType" Type="Int16" Nullable="false" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="ValidationRulesData" Relationship="MobileManagerModel.FK_BillingValidationRule_BillingRulesData" FromRole="ValidationRule" ToRole="ValidationRulesData" />
-          <NavigationProperty Name="ValidationRuleExceptions" Relationship="MobileManagerModel.FK_ValidationRuleException_ValidationRule" FromRole="ValidationRule" ToRole="ValidationRuleException" />
-        </EntityType>
-        <Association Name="FK_BillingValidationRule_BillingRulesData">
-          <End Type="MobileManagerModel.ValidationRulesData" Role="ValidationRulesData" Multiplicity="1" />
-          <End Type="MobileManagerModel.ValidationRule" Role="ValidationRule" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="ValidationRulesData">
-              <PropertyRef Name="pkValidationRulesDataID" />
-            </Principal>
-            <Dependent Role="ValidationRule">
-              <PropertyRef Name="fkValidationRulesDataID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <EntityType Name="Client">
           <Key>
             <PropertyRef Name="pkClientID" />
@@ -1783,27 +1764,10 @@
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="ClientBilling" Relationship="MobileManagerModel.FK_Client_ClientBilling" FromRole="Client" ToRole="ClientBilling" />
           <NavigationProperty Name="ClientLocation" Relationship="MobileManagerModel.FK_Client_ClientLocation" FromRole="Client" ToRole="ClientLocation" />
-          <NavigationProperty Name="Company" Relationship="MobileManagerModel.FK_Client_Company" FromRole="Client" ToRole="Company" />
           <NavigationProperty Name="Suburb" Relationship="MobileManagerModel.FK_Client_Suburb" FromRole="Client" ToRole="Suburb" />
           <NavigationProperty Name="Invoices" Relationship="MobileManagerModel.FK_Invoice_Client" FromRole="Client" ToRole="Invoice" />
           <NavigationProperty Name="Contract" Relationship="MobileManagerModel.FK_Client_Contract" FromRole="Client" ToRole="Contract" />
-        </EntityType>
-        <EntityType Name="Company">
-          <Key>
-            <PropertyRef Name="pkCompanyID" />
-          </Key>
-          <Property Name="pkCompanyID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="CompanyName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="WBSNumber" Type="String" MaxLength="25" FixedLength="false" Unicode="false" />
-          <Property Name="CostCode" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="AdminFee" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
-          <Property Name="IPAddress" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="Clients" Relationship="MobileManagerModel.FK_Client_Company" FromRole="Company" ToRole="Client" />
-          <NavigationProperty Name="CompanyBillingLevels" Relationship="MobileManagerModel.FK_CompanyBillingLevel_Company" FromRole="Company" ToRole="CompanyBillingLevel" />
-          <NavigationProperty Name="UserInCompanies" Relationship="MobileManagerModel.FK_UserInCompany_UserInCompany" FromRole="Company" ToRole="UserInCompany" />
+          <NavigationProperty Name="Company" Relationship="MobileManagerModel.FK_Client_Company" FromRole="Client" ToRole="Company" />
         </EntityType>
         <EntityType Name="Package">
           <Key>
@@ -1849,18 +1813,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Client_Company">
-          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="1" />
-          <End Type="MobileManagerModel.Client" Role="Client" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Company">
-              <PropertyRef Name="pkCompanyID" />
-            </Principal>
-            <Dependent Role="Client">
-              <PropertyRef Name="fkCompanyID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_Client_Suburb">
           <End Type="MobileManagerModel.Suburb" Role="Suburb" Multiplicity="1" />
           <End Type="MobileManagerModel.Client" Role="Client" Multiplicity="*" />
@@ -1882,30 +1834,6 @@
             </Principal>
             <Dependent Role="Invoice">
               <PropertyRef Name="fkClientID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_CompanyBillingLevel_Company">
-          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="1" />
-          <End Type="MobileManagerModel.CompanyBillingLevel" Role="CompanyBillingLevel" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Company">
-              <PropertyRef Name="pkCompanyID" />
-            </Principal>
-            <Dependent Role="CompanyBillingLevel">
-              <PropertyRef Name="fkCompanyID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_UserInCompany_UserInCompany">
-          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="1" />
-          <End Type="MobileManagerModel.UserInCompany" Role="UserInCompany" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Company">
-              <PropertyRef Name="pkCompanyID" />
-            </Principal>
-            <Dependent Role="UserInCompany">
-              <PropertyRef Name="fkCompanyID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -2045,7 +1973,7 @@
           <Property Name="pkBillingProcessID" Type="Int32" Nullable="false" />
           <Property Name="ProcessDescription" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
           <NavigationProperty Name="BillingProcessHistories" Relationship="MobileManagerModel.FK_BillingProcessHistory_BillingProcess" FromRole="BillingProcess" ToRole="BillingProcessHistory" />
-          <NavigationProperty Name="ValidationRuleExceptions" Relationship="MobileManagerModel.FK_ValidationRuleException_BillingProcess" FromRole="BillingProcess" ToRole="ValidationRuleException" />
+          <NavigationProperty Name="DataValidationExceptions" Relationship="MobileManagerModel.FK_DataValidationException_BillingProcess1" FromRole="BillingProcess" ToRole="DataValidationException" />
         </EntityType>
         <EntityType Name="BillingProcessHistory">
           <Key>
@@ -2076,76 +2004,197 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="ValidationRuleException">
+        <EntityType Name="AuditLog">
           <Key>
-            <PropertyRef Name="pkValidationRuleExceptionID" />
+            <PropertyRef Name="pkAuditLogID" />
           </Key>
-          <Property Name="pkValidationRuleExceptionID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="fkBillingProcessID" Type="Int32" Nullable="false" />
-          <Property Name="fkValidationRuleID" Type="Int32" Nullable="false" />
+          <Property Name="pkAuditLogID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="AuditGroup" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="AuditDescription" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="AuditComment" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="EntityID" Type="Int32" />
+          <Property Name="ChangedValue" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="AuditDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
+        <EntityType Name="CompanyGroup">
+          <Key>
+            <PropertyRef Name="pkCompanyGroupID" />
+          </Key>
+          <Property Name="pkCompanyGroupID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="GroupName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Companies" Relationship="MobileManagerModel.FK_Company_CompanyGroup" FromRole="CompanyGroup" ToRole="Company" />
+        </EntityType>
+        <EntityType Name="Company">
+          <Key>
+            <PropertyRef Name="pkCompanyID" />
+          </Key>
+          <Property Name="pkCompanyID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="fkCompanyGroupID" Type="Int32" Nullable="false" />
+          <Property Name="CompanyName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="WBSNumber" Type="String" MaxLength="25" FixedLength="false" Unicode="false" />
+          <Property Name="CostCode" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="AdminFee" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="IPAddress" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Clients" Relationship="MobileManagerModel.FK_Client_Company" FromRole="Company" ToRole="Client" />
+          <NavigationProperty Name="CompanyGroup" Relationship="MobileManagerModel.FK_Company_CompanyGroup" FromRole="Company" ToRole="CompanyGroup" />
+          <NavigationProperty Name="CompanyBillingLevels" Relationship="MobileManagerModel.FK_CompanyBillingLevel_Company" FromRole="Company" ToRole="CompanyBillingLevel" />
+          <NavigationProperty Name="UserInCompanies" Relationship="MobileManagerModel.FK_UserInCompany_UserInCompany" FromRole="Company" ToRole="UserInCompany" />
+        </EntityType>
+        <Association Name="FK_Client_Company">
+          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="1" />
+          <End Type="MobileManagerModel.Client" Role="Client" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="pkCompanyID" />
+            </Principal>
+            <Dependent Role="Client">
+              <PropertyRef Name="fkCompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Company_CompanyGroup">
+          <End Type="MobileManagerModel.CompanyGroup" Role="CompanyGroup" Multiplicity="1" />
+          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CompanyGroup">
+              <PropertyRef Name="pkCompanyGroupID" />
+            </Principal>
+            <Dependent Role="Company">
+              <PropertyRef Name="fkCompanyGroupID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_CompanyBillingLevel_Company">
+          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="1" />
+          <End Type="MobileManagerModel.CompanyBillingLevel" Role="CompanyBillingLevel" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="pkCompanyID" />
+            </Principal>
+            <Dependent Role="CompanyBillingLevel">
+              <PropertyRef Name="fkCompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UserInCompany_UserInCompany">
+          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="1" />
+          <End Type="MobileManagerModel.UserInCompany" Role="UserInCompany" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="pkCompanyID" />
+            </Principal>
+            <Dependent Role="UserInCompany">
+              <PropertyRef Name="fkCompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="DataValidationException">
+          <Key>
+            <PropertyRef Name="pkDataValidationExceptionID" />
+          </Key>
+          <Property Name="pkDataValidationExceptionID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
           <Property Name="BillingPeriod" Type="String" Nullable="false" MaxLength="6" FixedLength="false" Unicode="false" />
-          <Property Name="enValidationEntity" Type="Int16" Nullable="false" />
-          <Property Name="EntityID" Type="Int32" Nullable="false" />
+          <Property Name="fkBillingProcessID" Type="Int32" Nullable="false" />
+          <Property Name="fkDataValidationPropertyID" Type="Int32" Nullable="false" />
+          <Property Name="enDataValidationEntity" Type="Int16" Nullable="false" />
+          <Property Name="DataValidationEntityID" Type="Int32" Nullable="false" />
           <Property Name="Message" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
           <Property Name="CanApplyRule" Type="Boolean" />
           <Property Name="Result" Type="Boolean" />
-          <NavigationProperty Name="BillingProcess" Relationship="MobileManagerModel.FK_ValidationRuleException_BillingProcess" FromRole="ValidationRuleException" ToRole="BillingProcess" />
-          <NavigationProperty Name="ValidationRule" Relationship="MobileManagerModel.FK_ValidationRuleException_ValidationRule" FromRole="ValidationRuleException" ToRole="ValidationRule" />
+          <NavigationProperty Name="BillingProcess" Relationship="MobileManagerModel.FK_DataValidationException_BillingProcess1" FromRole="DataValidationException" ToRole="BillingProcess" />
+          <NavigationProperty Name="DataValidationProperty" Relationship="MobileManagerModel.FK_DataValidationException_DataValidationProperty" FromRole="DataValidationException" ToRole="DataValidationProperty" />
         </EntityType>
-        <Association Name="FK_ValidationRuleException_BillingProcess">
-          <End Type="MobileManagerModel.BillingProcess" Role="BillingProcess" Multiplicity="1" />
-          <End Type="MobileManagerModel.ValidationRuleException" Role="ValidationRuleException" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="BillingProcess">
-              <PropertyRef Name="pkBillingProcessID" />
-            </Principal>
-            <Dependent Role="ValidationRuleException">
-              <PropertyRef Name="fkBillingProcessID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_ValidationRuleException_ValidationRule">
-          <End Type="MobileManagerModel.ValidationRule" Role="ValidationRule" Multiplicity="1" />
-          <End Type="MobileManagerModel.ValidationRuleException" Role="ValidationRuleException" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="ValidationRule">
-              <PropertyRef Name="pkValidationRuleID" />
-            </Principal>
-            <Dependent Role="ValidationRuleException">
-              <PropertyRef Name="fkValidationRuleID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
+        <EntityType Name="DataValidationProperty">
+          <Key>
+            <PropertyRef Name="pkDataValidationPropertyID" />
+          </Key>
+          <Property Name="pkDataValidationPropertyID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="enDataValidationEntity" Type="Int16" Nullable="false" />
+          <Property Name="enDataValidationProperty" Type="Int16" Nullable="false" />
+          <Property Name="enDataType" Type="Int16" Nullable="false" />
+          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="DataValidationExceptions" Relationship="MobileManagerModel.FK_DataValidationException_DataValidationProperty" FromRole="DataValidationProperty" ToRole="DataValidationException" />
+          <NavigationProperty Name="DataValidationRules" Relationship="MobileManagerModel.FK_DataValidationRule_DataValidationProperty" FromRole="DataValidationProperty" ToRole="DataValidationRule" />
+        </EntityType>
+        <EntityType Name="DataValidationRule">
+          <Key>
+            <PropertyRef Name="pkDataValidationRuleID" />
+          </Key>
+          <Property Name="pkDataValidationRuleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="enValidationProcess" Type="Int16" Nullable="false" />
+          <Property Name="enDataValidationEntity" Type="Int16" Nullable="false" />
+          <Property Name="DataValidationEntityID" Type="Int32" Nullable="false" />
+          <Property Name="fkDataValidationPropertyID" Type="Int32" Nullable="false" />
+          <Property Name="enDataValidationOperator" Type="Int16" Nullable="false" />
+          <Property Name="DataValidationValue" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="DataValidationProperty" Relationship="MobileManagerModel.FK_DataValidationRule_DataValidationProperty" FromRole="DataValidationRule" ToRole="DataValidationProperty" />
+        </EntityType>
         <EntityType Name="ImportRuleData">
           <Key>
             <PropertyRef Name="pkImportRuleDataID" />
           </Key>
           <Property Name="pkImportRuleDataID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="enImportSource" Type="Int16" Nullable="false" />
-          <Property Name="enImportDestination" Type="Int16" Nullable="false" />
+          <Property Name="enDataImportColumn" Type="Int16" Nullable="false" />
+          <Property Name="enDataImportEntity" Type="Int16" Nullable="false" />
+          <Property Name="SearchEntities" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
           <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="DateModified" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
         </EntityType>
+        <Association Name="FK_DataValidationException_BillingProcess1">
+          <End Type="MobileManagerModel.BillingProcess" Role="BillingProcess" Multiplicity="1" />
+          <End Type="MobileManagerModel.DataValidationException" Role="DataValidationException" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BillingProcess">
+              <PropertyRef Name="pkBillingProcessID" />
+            </Principal>
+            <Dependent Role="DataValidationException">
+              <PropertyRef Name="fkBillingProcessID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_DataValidationException_DataValidationProperty">
+          <End Type="MobileManagerModel.DataValidationProperty" Role="DataValidationProperty" Multiplicity="1" />
+          <End Type="MobileManagerModel.DataValidationException" Role="DataValidationException" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DataValidationProperty">
+              <PropertyRef Name="pkDataValidationPropertyID" />
+            </Principal>
+            <Dependent Role="DataValidationException">
+              <PropertyRef Name="fkDataValidationPropertyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_DataValidationRule_DataValidationProperty">
+          <End Type="MobileManagerModel.DataValidationProperty" Role="DataValidationProperty" Multiplicity="1" />
+          <End Type="MobileManagerModel.DataValidationRule" Role="DataValidationRule" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DataValidationProperty">
+              <PropertyRef Name="pkDataValidationPropertyID" />
+            </Principal>
+            <Dependent Role="DataValidationRule">
+              <PropertyRef Name="fkDataValidationPropertyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="MobileManagerModelStoreContainer" CdmEntityContainer="MobileManagerEntities">
-          <EntitySetMapping Name="ActivityLogs">
-            <EntityTypeMapping TypeName="MobileManagerModel.ActivityLog">
-              <MappingFragment StoreEntitySet="ActivityLog">
-                <ScalarProperty Name="ActivityDate" ColumnName="ActivityDate" />
-                <ScalarProperty Name="pkActivityLogID" ColumnName="pkActivityLogID" />
-                <ScalarProperty Name="ActivityGroup" ColumnName="ActivityGroup" />
-                <ScalarProperty Name="ActivityDescription" ColumnName="ActivityDescription" />
-                <ScalarProperty Name="ActivityComment" ColumnName="ActivityComment" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="Cities">
             <EntityTypeMapping TypeName="MobileManagerModel.City">
               <MappingFragment StoreEntitySet="City">
@@ -2439,35 +2488,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="ValidationRulesDatas">
-            <EntityTypeMapping TypeName="MobileManagerModel.ValidationRulesData">
-              <MappingFragment StoreEntitySet="ValidationRulesData">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="enValidationDataType" ColumnName="enValidationDataType" />
-                <ScalarProperty Name="ValidationDataName" ColumnName="ValidationDataName" />
-                <ScalarProperty Name="enValidationRuleGroup" ColumnName="enValidationRuleGroup" />
-                <ScalarProperty Name="pkValidationRulesDataID" ColumnName="pkValidationRulesDataID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="ValidationRules">
-            <EntityTypeMapping TypeName="MobileManagerModel.ValidationRule">
-              <MappingFragment StoreEntitySet="ValidationRule">
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="enDateCompareType" ColumnName="enDateCompareType" />
-                <ScalarProperty Name="enNumericCompareType" ColumnName="enNumericCompareType" />
-                <ScalarProperty Name="enStringCompareType" ColumnName="enStringCompareType" />
-                <ScalarProperty Name="ValidationDataValue" ColumnName="ValidationDataValue" />
-                <ScalarProperty Name="EntityID" ColumnName="EntityID" />
-                <ScalarProperty Name="fkValidationRulesDataID" ColumnName="fkValidationRulesDataID" />
-                <ScalarProperty Name="enValidationRuleGroup" ColumnName="enValidationRuleGroup" />
-                <ScalarProperty Name="pkValidationRuleID" ColumnName="pkValidationRuleID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="Clients">
             <EntityTypeMapping TypeName="MobileManagerModel.Client">
               <MappingFragment StoreEntitySet="Client">
@@ -2493,21 +2513,6 @@
                 <ScalarProperty Name="PrimaryCellNumber" ColumnName="PrimaryCellNumber" />
                 <ScalarProperty Name="imenumber" ColumnName="imenumber" />
                 <ScalarProperty Name="pkClientID" ColumnName="pkClientID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Companies">
-            <EntityTypeMapping TypeName="MobileManagerModel.Company">
-              <MappingFragment StoreEntitySet="Company">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="IPAddress" ColumnName="IPAddress" />
-                <ScalarProperty Name="AdminFee" ColumnName="AdminFee" />
-                <ScalarProperty Name="CostCode" ColumnName="CostCode" />
-                <ScalarProperty Name="WBSNumber" ColumnName="WBSNumber" />
-                <ScalarProperty Name="CompanyName" ColumnName="CompanyName" />
-                <ScalarProperty Name="pkCompanyID" ColumnName="pkCompanyID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -2595,18 +2600,88 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="ValidationRuleExceptions">
-            <EntityTypeMapping TypeName="MobileManagerModel.ValidationRuleException">
-              <MappingFragment StoreEntitySet="ValidationRuleException">
+          <EntitySetMapping Name="AuditLogs">
+            <EntityTypeMapping TypeName="MobileManagerModel.AuditLog">
+              <MappingFragment StoreEntitySet="AuditLog">
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="AuditDate" ColumnName="AuditDate" />
+                <ScalarProperty Name="ChangedValue" ColumnName="ChangedValue" />
+                <ScalarProperty Name="EntityID" ColumnName="EntityID" />
+                <ScalarProperty Name="AuditComment" ColumnName="AuditComment" />
+                <ScalarProperty Name="AuditDescription" ColumnName="AuditDescription" />
+                <ScalarProperty Name="AuditGroup" ColumnName="AuditGroup" />
+                <ScalarProperty Name="pkAuditLogID" ColumnName="pkAuditLogID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CompanyGroups">
+            <EntityTypeMapping TypeName="MobileManagerModel.CompanyGroup">
+              <MappingFragment StoreEntitySet="CompanyGroup">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="GroupName" ColumnName="GroupName" />
+                <ScalarProperty Name="pkCompanyGroupID" ColumnName="pkCompanyGroupID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Companies">
+            <EntityTypeMapping TypeName="MobileManagerModel.Company">
+              <MappingFragment StoreEntitySet="Company">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="IPAddress" ColumnName="IPAddress" />
+                <ScalarProperty Name="AdminFee" ColumnName="AdminFee" />
+                <ScalarProperty Name="CostCode" ColumnName="CostCode" />
+                <ScalarProperty Name="WBSNumber" ColumnName="WBSNumber" />
+                <ScalarProperty Name="CompanyName" ColumnName="CompanyName" />
+                <ScalarProperty Name="fkCompanyGroupID" ColumnName="fkCompanyGroupID" />
+                <ScalarProperty Name="pkCompanyID" ColumnName="pkCompanyID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DataValidationExceptions">
+            <EntityTypeMapping TypeName="MobileManagerModel.DataValidationException">
+              <MappingFragment StoreEntitySet="DataValidationException">
                 <ScalarProperty Name="Result" ColumnName="Result" />
                 <ScalarProperty Name="CanApplyRule" ColumnName="CanApplyRule" />
                 <ScalarProperty Name="Message" ColumnName="Message" />
-                <ScalarProperty Name="EntityID" ColumnName="EntityID" />
-                <ScalarProperty Name="enValidationEntity" ColumnName="enValidationEntity" />
-                <ScalarProperty Name="BillingPeriod" ColumnName="BillingPeriod" />
-                <ScalarProperty Name="fkValidationRuleID" ColumnName="fkValidationRuleID" />
+                <ScalarProperty Name="DataValidationEntityID" ColumnName="DataValidationEntityID" />
+                <ScalarProperty Name="enDataValidationEntity" ColumnName="enDataValidationEntity" />
+                <ScalarProperty Name="fkDataValidationPropertyID" ColumnName="fkDataValidationPropertyID" />
                 <ScalarProperty Name="fkBillingProcessID" ColumnName="fkBillingProcessID" />
-                <ScalarProperty Name="pkValidationRuleExceptionID" ColumnName="pkValidationRuleExceptionID" />
+                <ScalarProperty Name="BillingPeriod" ColumnName="BillingPeriod" />
+                <ScalarProperty Name="pkDataValidationExceptionID" ColumnName="pkDataValidationExceptionID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DataValidationProperties">
+            <EntityTypeMapping TypeName="MobileManagerModel.DataValidationProperty">
+              <MappingFragment StoreEntitySet="DataValidationProperty">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="enDataType" ColumnName="enDataType" />
+                <ScalarProperty Name="enDataValidationProperty" ColumnName="enDataValidationProperty" />
+                <ScalarProperty Name="enDataValidationEntity" ColumnName="enDataValidationEntity" />
+                <ScalarProperty Name="pkDataValidationPropertyID" ColumnName="pkDataValidationPropertyID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DataValidationRules">
+            <EntityTypeMapping TypeName="MobileManagerModel.DataValidationRule">
+              <MappingFragment StoreEntitySet="DataValidationRule">
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="DataValidationValue" ColumnName="DataValidationValue" />
+                <ScalarProperty Name="enDataValidationOperator" ColumnName="enDataValidationOperator" />
+                <ScalarProperty Name="fkDataValidationPropertyID" ColumnName="fkDataValidationPropertyID" />
+                <ScalarProperty Name="DataValidationEntityID" ColumnName="DataValidationEntityID" />
+                <ScalarProperty Name="enDataValidationEntity" ColumnName="enDataValidationEntity" />
+                <ScalarProperty Name="enValidationProcess" ColumnName="enValidationProcess" />
+                <ScalarProperty Name="pkDataValidationRuleID" ColumnName="pkDataValidationRuleID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -2616,8 +2691,9 @@
                 <ScalarProperty Name="IsActive" ColumnName="IsActive" />
                 <ScalarProperty Name="DateModified" ColumnName="DateModified" />
                 <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="enImportDestination" ColumnName="enImportDestination" />
-                <ScalarProperty Name="enImportSource" ColumnName="enImportSource" />
+                <ScalarProperty Name="SearchEntities" ColumnName="SearchEntities" />
+                <ScalarProperty Name="enDataImportEntity" ColumnName="enDataImportEntity" />
+                <ScalarProperty Name="enDataImportColumn" ColumnName="enDataImportColumn" />
                 <ScalarProperty Name="pkImportRuleDataID" ColumnName="pkImportRuleDataID" />
               </MappingFragment>
             </EntityTypeMapping>

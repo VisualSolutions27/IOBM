@@ -19,12 +19,14 @@
     <Grid x:Name="LayouControlView" Grid.Row="1" Grid.Column="0" >
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource UXHeaderStyle}">
+        <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource UXHeaderStyle}">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -35,16 +37,125 @@
                 <TextBlock Text="Data Import View" Margin="10,3,0,0"  Style="{StaticResource UXHeaderTextStyle}"></TextBlock>
             </Grid>
         </Border>
-        <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="5">
+        <GroupBox Grid.Row="1" Grid.Column="0" Header="Source Parametes" Margin="5" Style="{StaticResource UXGroupBoxStyle}">
+            <Grid >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="95" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="75" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="75" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Data file:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <TextBox x:Name="TextBoxImportFile" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" IsTabStop="False" IsReadOnly="True" Style="{StaticResource UXTextBoxStyle}" 
+                    Text="{Binding SelectedImportFile, UpdateSourceTrigger=PropertyChanged}" Margin="0,0">
+                </TextBox>
+                <TextBlock Grid.Row="0" Grid.Column="4" Text="Data sheets:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <Border Grid.Row="0" Grid.Column="5" BorderThickness="1" BorderBrush="{Binding ValidDataSheet}">
+                    <ComboBox x:Name="ComboBoxDataSheet" ToolTip="Select the data sheet to import from." TabIndex="2" IsSynchronizedWithCurrentItem="True" Height="22" 
+                        DisplayMemberPath="SheetName" IsEnabled="{Binding ValidDataFile}" ItemsSource="{Binding DataSheetCollection}" 
+                        SelectedItem="{Binding SelectedDataSheet, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                    </ComboBox>
+                </Border>
+                <TextBlock Grid.Row="0" Grid.Column="7" Text="Search field:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <Border Grid.Row="0" Grid.Column="8" BorderThickness="1" BorderBrush="{Binding ValidSearchColumn}">
+                    <ComboBox x:Name="ComboBoxSearchColumns" ToolTip="Select the column to search on." TabIndex="3" IsSynchronizedWithCurrentItem="True"
+                        IsEnabled="{Binding ValidDataImport}" ItemsSource="{Binding SearchColumnCollection}" 
+                        SelectedItem="{Binding SelectedSearchColumn, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Height="22" >
+                    </ComboBox>
+                </Border>
+                <TextBlock Grid.Row="0" Grid.Column="10" Text="Source field:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <Border Grid.Row="0" Grid.Column="11" BorderThickness="1" BorderBrush="{Binding ValidSourceColumn}">
+                    <ComboBox x:Name="ComboBoSourceColumns" ToolTip="Select the source column to import from." TabIndex="4" IsSynchronizedWithCurrentItem="True"
+                        IsEnabled="{Binding ValidDataImport}" ItemsSource="{Binding SourceColumnCollection}" 
+                        SelectedItem="{Binding SelectedSourceColumn, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Height="22" >
+                    </ComboBox>
+                </Border>
+                <Button x:Name="ButtonImport" Grid.Row="0" Grid.Column="13" ToolTip="Select the data file to import from." TabIndex="1"
+                    Width="80" Style="{StaticResource UXImageTextButtonStyle}" Command="{Binding OpenFileCommand}">
+                    <StackPanel Orientation="Horizontal" ToolTip="Select the data file to import.">
+                        <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/FI (145).ico" Margin="0,0,10,0"/>
+                        <TextBlock Text="Open" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </GroupBox>
+        <GroupBox Grid.Row="2" Grid.Column="0" Header="Destination Parametes" Margin="5" Style="{StaticResource UXGroupBoxStyle}">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="95" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="80" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="75" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="5" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Destination field:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" BorderThickness="1" BorderBrush="{Binding ValidDestinationColumn}">
+                    <ComboBox x:Name="ComboBoxDataSource" ToolTip="Select the destination column to import to." TabIndex="5" IsSynchronizedWithCurrentItem="True"
+                        IsEnabled="{Binding ValidDataImport}" ItemsSource="{Binding DestinationColumnCollection}" 
+                        SelectedItem="{Binding SelectedDestinationColumn, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Height="22" >
+                    </ComboBox>
+                </Border>
+                <TextBlock Grid.Row="0" Grid.Column="4" Text="Destination entity:" Style="{StaticResource UXLabelTextStyle}" ></TextBlock>
+                <Border Grid.Row="0" Grid.Column="5" BorderThickness="1" BorderBrush="{Binding ValidDestinationEntity}">
+                    <ComboBox x:Name="ComboBoxDataDestination" ToolTip="Select the destination entity to import to." TabIndex="6" IsSynchronizedWithCurrentItem="True"
+                        IsEnabled="{Binding ValidDataImport}" ItemsSource="{Binding DestinationEntityCollection}" 
+                        SelectedItem="{Binding SelectedDestinationEntity, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Height="22">
+                    </ComboBox>
+                </Border>
+                <TextBlock Grid.Row="0" Grid.Column="7" Text="Search entity:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <Border Grid.Row="0" Grid.Column="8" BorderThickness="1" BorderBrush="{Binding ValidSearchEntity}">
+                    <ComboBox x:Name="ComboBoxSearchCriteria" ToolTip="Select the data entity to search on." TabIndex="7" IsSynchronizedWithCurrentItem="True" Height="22" 
+                        IsEnabled="{Binding ValidSearchEntities}" ItemsSource="{Binding SearchEntityCollection}" 
+                        SelectedItem="{Binding SelectedSearchEntity, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+                    </ComboBox>
+                </Border>
+                <TextBlock Grid.Row="0" Grid.Column="10" Text="Company:" Style="{StaticResource UXLabelTextStyle}" ></TextBlock>
+                <Border Grid.Row="0" Grid.Column="11" BorderThickness="1" BorderBrush="{Binding ValidDestinationCompany}">
+                    <ComboBox x:Name="ComboBoxDestinationCompanies" ToolTip="Select the company that the import data is linked to." TabIndex="8" IsSynchronizedWithCurrentItem="True"
+                        IsEnabled="{Binding DestinationCompanyLinked}" ItemsSource="{Binding DestinationCompanyCollection}" DisplayMemberPath="GroupName"
+                        SelectedItem="{Binding SelectedDestinationCompany, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Height="22">
+                    </ComboBox>
+                </Border>
+                <Button x:Name="ButtonUpdate" Grid.Row="4" Grid.Column="13" ToolTip="Update the data from the selected data sheet." TabIndex="9"
+                    Width="80" Style="{StaticResource UXImageTextButtonStyle}" Command="{Binding UpdateCommand}">
+                    <StackPanel Orientation="Horizontal" ToolTip="Update the selected destination data.">
+                        <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/374.png" Margin="0,1,10,1"/>
+                        <TextBlock Text="Update" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </GroupBox>
+        <Grid Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="5">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="25" />
                 <RowDefinition Height="10" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="10" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="10" />
-                <RowDefinition Height="Auto" />
+                <RowDefinition Height="25" />
                 <RowDefinition Height="25" />
                 <RowDefinition Height="25" />
                 <RowDefinition Height="*" />
@@ -53,214 +164,42 @@
                 <ColumnDefinition Width="75" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="10" />
-                <ColumnDefinition Width="75" />
-                <ColumnDefinition Width="2*" />
                 <ColumnDefinition Width="10" />
                 <ColumnDefinition Width="95" />
                 <ColumnDefinition Width="2*" />
                 <ColumnDefinition Width="10" />
                 <ColumnDefinition Width="100" />
                 <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="10" />
+                <ColumnDefinition Width="80" />
+                <ColumnDefinition Width="2*" />
                 <ColumnDefinition Width="5" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="Data file:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-            <TextBox x:Name="TextBoxImportFile" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="11" IsTabStop="False" IsReadOnly="True" Style="{StaticResource UXTextBoxStyle}" 
-                Text="{Binding SelectedImportFile, UpdateSourceTrigger=PropertyChanged}" Margin="0,0">
-            </TextBox>
-            <Button x:Name="ButtonImport" Grid.Row="0" Grid.Column="13" ToolTip="Select the data file to import from." TabIndex="1"
-                Width="80" Style="{StaticResource UXImageTextButtonStyle}" Command="{Binding OpenFileCommand}">
-                <StackPanel Orientation="Horizontal" ToolTip="Select the data file to import.">
-                    <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/FI (145).ico" Margin="0,0,10,0"/>
-                    <TextBlock Text="Open" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Data sheets:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-            <Border Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" BorderThickness="1" BorderBrush="{Binding ValidDataSheet}">
-                <ComboBox x:Name="ComboBoxDataSheet" ToolTip="Select the data sheet to import from." TabIndex="2" IsSynchronizedWithCurrentItem="True" Height="22" 
-                    DisplayMemberPath="SheetName" IsEnabled="{Binding ValidDataFile}" ItemsSource="{Binding DataSheetCollection}" 
-                    SelectedItem="{Binding SelectedDataSheet, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
-                </ComboBox>
-            </Border>
-            <TextBlock Grid.Row="2" Grid.Column="4" Text="Source field:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-            <Border Grid.Row="2" Grid.Column="5" BorderThickness="1" BorderBrush="{Binding ValidSourceColumn}">
-                <ComboBox x:Name="ComboBoxDataColumns" ToolTip="Select the source column to import from." TabIndex="3" IsSynchronizedWithCurrentItem="True"
-                    IsEnabled="{Binding ValidSelectedDataSheet}" ItemsSource="{Binding SourceColumnCollection}" 
-                    SelectedItem="{Binding SelectedSourceColumn, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Height="22" >
-                </ComboBox>
-            </Border>
-            <TextBlock Grid.Row="2" Grid.Column="7" Text="Destination field:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-            <Border Grid.Row="2" Grid.Column="8"  BorderThickness="1" BorderBrush="{Binding ValidDestinationColumn}">
-                <ComboBox x:Name="ComboBoxDataSource" ToolTip="Select the destination column to import to." TabIndex="4" IsSynchronizedWithCurrentItem="True"
-                    IsEnabled="{Binding ValidSelectedDataSheet}" ItemsSource="{Binding DestinationColumnCollection}" 
-                    SelectedItem="{Binding SelectedDestinationColumn, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Height="22" >
-                </ComboBox>
-            </Border>
-            <TextBlock Grid.Row="2" Grid.Column="10" Text="Destination entity:" Style="{StaticResource UXLabelTextStyle}" ></TextBlock>
-            <Border Grid.Row="2" Grid.Column="11" BorderThickness="1" BorderBrush="{Binding ValidDestinationEntity}">
-                <ComboBox x:Name="ComboBoxDataDestination" ToolTip="Select the destination entity to import to." TabIndex="5" IsSynchronizedWithCurrentItem="True"
-                    IsEnabled="{Binding ValidSelectedDataSheet}" ItemsSource="{Binding DestinationEntityCollection}" 
-                    SelectedItem="{Binding SelectedDestinationEntity, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Height="22">
-                </ComboBox>
-            </Border>
-            <Button x:Name="ButtonUpdate" Grid.Row="2" Grid.Column="13" ToolTip="Update the data from the selected data sheet." TabIndex="6"
-                Width="80" Style="{StaticResource UXImageTextButtonStyle}" Command="{Binding UpdateCommand}">
-                <StackPanel Orientation="Horizontal" ToolTip="Update the selected destination data.">
-                    <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/374.png" Margin="0,1,10,1"/>
-                    <TextBlock Text="Update" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
-            <TextBlock x:Name="TextBlockImportUpdateProgress" Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource UXLabelTextStyle}"                
+            <TextBlock x:Name="TextBlockImportUpdateProgress" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" Style="{StaticResource UXLabelTextStyle}"                
                 Text="{Binding ImportUpdateDescription, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBlock Grid.Row="4" Grid.Column="4" Grid.ColumnSpan="2" Text="{Binding ExceptionDescription, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Bottom"/>
-            <ListView  Grid.Row="5" Grid.Column="4" Grid.ColumnSpan="10" Grid.RowSpan="4" TabIndex="4"
+            <TextBlock Grid.Row="0" Grid.Column="4" Grid.ColumnSpan="2" Text="{Binding ExceptionDescription, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Bottom"/>
+            <ListView  Grid.Row="1" Grid.Column="4" Grid.ColumnSpan="10" Grid.RowSpan="4" TabIndex="4"
                 ItemsSource="{Binding ExceptionsCollection, UpdateSourceTrigger=PropertyChanged}">
             </ListView>
-            <ProgressBar x:Name="ProgressBarImportUpdate" Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="3" Height="20" BorderBrush="DarkGray" BorderThickness="1"
+            <ProgressBar x:Name="ProgressBarImportUpdate" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"  BorderBrush="DarkGray" BorderThickness="1"
                 Value="{Binding ImportUpdateProgress, UpdateSourceTrigger=PropertyChanged}" Maximum="{Binding ImportUpdateCount, UpdateSourceTrigger=PropertyChanged}"/>
-            <Border Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="3" Height="1" Background="Gray" VerticalAlignment="Top"></Border>
-            <TextBlock Grid.Row="7" Grid.Column="0" Text="Data" Style="{StaticResource UXLabelTextStyle}" FontWeight="Bold" Margin="0,3,0,3"></TextBlock>
-            <TextBlock Grid.Row="7" Grid.Column="1" Text="Passed" Style="{StaticResource UXLabelTextStyle}" FontWeight="Bold" HorizontalAlignment="Center"></TextBlock>
-            <TextBlock Grid.Row="7" Grid.Column="2" Text="Failed" Style="{StaticResource UXLabelTextStyle}" FontWeight="Bold" HorizontalAlignment="Center"></TextBlock>
-            <Border Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="3" Height="1" Background="Gray" VerticalAlignment="Bottom" ></Border>
-            <TextBlock Grid.Row="8" Grid.Column="0" Text="Data items" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-            <TextBlock x:Name="TextBlockImportUpdatePassed" Grid.Row="8" Grid.Column="1" Style="{StaticResource UXLabelTextStyle}" HorizontalAlignment="Center"
+            <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Height="1" Background="Gray" VerticalAlignment="Top"></Border>
+            <TextBlock Grid.Row="3" Grid.Column="0" Text="Data" Style="{StaticResource UXLabelTextStyle}" FontWeight="Bold" Margin="0,3,0,3"></TextBlock>
+            <TextBlock Grid.Row="3" Grid.Column="1" Text="Passed" Style="{StaticResource UXLabelTextStyle}" FontWeight="Bold" HorizontalAlignment="Center"></TextBlock>
+            <TextBlock Grid.Row="3" Grid.Column="2" Text="Failed" Style="{StaticResource UXLabelTextStyle}" FontWeight="Bold" HorizontalAlignment="Center"></TextBlock>
+            <Border Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="3" Height="1" Background="Gray" VerticalAlignment="Bottom" ></Border>
+            <TextBlock Grid.Row="4" Grid.Column="0" Text="Data items" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+            <TextBlock x:Name="TextBlockImportUpdatePassed" Grid.Row="4" Grid.Column="1" Style="{StaticResource UXLabelTextStyle}" HorizontalAlignment="Center"
                 Text="{Binding ImportUpdatesPassed, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBlock x:Name="TextBlockGroupFailed" Grid.Row="8" Grid.Column="2" Style="{StaticResource UXLabelTextStyle}" HorizontalAlignment="Center"
+            <TextBlock x:Name="TextBlockGroupFailed" Grid.Row="4" Grid.Column="2" Style="{StaticResource UXLabelTextStyle}" HorizontalAlignment="Center"
                 Text="{Binding ImportUpdatesFailed, UpdateSourceTrigger=PropertyChanged}"/>
-            <Border Grid.Row="8" Grid.Column="0" Grid.ColumnSpan="3" Height="1" Background="Gray" VerticalAlignment="Bottom" ></Border>
-            <TextBlock Grid.Row="9" Grid.Column="0" Grid.ColumnSpan="2" Text="Data Imported" VerticalAlignment="Bottom"/>
-            <DataGrid x:Name="DataGridImportedData" Grid.Row="10" Grid.ColumnSpan="14" AutoGenerateColumns="True" CanUserReorderColumns="False" CanUserSortColumns="True" MinHeight="52"
+            <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Height="1" Background="Gray" VerticalAlignment="Bottom" ></Border>
+            <TextBlock Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Text="Imported Data" VerticalAlignment="Bottom"/>
+            <DataGrid x:Name="DataGridImportedData" Grid.Row="6" Grid.ColumnSpan="14" AutoGenerateColumns="True" CanUserReorderColumns="False" CanUserSortColumns="True" MinHeight="52"
                 IsReadOnly="True" TabIndex="5" Style="{StaticResource DataGridStyle}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
                 ItemsSource="{Binding ImportedDataCollection}">
-                <!--<DataGrid.Columns>
-                    <DataGridTextColumn Header="Entity Name" Binding="{Binding EntityName}" Width="*" />
-                    <DataGridTextColumn Header="Data Name" Binding="{Binding RuleDataName}" Width="*" />
-                    <DataGridTextColumn Header="Data Type" Binding="{Binding RuleDataTypeName}" Width="*" />
-                    <DataGridTextColumn Header="String Operator" Binding="{Binding enStringCompareType, Converter={StaticResource UIDataConvertionHelper}, ConverterParameter='StringCompareType'}" Width="120">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Center" />
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="Numeric Operator" Binding="{Binding enNumericCompareType, Converter={StaticResource UIDataConvertionHelper}, ConverterParameter='NumericCompareType'}" Width="120">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Center" />
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="Date Operator" Binding="{Binding enDateCompareType, Converter={StaticResource UIDataConvertionHelper}, ConverterParameter='DateCompareType'}" Width="120">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Center" />
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="Validation Value" Binding="{Binding ValidationDataValue}" Width="*" />
-                </DataGrid.Columns>-->
             </DataGrid>
         </Grid>
     </Grid>
-
-    <!--<Grid x:Name="LayoutControl">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="20" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="20" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="20" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="30" />
-            <RowDefinition Height="*" />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="165" />
-            <ColumnDefinition Width="10" />
-            <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="10" />
-            <ColumnDefinition Width="*" />
-        </Grid.ColumnDefinitions>
-        <StackPanel Grid.Row="1" Grid.Column="0" Grid.RowSpan="10">
-            <Button x:Name="ButtonStart" ToolTip="Start the billing data validation process." TabIndex="1" Margin="0,0,0,10" 
-                Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" Command="{Binding StartValidationCommand}">
-                <StackPanel Orientation="Horizontal">
-                    <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/062.png" Margin="0,1,10,1"/>
-                    <TextBlock Text="Start" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
-
-        </StackPanel>
-        <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="10" VerticalAlignment="Bottom">
-            <Button x:Name="ButtonApplyRule" ToolTip="Apply the data rule to fix the exceptions." TabIndex="3" Margin="0,0,0,10" 
-                Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" Command="{Binding ApplyRuleFixCommand}">
-                <StackPanel Orientation="Horizontal" Width="118">
-                    <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/T (263).ico" Margin="0,1,10,1"/>
-                    <TextBlock Text="Apply Data Rule" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
-            <Button x:Name="ButtonFixManually" ToolTip="Fix the selected exception manually." TabIndex="4" 
-                Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" Command="{Binding ManualFixCommand}">
-                <StackPanel Orientation="Horizontal" Width="118">
-                    <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/T (264).ico" Margin="0,1,10,1"/>
-                    <TextBlock Text="Fix Manually" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
-        </StackPanel>
-        <TextBlock x:Name="TextBlockGroupProgress" Grid.Row="0" Grid.Column="2" Style="{StaticResource UXLabelTextStyle}"                
-            Text="{Binding ValidationGroupDescription, UpdateSourceTrigger=PropertyChanged}"/>
-        <TextBlock x:Name="TextBlockentityProgress" Grid.Row="2" Grid.Column="2" VerticalAlignment="Bottom" Style="{StaticResource UXLabelTextStyle}"                
-            Text="{Binding ValidationEntityDescription, UpdateSourceTrigger=PropertyChanged}"/>
-        <ProgressBar x:Name="ProgressBarEntities" Grid.Row="3" Grid.Column="2" Height="20" BorderBrush="DarkGray" BorderThickness="1"
-            Value="{Binding ValidationEntityProgress, UpdateSourceTrigger=PropertyChanged}" Maximum="{Binding ValidationEntityCount, UpdateSourceTrigger=PropertyChanged}"/>
-        <TextBlock x:Name="TextBlockDataRuleProgress" Grid.Row="4" Grid.Column="2" VerticalAlignment="Bottom" Style="{StaticResource UXLabelTextStyle}"                
-            Text="{Binding ValidationDataRuleDescription, UpdateSourceTrigger=PropertyChanged}"/>
-        <ProgressBar x:Name="ProgressBarDataRule" Grid.Row="5" Grid.Column="2" Height="20" BorderBrush="DarkGray" BorderThickness="1"
-            Value="{Binding ValidationDataRuleProgress, UpdateSourceTrigger=PropertyChanged}" Maximum="{Binding ValidationDataRuleCount, UpdateSourceTrigger=PropertyChanged}"/>
-        <TextBlock x:Name="TextBlockRuleEntityProgress" Grid.Row="6" Grid.Column="2" VerticalAlignment="Bottom" Style="{StaticResource UXLabelTextStyle}"                
-            Text="{Binding ValidationRuleEntityDescription, UpdateSourceTrigger=PropertyChanged}"/>
-        <ProgressBar x:Name="ProgressBarRuleEntity" Grid.Row="7" Grid.Column="2" Height="20" BorderBrush="DarkGray" BorderThickness="1"
-            Value="{Binding ValidationRuleEntityProgress, UpdateSourceTrigger=PropertyChanged}" Maximum="{Binding ValidationRuleEntityCount, UpdateSourceTrigger=PropertyChanged}"/>
-        <Grid Grid.Row="1" Grid.Column="4" Grid.RowSpan="7">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="100" />
-                <ColumnDefinition Width="100" />
-            </Grid.ColumnDefinitions>
-
-            <TextBlock Grid.Row="1" Grid.Column="0" Text="Groups" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-            <TextBlock x:Name="TextBlockGroupPassed" Grid.Row="1" Grid.Column="1" Style="{StaticResource UXLabelTextStyle}" HorizontalAlignment="Center"
-                Text="{Binding ValidationGroupsPassed, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBlock x:Name="TextBlockGroupFailed" Grid.Row="1" Grid.Column="2" Style="{StaticResource UXLabelTextStyle}" HorizontalAlignment="Center"
-                Text="{Binding ValidationGroupsFailed, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBlock Grid.Row="2" Grid.Column="0" Text="Group entities" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-            <TextBlock x:Name="TextBlockGroupEntitiesPassed" Grid.Row="2" Grid.Column="1" Style="{StaticResource UXLabelTextStyle}" HorizontalAlignment="Center"
-                Text="{Binding ValidationEntitiesPassed, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBlock x:Name="TextBlockGroupEntitiesFailed" Grid.Row="2" Grid.Column="2" Style="{StaticResource UXLabelTextStyle}" HorizontalAlignment="Center"
-                Text="{Binding ValidationEntitiesFailed, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBlock Grid.Row="3" Grid.Column="0" Text="Data Rules" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-            <TextBlock x:Name="TextBlockDataRulesPassed" Grid.Row="3" Grid.Column="1" Style="{StaticResource UXLabelTextStyle}" HorizontalAlignment="Center"
-                Text="{Binding ValidationDataRulesPassed, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBlock x:Name="TextBlockDataRulesFailed" Grid.Row="3" Grid.Column="2" Style="{StaticResource UXLabelTextStyle}" HorizontalAlignment="Center"
-                Text="{Binding ValidationDataRulesFailed, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBlock Grid.Row="4" Grid.Column="0" Text="Data rule entities" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-            <TextBlock x:Name="TextBlockRuleEntitiesPassed" Grid.Row="4" Grid.Column="1" Style="{StaticResource UXLabelTextStyle}" HorizontalAlignment="Center"
-                Text="{Binding ValidationRuleEntitiesPassed, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBlock x:Name="TextBlockRuleEntitiesFailed" Grid.Row="4" Grid.Column="2" Style="{StaticResource UXLabelTextStyle}" HorizontalAlignment="Center"
-                Text="{Binding ValidationRuleEntitiesFailed, UpdateSourceTrigger=PropertyChanged}"/>
-            <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Height="1" VerticalAlignment="Bottom" Background="Gray" Margin="0,5,0,0"></Border>
-        </Grid>
-        <TextBlock Grid.Row="8" Grid.Column="2" Text="Data Validation Exceptions" Style="{StaticResource UXLabelTextStyle}" VerticalAlignment="Bottom" ></TextBlock>
-    </Grid>-->
 </UserControl>

@@ -65,10 +65,14 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     /// </summary>
     public enum SearchEntity
     {
+        ClientID,
         EmployeeNumber,
-        CellNumber,
+        PrimaryCellNumber,
         IDNumber,
         Email,
+        CompanyName,
+        PackageName,
+        AccountNumber,
         Other
     }
 
@@ -138,51 +142,119 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         DataImport = 3
     }
 
+    #region Data Validation
+
     /// <summary>
-    /// The <see cref="ValidationRuleGroup"/> enumeration a list of 
-    /// data entity options to validate on.
+    /// The <see cref="DataValidationEntityName"/> enumeration a list of 
+    /// data entities to validate on.
     /// </summary>
-    public enum ValidationRuleGroup
+    public enum DataValidationEntityName
     {
+        [Description("-- Please Select --")]
         None = 0,
+        [Description("Client Data")]
         Client = 1,
+        [Description("Company Data")]
         Company = 2,
-        Package = 3,
-        Device = 4,
-        SimmCard = 5,
-        Status = 6
+        [Description("Contract Data")]
+        Contract = 3,
+        [Description("Package Data")]
+        Package = 4,
+        [Description("Device Data")]
+        Device = 5,
+        [Description("Simmcard Data")]
+        SimmCard = 6,
+        [Description("Status Data")]
+        Status = 7
     }
 
     /// <summary>
-    /// The <see cref="ValidationDataType"/> enumeration a list of 
-    /// data types to validate on.
+    /// The <see cref="DataValidationPropertyName"/> enumeration a list of 
+    /// data properties to validate on.
     /// </summary>
-    public enum ValidationDataType
+    public enum DataValidationPropertyName
     {
+        [Description("-- Please Select --")]
         None = 0,
-        String = 1,
-        Integer = 2,
-        Decimal = 3,
-        Date = 4,
-        Bool = 5
+        [Description("Cell Number")]
+        PrimaryCellNumber = 1,
+        [Description("Client Employee Number")]
+        EmployeeNumber = 2,
+        [Description("Client Name")]
+        ClientName = 3,
+        [Description("Clent Land Line")]
+        LandLine = 4,
+        [Description("Client ID Number")]
+        IDNumber = 5,
+        [Description("Client EMail Address")]
+        Email = 6,
+        [Description("Cost Code")]
+        CostCode = 7,
+        [Description("WBS Number")]
+        WBSNumber = 8,
+        [Description("Admin Fee")]
+        AdminFee = 9,
+        [Description("IP Address")]
+        IPAddress = 10,
+        [Description("Client Street Address")]
+        AddressLine1 = 11,
+        [Description("Client Suburb")]
+        fkSuburbID = 12,
+        [Description("Is Client Billable")]
+        IsBillable = 13,
+        [Description("Has Client Got Split Billing")]
+        IsSplitBilling = 14,
+        [Description("Client Voice Allowance")]
+        VoiceAllowance = 15,
+        [Description("Clent SP Limit")]
+        SPLimit = 16,
+        [Description("Company Name")]
+        CompanyName = 17,
+        [Description("Company Billing Levels")]
+        CompanyBillingLevel = 18,
+        [Description("Contract Account Number")]
+        AccountNumber = 19,
+        [Description("Contract Start Date")]
+        ContractStartDate = 20,
+        [Description("Contract End Date")]
+        ContractEndDate = 21,
+        [Description("Contract Upgrade Date")]
+        ContractUpgradeDate = 22,
+        [Description("Contract Payment Cancel Date")]
+        PaymentCancelDate = 23,
+        [Description("Device IME Number")]
+        IMENumber = 24,
+        [Description("Device Serial Number")]
+        SerialNumber = 25,
+        [Description("Package Name")]
+        PackageName = 26,
+        [Description("Package Cost")]
+        Cost = 27,
+        [Description("Package MB Data")]
+        MBData = 28,
+        [Description("Package Talk Time")]
+        TalkTimeMinutes = 29,
+        [Description("Package SMS Limit")]
+        SMSNumber = 30,
+        [Description("Package Rand Value")]
+        RandValue = 31,
+        [Description("Package SPUL Value")]
+        SPULValue = 32,
+        [Description("Simm Card Number")]
+        CardNumber = 33,
+        [Description("Simm Card PUK Number")]
+        PUKNumber = 34,
+        [Description("Simm Card Cell Number")]
+        CellNumber = 35,
     }
 
-    /// <summary>
-    /// The <see cref="DataValidationEntity"/> enumeration a list of 
-    /// data entity options to validate on.
-    /// </summary>
-    public enum DataValidationEntity
-    {
-        None = 0,
-        Client = 1,
-        Company = 2
-    }
+    #endregion
 
     /// <summary>
-    /// The <see cref="DataImportColumns"/> enumeration a list of 
+    /// The <see cref="DataImportColumn"/> enumeration a list of 
     /// data import column options.
     /// </summary>
-    public enum DataImportColumns
+    public enum DataImportColumn
     {
         [Description("-- Please Select --")]
         None = 0,
@@ -210,33 +282,31 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         SPLimit = 11,
         [Description("Stop Billing Period")]
         StopBilling = 12,
-        [Description("Company Name")]
-        CompanyName = 13,
         [Description("Admin Fee")]
-        AdminFee = 14,
+        AdminFee = 13,
         [Description("Company Billing Level")]
-        CompanyBillingLevel = 15,
+        CompanyBillingLevel = 14,
         [Description("Contract Payment Cancel Date")]
-        PaymentCancelDate = 16,
+        PaymentCancelDate = 15,
         [Description("Package Name")]
-        PackageName = 17,
+        PackageName = 16,
         [Description("Package Cost")]
-        Cost = 18,
+        Cost = 17,
         [Description("Package MB Data")]
-        MBData = 19,
+        MBData = 18,
         [Description("Package Talk Time")]
-        TalkTimeMinutes = 20,
+        TalkTimeMinutes = 19,
         [Description("Package Rand Value")]
-        RandValue = 21,
+        RandValue = 20,
         [Description("Package SPUL Value")]
-        SPULValue = 22
+        SPULValue = 21
     }
 
     /// <summary>
-    /// The <see cref="DataImportEntities"/> enumeration a list of 
+    /// The <see cref="DataImportEntity"/> enumeration a list of 
     /// data import entities options.
     /// </summary>
-    public enum DataImportEntities
+    public enum DataImportEntity
     {
         [Description("-- Please Select --")]
         None = 0,
@@ -278,11 +348,7 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         {
             return Convert.ToInt16(type);
         }
-        public static short Value(this ValidationRuleGroup type)
-        {
-            return Convert.ToInt16(type);
-        }
-        public static short Value(this ValidationDataType type)
+        public static short Value(this DataValidationEntityName type)
         {
             return Convert.ToInt16(type);
         }
@@ -290,15 +356,15 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         {
             return Convert.ToInt16(type);
         }
-        public static short Value(this DataValidationEntity type)
+        public static short Value(this DataImportColumn type)
         {
             return Convert.ToInt16(type);
         }
-        public static short Value(this DataImportColumns type)
+        public static short Value(this DataImportEntity type)
         {
             return Convert.ToInt16(type);
         }
-        public static short Value(this DataImportEntities type)
+        public static short Value(this DataValidationPropertyName type)
         {
             return Convert.ToInt16(type);
         }

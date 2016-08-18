@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Gijima.IOBM.Infrastructure.Structs;
+using System;
 using System.ComponentModel;
 using System.Reflection;
 
@@ -64,6 +65,28 @@ namespace Gijima.IOBM.Infrastructure.Helpers
             }
 
             throw new ArgumentException("Not found.", "description");
+        }
+
+        /// <summary>
+        /// Retrieve the name on the relevant operator, e.g.
+        /// string, date, numeric, bool, integer
+        /// </summary>
+        /// <param name="enDataType">The data type Enumerator</param>
+        /// <param name="operatorEnumValue">The operator enum value.</param>
+        /// <returns>A string representing the friendly name</returns>
+        public static string GetOperatorFromDataTypeEnum(DataTypeName enDataType, short operatorEnumValue)
+        {
+            switch (enDataType)
+            {
+                case DataTypeName.None:
+                    return "Equal";
+                case DataTypeName.String:
+                    return ((StringOperator)operatorEnumValue).ToString();
+                case DataTypeName.DateTime:
+                    return ((DateOperator)operatorEnumValue).ToString();
+                default:
+                    return ((NumericOperator)operatorEnumValue).ToString();
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Gijima.IOBM.MobileManager.Views.ViewActivityLog"
+﻿<UserControl x:Class="Gijima.IOBM.MobileManager.Views.ViewAuditLog"
              xmlns:local="clr-namespace:Gijima.IOBM.MobileManager.Views"             
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -72,10 +72,10 @@
                 </Grid>
                 <DataGrid Grid.Row="2" Grid.ColumnSpan="2" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserSortColumns="True" 
                     IsReadOnly="True" TabIndex="2" Style="{StaticResource DataGridStyle}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}" 
-                    ItemsSource="{Binding ActivityLogCollection}" SelectedItem="{Binding SelectedActivityLog}">
+                    ItemsSource="{Binding AuditLogCollection}" SelectedItem="{Binding SelectedAuditLog}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Activity Description" Binding="{Binding ActivityDescription}" Width="*" />
-                        <DataGridTextColumn Header="Activity Comment" Binding="{Binding ActivityComment}" Width="Auto" />
+                        <DataGridTextColumn Header="Activity Description" Binding="{Binding AuditDescription}" Width="*" />
+                        <DataGridTextColumn Header="Activity Comment" Binding="{Binding AuditComment}" Width="Auto" />
                         <DataGridTextColumn Header="Modified By" Binding="{Binding ModifiedBy}" Width="Auto" />
                         <DataGridTextColumn Header="Modified Date" Binding="{Binding ModifiedDate}" Width="Auto" />
                     </DataGrid.Columns>

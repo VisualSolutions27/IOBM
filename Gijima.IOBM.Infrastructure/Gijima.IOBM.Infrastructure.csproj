@@ -66,6 +66,7 @@
     <Compile Include="Helpers\UnitConvertionHelper.cs" />
     <Compile Include="Structs\ADUser.cs" />
     <Compile Include="Structs\ApplicationInfo.cs" />
+    <Compile Include="Structs\DataActivityLog.cs" />
     <Compile Include="Structs\Enumerator.cs" />
     <Compile Include="Structs\IOBMEnvironment.cs" />
     <Compile Include="Structs\ProgressBarInfo.cs" />

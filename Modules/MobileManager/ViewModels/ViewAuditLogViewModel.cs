@@ -15,11 +15,11 @@ using System.Windows;
 
 namespace Gijima.IOBM.MobileManager.ViewModels
 {
-    public class ViewActivityLogViewModel : BindableBase
+    public class ViewAuditLogViewModel : BindableBase
     {
         #region Properties & Attributes
 
-        private ActivityLogModel _model = null;
+        private AuditLogModel _model = null;
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
 
@@ -35,17 +35,17 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Holds the selected activity log
         /// </summary>
-        public ActivityLog SelectedActivityLog
+        public AuditLog SelectedAuditLog
         {
-            get { return _selectedActivityLog; }
+            get { return _selectedAuditLog; }
             set
             {
                 ShowComment = value == null ? Visibility.Collapsed : Visibility.Visible;
-                SelectedComment = value != null ? value.ActivityComment : string.Empty;
-                SetProperty(ref _selectedActivityLog, value);
+                SelectedComment = value != null ? value.AuditComment : string.Empty;
+                SetProperty(ref _selectedAuditLog, value);
             }
         }
-        private ActivityLog _selectedActivityLog = null;
+        private AuditLog _selectedAuditLog = null;
 
         /// <summary>
         /// Holds the selected activity log filter
@@ -56,7 +56,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set
             {
                 SetProperty(ref _selectedActivityLogFilter, value);
-                Task.Run(() => ReadActivityLogsAsync());
+                Task.Run(() => ReadAuditLogsAsync());
             }
         }
         private string _selectedActivityLogFilter = null;
@@ -84,12 +84,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// The collection of activity log results
         /// </summary>
-        public ObservableCollection<ActivityLog> ActivityLogCollection
+        public ObservableCollection<AuditLog> AuditLogCollection
         {
             get { return _activityLogCollection; }
             set { SetProperty(ref _activityLogCollection, value); }
         }
-        private ObservableCollection<ActivityLog> _activityLogCollection = null;
+        private ObservableCollection<AuditLog> _activityLogCollection = null;
 
         #region Required Fields
 
@@ -135,24 +135,24 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Constructor
         /// </summary>
-        public ViewActivityLogViewModel(IEventAggregator eventAggreagator)
+        public ViewAuditLogViewModel(IEventAggregator eventAggreagator)
         {
             _eventAggregator = eventAggreagator;
-            InitialiseActivityLogView();
+            InitialiseAuditLogView();
         }
 
         /// <summary>
         /// Initialise all the view dependencies
         /// </summary>
-        private void InitialiseActivityLogView()
+        private void InitialiseAuditLogView()
         {
-            _model = new ActivityLogModel(_eventAggregator);
+            _model = new AuditLogModel(_eventAggregator);
             _securityHelper = new SecurityHelper(_eventAggregator);
             InitialiseViewControls();
 
             // Initialise the view commands
-            CancelCommand = new DelegateCommand(ExecuteCancel, CanExecuteCancel).ObservesProperty(() => SelectedActivityLog);
-            SaveCommand = new DelegateCommand(ExecuteSave, CanExecuteSave).ObservesProperty(() => SelectedActivityLog);
+            CancelCommand = new DelegateCommand(ExecuteCancel, CanExecuteCancel).ObservesProperty(() => SelectedAuditLog);
+            SaveCommand = new DelegateCommand(ExecuteSave, CanExecuteSave).ObservesProperty(() => SelectedAuditLog);
 
             // Subscribe to this event to read to activity logs from the database for the specified process
             _eventAggregator.GetEvent<SetActivityLogProcessEvent>().Subscribe(SetActivityLogProcess_Event, true);
@@ -165,7 +165,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void InitialiseViewControls()
         {
-            SelectedActivityLog = null;
+            SelectedAuditLog = null;
             SelectedActivityLogFilter = AdminActivityFilter.None.ToString();
             SelectedComment = string.Empty;
         }
@@ -173,11 +173,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Load all the activity logs based on the selected filter from the database
         /// </summary>
-        private async Task ReadActivityLogsAsync()
+        private async Task ReadAuditLogsAsync()
         {
             try
             {
-                ActivityLogCollection = await Task.Run(() => new ActivityLogModel(_eventAggregator).ReadActivityLogs(SelectedActivityLogFilter));
+                AuditLogCollection = await Task.Run(() => new AuditLogModel(_eventAggregator).ReadAuditLogs(SelectedActivityLogFilter));
             }
             catch (Exception ex)
             {
@@ -220,7 +220,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             if (ActivityLogFilterCollection.Count > 0)
             {
                 SelectedActivityLogFilter = AdminActivityFilter.None.ToString();
-                await ReadActivityLogsAsync();
+                await ReadAuditLogsAsync();
             }
         }
 
@@ -234,7 +234,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns>True if can execute</returns>
         private bool CanExecuteCancel()
         {
-            return SelectedActivityLog != null;
+            return SelectedAuditLog != null;
         }
 
         /// <summary>
@@ -257,7 +257,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             result = MobileManagerEnvironment.ClientCompanyID == 0 || _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false;
 
             if (result)
-                result = SelectedActivityLog != null;
+                result = SelectedAuditLog != null;
 
             return result;
         }
@@ -270,16 +270,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             try
             {
                 bool result = false;
-                SelectedActivityLog.ActivityComment = SelectedComment;
-                SelectedActivityLog.ModifiedBy = SecurityHelper.LoggedInDomainName;
-                SelectedActivityLog.ModifiedDate = DateTime.Now;
+                SelectedAuditLog.AuditComment = SelectedComment;
+                SelectedAuditLog.ModifiedBy = SecurityHelper.LoggedInDomainName;
+                SelectedAuditLog.ModifiedDate = DateTime.Now;
 
-                result = await Task.Run(() => _model.UpdateActivityLog(SelectedActivityLog));
+                result = await Task.Run(() => _model.UpdateAuditLog(SelectedAuditLog));
 
                 if (result)
                 {
                     InitialiseViewControls();
-                    await ReadActivityLogsAsync();
+                    await ReadAuditLogsAsync();
                 }
             }
             catch (Exception ex)

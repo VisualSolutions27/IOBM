@@ -38,8 +38,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             {
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    if (!db.ImportRuleDatas.Any(p => p.enImportSource == importRuleData.enImportSource &&
-                                                     p.enImportDestination == importRuleData.enImportDestination))
+                    if (!db.ImportRuleDatas.Any(p => p.enDataImportColumn == importRuleData.enDataImportColumn &&
+                                                     p.enDataImportEntity == importRuleData.enDataImportEntity))
                     {
                         db.ImportRuleDatas.Add(importRuleData);
                         db.SaveChanges();
@@ -48,8 +48,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     else
                     {
                         _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The data import rule source {0} and destination {1} already exist.", 
-                                                                                       ((DataImportColumns)importRuleData.enImportSource).ToString(),
-                                                                                       ((DataImportEntities)importRuleData.enImportDestination).ToString()));
+                                                                                       ((DataImportColumn)importRuleData.enDataImportColumn).ToString(),
+                                                                                       ((DataImportEntity)importRuleData.enDataImportEntity).ToString()));
                         return false;
                     }
                 }
@@ -93,29 +93,29 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// </summary>
         /// <param name="validationRulesData">The validation rule data entity to update.</param>
         /// <returns>True if successfull</returns>
-        public bool UpdateValidationRulesData(ValidationRulesData validationRulesData)
+        public bool UpdateDataValidationOption(DataValidationProperty validationRulesData)
         {
             try
             {
                 //using (var db = MobileManagerEntities.GetContext())
                 //{
-                //    ValidationRulesData existingValidationRulesData = db.ValidationRulesDatas.Where(p => p.enValidationRuleGroup == validationRulesData.enValidationRuleGroup &&
+                //    DataValidationOption existingDataValidationOption = db.DataValidationOptions.Where(p => p.enDataValidationEntity == validationRulesData.enDataValidationEntity &&
                 //                                                                                         p.ValidationDataName == validationRulesData.ValidationDataName).FirstOrDefault();
 
                 //    // Check to see if the validation rule data name already exist for another entity 
-                //    if (existingValidationRulesData != null && existingValidationRulesData.pkValidationRulesDataID != validationRulesData.pkValidationRulesDataID)
+                //    if (existingDataValidationOption != null && existingDataValidationOption.pkDataValidationOptionID != validationRulesData.pkDataValidationOptionID)
                 //    {
                 //        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The validation rule data {0} already exist.", validationRulesData.ValidationDataName));
                 //        return false;
                 //    }
                 //    else
                 //    {
-                //        if (existingValidationRulesData != null)
+                //        if (existingDataValidationOption != null)
                 //        {
-                //            existingValidationRulesData.enValidationRuleGroup = validationRulesData.enValidationRuleGroup;
-                //            existingValidationRulesData.ValidationDataName = validationRulesData.ValidationDataName;
-                //            existingValidationRulesData.ModifiedBy = validationRulesData.ModifiedBy;
-                //            existingValidationRulesData.ModifiedDate = validationRulesData.ModifiedDate;
+                //            existingDataValidationOption.enDataValidationEntity = validationRulesData.enDataValidationEntity;
+                //            existingDataValidationOption.ValidationDataName = validationRulesData.ValidationDataName;
+                //            existingDataValidationOption.ModifiedBy = validationRulesData.ModifiedBy;
+                //            existingDataValidationOption.ModifiedDate = validationRulesData.ModifiedDate;
                 //            db.SaveChanges();
                 //            return true;
                 //        }

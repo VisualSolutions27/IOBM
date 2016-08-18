@@ -49,6 +49,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ImportExceptionInfo.cs" />
     <Compile Include="WorkSheetInfo.cs" />
     <Compile Include="MSOfficeHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

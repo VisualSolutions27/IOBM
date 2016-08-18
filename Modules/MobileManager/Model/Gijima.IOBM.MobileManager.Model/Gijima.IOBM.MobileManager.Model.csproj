@@ -60,7 +60,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Data\ActivityLog.cs">
+    <Compile Include="Data\AuditLog.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Data\BillingLevel.cs">
@@ -90,7 +90,19 @@
     <Compile Include="Data\CompanyBillingLevel.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="Data\CompanyGroup.cs">
+      <DependentUpon>MobileManagerEntities.tt</DependentUpon>
+    </Compile>
     <Compile Include="Data\Contract.cs">
+      <DependentUpon>MobileManagerEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DataValidationException.cs">
+      <DependentUpon>MobileManagerEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DataValidationProperty.cs">
+      <DependentUpon>MobileManagerEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DataValidationRule.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Data\Device.cs">
@@ -103,7 +115,8 @@
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Data\Extentions\CompanyExt.cs" />
-    <Compile Include="Data\Extentions\ValidationRuleExt.cs" />
+    <Compile Include="Data\Extentions\DataValidationPropertyExt.cs" />
+    <Compile Include="Data\Extentions\DataValidationRuleExt.cs" />
     <Compile Include="Data\ImportRuleData.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
@@ -168,16 +181,7 @@
     <Compile Include="Data\UserInRole.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Data\ValidationRule.cs">
-      <DependentUpon>MobileManagerEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Data\ValidationRuleException.cs">
-      <DependentUpon>MobileManagerEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Data\ValidationRulesData.cs">
-      <DependentUpon>MobileManagerEntities.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Models\ActivityLogModel.cs" />
+    <Compile Include="Models\AuditLogModel.cs" />
     <Compile Include="Models\BillingLevelModel.cs" />
     <Compile Include="Models\BillingProcessModel.cs" />
     <Compile Include="Models\CityModel.cs" />
@@ -199,12 +203,16 @@
     <Compile Include="Models\SimmCardModel.cs" />
     <Compile Include="Models\StatusModel.cs" />
     <Compile Include="Models\SuburbModel.cs" />
-    <Compile Include="Models\ValidationRuleExceptionModel.cs" />
-    <Compile Include="Models\ValidationRulesDataModel.cs" />
-    <Compile Include="Models\ValidationRuleModel.cs" />
+    <Compile Include="Models\DataValidationExceptionModel.cs" />
+    <Compile Include="Models\DataValidationPropertyModel.cs" />
+    <Compile Include="Models\DataValidationRuleModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Gijima.DataImport.MSOffice\Gijima.DataImport.MSOffice.csproj">
+      <Project>{757A257E-1E48-431B-B0C9-F5F0A93A2B07}</Project>
+      <Name>Gijima.DataImport.MSOffice</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\..\..\Gijima.IOBM.Infrastructure\Gijima.IOBM.Infrastructure.csproj">
       <Project>{55b7d4d2-9f8d-4c92-9fea-97f5f58ded4a}</Project>
       <Name>Gijima.IOBM.Infrastructure</Name>

@@ -6,7 +6,7 @@
         xmlns:prism="http://prismlibrary.com/"
         prism:ViewModelLocator.AutoWireViewModel="True"
         mc:Ignorable="d" 
-        d:DesignHeight="600" d:DesignWidth="1200" WindowState="Maximized" WindowStartupLocation="CenterScreen">
+        d:DesignHeight="600" d:DesignWidth="1200" WindowState="Maximized" WindowStartupLocation="CenterScreen" Icon="Assets/Images/iomb_mm.ico">
 
     <Border x:Name="ContainerMainWindow" Grid.Row="0" Grid.Column="0" Background="#66F2E9C1" BorderBrush="Gray" BorderThickness="0,1,0,0">
         <Grid x:Name="LayoutMainWindow">
@@ -20,7 +20,7 @@
             </Grid.ColumnDefinitions>
             <Grid x:Name="LayoutMainWindowHeader" Grid.Row="0" Grid.Column="0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="60" />
+                    <RowDefinition Height="40" />
                     <RowDefinition Height="25" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -28,9 +28,9 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Source="Assets/Images/Gijima-Dots.png" Stretch="None" Margin="10,5,0,0" />
-                <Image Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Source="Assets/Images/IOBM.png" Stretch="Fill" HorizontalAlignment="Left" Margin="10,5,0,5" Height="60" Width="100"/>
-                <Image Grid.Row="0" Grid.Column="2" Grid.RowSpan="1" Source="Assets/Images/Gijima.png" Stretch="Fill" HorizontalAlignment="Left" Margin="0,5,10,0" Height="60" />
+                <Image Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Source="Assets/Images/Gijima-Dots.png" Stretch="None" Margin="10,0,0,0" />
+                <Image Grid.Row="0" Grid.Column="1" Grid.RowSpan="2" Source="Assets/Images/iobm-mm.png" Stretch="Fill" HorizontalAlignment="Left" Margin="10,0,0,0" Height="40" Width="200"/>
+                <Image Grid.Row="0" Grid.Column="2" Grid.RowSpan="1" Source="Assets/Images/Gijima.png" Stretch="Fill" HorizontalAlignment="Left" Margin="0,2,10,2" Height="40" />
                 <TextBlock x:Name="TextBlockLoggedInUser" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" Text="{Binding LoggedInUser}" Margin="0,4,20,0" HorizontalAlignment="Right" Style="{StaticResource WelcomeTextStyle}" />
             </Grid>
             <ContentControl x:Name="MainContent" Grid.Row="1" Grid.Column="0" prism:RegionManager.RegionName="MainRegion"/>

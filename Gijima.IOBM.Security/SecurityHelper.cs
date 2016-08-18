@@ -32,6 +32,7 @@ namespace Gijima.IOBM.Security
         #region Properties
 
         public static string LoggedInDomainName { get; set; }
+        public static string LoggedInFullName { get; set; }
         public static IEnumerable<UserInRole> UserRoles { get; set; }
         public static IEnumerable<UserInApplication> UserApplications { get; set; }
 
@@ -66,6 +67,7 @@ namespace Gijima.IOBM.Security
                     return false;
 
                 LoggedInDomainName = loggedInUser.UserName;
+                LoggedInFullName = loggedInUser.UserFullName != null ? loggedInUser.UserFullName : loggedInUser.UserName;
                 UserRoles = loggedInUser.UserInRoles;
                 UserApplications = loggedInUser.UserInApplications;
                 return true;

@@ -34,65 +34,69 @@
                     <ColumnDefinition Width="2" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="Billing Configuration View" Style="{StaticResource UXHeaderTextStyle}"></TextBlock>
+                <TextBlock Text="Data Validation Configuration View" Style="{StaticResource UXHeaderTextStyle}"></TextBlock>
                 <TextBlock Text="Process:" Grid.Column="1" Style="{StaticResource UXLabelTextStyle}" Foreground="White" FontWeight="Medium" FontSize="14"></TextBlock>
-                <ComboBox Grid.Column="2" ToolTip="Select a billing process to configure." TabIndex="1" Height="20" Margin="0,3,0,2" IsSynchronizedWithCurrentItem="True"
-                    ItemsSource="{Binding BillingProcessCollection}" SelectedItem="{Binding SelectedBillingProcess}">
+                <ComboBox Grid.Column="2" ToolTip="Select a data validation process to configure." TabIndex="1" Height="20" Margin="0,3,0,2" IsSynchronizedWithCurrentItem="True"
+                    ItemsSource="{Binding DataValidationProcessCollection}" SelectedItem="{Binding SelectedDataValidationProcess}">
                 </ComboBox>                
                 <StackPanel Grid.Row="0" Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,1,10,0">
                     <Button x:Name="ButtonCancel" ToolTip="Cancel the current operation." TabIndex="7" Margin="0,0,2,0" 
                         Style="{StaticResource UXHeaderImageButtonStyle}" Command="{Binding CancelCommand}">
                         <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/stop_32.ico" Margin="2"/>
                     </Button>
-                    <Button x:Name="ButtonAdd" ToolTip="Add new billing configuration values." TabIndex="8" Margin="0,0,2,0"
+                    <Button x:Name="ButtonAdd" ToolTip="Add a new data validation rule." TabIndex="8" Margin="0,0,2,0"
                         Style="{StaticResource UXHeaderImageButtonStyle}" Command="{Binding AddCommand}">
                         <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/508.png" Margin="2,2,2,2"/>
                     </Button>
-                    <Button x:Name="ButtonSave" ToolTip="Save the billing configuration values." TabIndex="9" Margin="0"
+                    <Button x:Name="ButtonDelete" ToolTip="Delete the selected data validation rule." TabIndex="8" Margin="0,0,2,0"
+                        Style="{StaticResource UXHeaderImageButtonStyle}" Command="{Binding DeleteCommand}">
+                        <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/278.png" Margin="2,2,2,2"/>
+                    </Button>
+                    <Button x:Name="ButtonSave" ToolTip="Save the data validation rule." TabIndex="9" Margin="0"
                         Style="{StaticResource UXHeaderImageButtonStyle}" Command="{Binding SaveCommand}">
                         <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/save_32.ico" Margin="2"/>
                     </Button>
                 </StackPanel>
             </Grid>
         </Border>
-        <Grid x:Name="GridApplicationUsers" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="5">
+        <Grid x:Name="GridApplicationUsers" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="5,10,5,5">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="25" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="60" />
+                <ColumnDefinition Width="40" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="10" />
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="10" />
-                <ColumnDefinition Width="70" />
+                <ColumnDefinition Width="60" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="10" />
                 <ColumnDefinition Width="120" />
                 <ColumnDefinition Width="10" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="Category:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-            <Border Grid.Row="0" Grid.Column="1" BorderThickness="1" BorderBrush="{Binding ValidCategory}">
-                <ComboBox x:Name="ComboBoxCategory" ToolTip="Select the validation category." TabIndex="1" IsSynchronizedWithCurrentItem="True"
-                    ItemsSource="{Binding CategoryCollection}" SelectedItem="{Binding SelectedCategory, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Height="22" >
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Entity:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+            <Border Grid.Row="0" Grid.Column="1" BorderThickness="1" BorderBrush="{Binding ValidValidationEntity}">
+                <ComboBox x:Name="ComboBoxValidationEntities" ToolTip="Select the validation entity." TabIndex="1" IsSynchronizedWithCurrentItem="True"
+                    ItemsSource="{Binding ValidationEntityCollection}" SelectedItem="{Binding SelectedValidationEntity, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Height="22" >
                 </ComboBox>
             </Border>
-            <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding EntityLabel}" Style="{StaticResource UXLabelTextStyle}" Margin="0,0,10,0"></TextBlock>
-            <Border Grid.Row="0" Grid.Column="4" BorderThickness="1" BorderBrush="{Binding ValidEntity}">
-                <ComboBox x:Name="ComboBoxEntities" ToolTip="Select the validation entity." TabIndex="2" IsSynchronizedWithCurrentItem="True"
-                    ItemsSource="{Binding EntityCollection}" DisplayMemberPath="{Binding EntityDisplayName}" Height="22"
-                    SelectedItem="{Binding SelectedEntity, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+            <TextBlock Grid.Row="0" Grid.Column="3" Text="Data item:" Style="{StaticResource UXLabelTextStyle}" Margin="0,0,5,0"></TextBlock>
+            <Border Grid.Row="0" Grid.Column="4" BorderThickness="1" BorderBrush="{Binding ValidValidationData}">
+                <ComboBox x:Name="ComboBoxValidationData" ToolTip="Select the validation entity data item." TabIndex="2" IsSynchronizedWithCurrentItem="True"
+                    ItemsSource="{Binding ValidationDataCollection}" DisplayMemberPath="{Binding EntityDisplayName}" Height="22"
+                    SelectedItem="{Binding SelectedValidationData, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
                 </ComboBox>
             </Border>
-            <TextBlock Grid.Row="0" Grid.Column="6" Text="Rule data:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-            <Border Grid.Row="0" Grid.Column="7" BorderThickness="1" BorderBrush="{Binding ValidRuleData}">
-                <ComboBox x:Name="ComboBoxRuleData" ToolTip="Select the entity to base the rule on." TabIndex="3" IsSynchronizedWithCurrentItem="True"
-                    ItemsSource="{Binding RuleDataCollection}" DisplayMemberPath="ValidationDataName" Height="22"
-                    SelectedItem="{Binding SelectedRuleData, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+            <TextBlock Grid.Row="0" Grid.Column="6" Text="Data field:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+            <Border Grid.Row="0" Grid.Column="7" BorderThickness="1" BorderBrush="{Binding ValidDataProperty}">
+                <ComboBox x:Name="ComboBoxDataProperties" ToolTip="Select the data field to base the rule on." TabIndex="3" IsSynchronizedWithCurrentItem="True"
+                    ItemsSource="{Binding DataPropertyCollection}" DisplayMemberPath="PropertyDescription" Height="22"
+                    SelectedItem="{Binding SelectedDataProperty, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
                 </ComboBox>
             </Border>
             <Border Grid.Row="0" Grid.Column="9" BorderThickness="1" BorderBrush="{Binding ValidOperator}">
@@ -108,31 +112,18 @@
                 IsReadOnly="True" TabIndex="6" Style="{StaticResource DataGridStyle}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"
                 ItemsSource="{Binding ValidationRuleCollection}" SelectedItem="{Binding SelectedValidationRule}">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Entity Name" Binding="{Binding EntityName}" Width="*" />
-                    <DataGridTextColumn Header="Data Name" Binding="{Binding RuleDataName}" Width="*" />
-                    <DataGridTextColumn Header="Data Type" Binding="{Binding RuleDataTypeName}" Width="*" />
-                    <DataGridTextColumn Header="String Operator" Binding="{Binding enStringCompareType, Converter={StaticResource UIDataConvertionHelper}, ConverterParameter='StringCompareType'}" Width="120">
+                    <DataGridTextColumn Header="Entity" Binding="{Binding EntityDescription}" Width="*" />
+                    <DataGridTextColumn Header="Data Item" Binding="{Binding DataDescription}" Width="*" />
+                    <DataGridTextColumn Header="Data Field" Binding="{Binding PropertyDescription}" Width="*" />
+                    <DataGridTextColumn Header="Data Type" Binding="{Binding DataTypeDescription}" Width="Auto" />
+                    <DataGridTextColumn Header="Operator" Binding="{Binding OperatorDescription}" Width="Auto">
                         <DataGridTextColumn.ElementStyle>
                             <Style TargetType="TextBlock">
                                 <Setter Property="HorizontalAlignment" Value="Center" />
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="Numeric Operator" Binding="{Binding enNumericCompareType, Converter={StaticResource UIDataConvertionHelper}, ConverterParameter='NumericCompareType'}" Width="120">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Center" />
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="Date Operator" Binding="{Binding enDateCompareType, Converter={StaticResource UIDataConvertionHelper}, ConverterParameter='DateCompareType'}" Width="120">
-                        <DataGridTextColumn.ElementStyle>
-                            <Style TargetType="TextBlock">
-                                <Setter Property="HorizontalAlignment" Value="Center" />
-                            </Style>
-                        </DataGridTextColumn.ElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="Validation Value" Binding="{Binding ValidationDataValue}" Width="*" />
+                    <DataGridTextColumn Header="Validation Value" Binding="{Binding DataValidationValue}" Width="Auto" />
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

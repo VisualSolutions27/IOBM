@@ -1,13 +1,19 @@
-﻿using Gijima.IOBM.Infrastructure.Events;
+﻿using Gijima.DataImport.MSOffice;
+using Gijima.IOBM.Infrastructure.Events;
 using Gijima.IOBM.Infrastructure.Helpers;
+using Gijima.IOBM.MobileManager.Common.Events;
+using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
+using Gijima.IOBM.Security;
 using Prism.Events;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Gijima.IOBM.MobileManager.Model.Models
 {
@@ -16,7 +22,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         #region Properties and Attributes
 
         private IEventAggregator _eventAggregator;
-        private ActivityLogModel _activityLogger = null;
+        private AuditLogModel _activityLogger = null;
         private DataActivityHelper _dataActivityHelper = null;
 
         #endregion
@@ -35,7 +41,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         public ClientModel(IEventAggregator eventAggreagator)
         {
             _eventAggregator = eventAggreagator;
-            _activityLogger = new ActivityLogModel(_eventAggregator);
+            _activityLogger = new AuditLogModel(_eventAggregator);
             _dataActivityHelper = new DataActivityHelper(_eventAggregator);
         }
 
@@ -153,6 +159,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 return 0;
             }
         }
+        
         /// <summary>
         /// Update an existing client entity in the database
         /// </summary>
@@ -197,10 +204,10 @@ namespace Gijima.IOBM.MobileManager.Model.Models
 
                             db.SaveChanges();
 
-                            result = _activityLogger.CreateDataChangeActivities<Client>(_dataActivityHelper.GetDataChangeActivities<Client>(existingClient, client, db), userName);
-                            result = _activityLogger.CreateDataChangeActivities<Contract>(_dataActivityHelper.GetDataChangeActivities<Contract>(existingClient.Contract, client.Contract, db), userName);
-                            result = _activityLogger.CreateDataChangeActivities<PackageSetup>(_dataActivityHelper.GetDataChangeActivities<PackageSetup>(existingClient.Contract.PackageSetup, client.Contract.PackageSetup, db), userName);
-                            result = _activityLogger.CreateDataChangeActivities<ClientBilling>(_dataActivityHelper.GetDataChangeActivities<ClientBilling>(existingClient.ClientBilling, client.ClientBilling, db), userName);
+                            result = _activityLogger.CreateDataChangeAudits<Client>(_dataActivityHelper.GetDataChangeActivities<Client>(existingClient, client, db));
+                            result = _activityLogger.CreateDataChangeAudits<Contract>(_dataActivityHelper.GetDataChangeActivities<Contract>(existingClient.Contract, client.Contract, db));
+                            result = _activityLogger.CreateDataChangeAudits<PackageSetup>(_dataActivityHelper.GetDataChangeActivities<PackageSetup>(existingClient.Contract.PackageSetup, client.Contract.PackageSetup, db));
+                            result = _activityLogger.CreateDataChangeAudits<ClientBilling>(_dataActivityHelper.GetDataChangeActivities<ClientBilling>(existingClient.ClientBilling, client.ClientBilling, db));
 
                             //// Commit changes
                             //tc.Complete();
@@ -215,6 +222,114 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             catch (Exception ex)
             {
                 _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Update an existing client entity in the database
+        /// </summary>
+        /// <param name="searchEntity">The client data to search on.</param>
+        /// <param name="searchCriteria">The client search criteria to search for.</param>
+        /// <param name="updateColumn">The client entity property (column) to update.</param>
+        /// <param name="updateValue">The value to update client entity property (column) with.</param>
+        /// <param name="companyGroup">The company group the client is linked to.</param>
+        /// <param name="errorMessage">OUT The error message.</param>
+        /// <returns>True if successfull</returns>
+        public bool UpdateClient(SearchEntity searchEntity, string searchCriteria, string updateColumn, object updateValue, CompanyGroup companyGroup, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+            Client existingClient = null;
+            Client clientToUpdate = null;
+            bool result = false;
+
+            try
+            {
+                //using (TransactionScope tc = TransactionHelper.CreateTransactionScope())
+                //{
+                using (var db = MobileManagerEntities.GetContext())
+                {
+                    switch (searchEntity)
+                    {
+                        case SearchEntity.ClientID:
+                            existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.ClientID).FirstOrDefault();
+                            break;
+                        case SearchEntity.PrimaryCellNumber:
+                            existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.PrimaryCellNumber).FirstOrDefault();
+                            break;
+                        case SearchEntity.EmployeeNumber:
+                            if (companyGroup == null)
+                                existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.EmployeeNumber).FirstOrDefault();
+                            else
+                                existingClient = new SearchEngineModel(_eventAggregator).SearchForClientByCompanyGroup(searchCriteria, SearchEntity.EmployeeNumber, companyGroup).FirstOrDefault();
+                            break;
+                        case SearchEntity.IDNumber:
+                            existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.IDNumber).FirstOrDefault();
+                            break;
+                    }
+
+                    if (existingClient != null)
+                    {
+                        clientToUpdate = db.Clients.Where(p => p.pkClientID == existingClient.pkClientID).FirstOrDefault();
+
+                         // Get the client table properties (Fields)
+                         PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(Client));
+
+                        foreach (PropertyDescriptor property in properties)
+                        {
+                            // Find the data column (property) to update
+                            if (property.Name == updateColumn)
+                            {
+                                // Update the property value based on the data type
+                                if (property.PropertyType == typeof(DateTime))
+                                {
+                                    property.SetValue(clientToUpdate, Convert.ToDateTime(updateValue));
+                                }
+                                else if (property.PropertyType == typeof(int))
+                                {
+                                    property.SetValue(clientToUpdate, Convert.ToInt32(updateValue));
+                                }
+                                else if (property.PropertyType == typeof(decimal))
+                                {
+                                    property.SetValue(clientToUpdate, Convert.ToDecimal(updateValue));
+                                }
+                                else if (property.PropertyType == typeof(bool))
+                                {
+                                    property.SetValue(clientToUpdate, Convert.ToBoolean(updateValue));
+                                }
+                                else if (property.PropertyType == typeof(string))
+                                {
+                                    property.SetValue(clientToUpdate, updateValue);
+                                }
+                                else
+                                {
+                                    errorMessage = string.Format("Data type {0) not found for {1}.", property.PropertyType, updateColumn);
+                                    return false;
+                                }
+
+                                db.SaveChanges();
+
+                                result = _activityLogger.CreateDataChangeAudits<Client>(_dataActivityHelper.GetDataChangeActivities<Client>(existingClient, clientToUpdate, db));
+
+                                //// Commit changes
+                                //tc.Complete();
+                            }
+                        }
+                    }
+                    else
+                    {
+                        errorMessage = string.Format("Client not found for {0} {1}.", searchEntity.ToString(), searchCriteria);
+                        return false;
+                    }
+                }
+
+                return result;
+                //}
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                errorMessage = string.Format("Error: {0} {1}.", ex.Message, ex.InnerException.Message);
                 return false;
             }
         }

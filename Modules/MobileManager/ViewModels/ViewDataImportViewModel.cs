@@ -2,7 +2,6 @@
 using Gijima.IOBM.Infrastructure.Events;
 using Gijima.IOBM.Infrastructure.Helpers;
 using Gijima.IOBM.Infrastructure.Structs;
-using Gijima.IOBM.MobileManager.Common.Events;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
 using Gijima.IOBM.MobileManager.Model.Models;
@@ -103,40 +102,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private int _importUpdatesFailed;
 
         /// <summary>
-        /// The selected exceptions
-        /// </summary>
-        public string SelectedExceptions
-        {
-            get { return _selectedExceptions; }
-            set
-            {
-                SetProperty(ref _selectedExceptions, value);
-                PopulateSelectedExceptions(value);
-            }
-        }
-        private string _selectedExceptions;
-
-        ///// <summary>
-        ///// The current selected exception
-        ///// </summary>
-        //private ValidationRuleException SelectedException
-        //{
-        //    get { return _selectedException; }
-        //    set { SetProperty(ref _selectedException, value); }
-        //}
-        //private ValidationRuleException _selectedException = null;
-
-        ///// <summary>
-        ///// The selected exceptions to fix
-        ///// </summary>
-        //private ObservableCollection<ValidationRuleException> ExceptionsToFix
-        //{
-        //    get { return _exceptionsToFix; }
-        //    set { SetProperty(ref _exceptionsToFix, value); }
-        //}
-        //private ObservableCollection<ValidationRuleException> _exceptionsToFix = null;
-
-        /// <summary>
         /// The collection of imported excel data
         /// </summary>
         public DataTable ImportedDataCollection
@@ -145,6 +110,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set { SetProperty(ref _importDataCollection, value); }
         }
         private DataTable _importDataCollection = null;
+        
+        /// <summary>
+        /// The collection of data import/update exceptions
+        /// </summary>
+        public ObservableCollection<string> ExceptionsCollection
+        {
+            get { return _exceptionsCollection; }
+            set { SetProperty(ref _exceptionsCollection, value); }
+        }
+        private ObservableCollection<string> _exceptionsCollection = null;
 
         #region View Lookup Data Collections
 
@@ -161,12 +136,32 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// The collection of data sheet columns from the selected Excel sheet
         /// </summary>
+        public ObservableCollection<string> SearchColumnCollection
+        {
+            get { return _searchColumnCollection; }
+            set { SetProperty(ref _searchColumnCollection, value); }
+        }
+        private ObservableCollection<string> _searchColumnCollection = null;
+
+        /// <summary>
+        /// The collection of data sheet columns from the selected Excel sheet
+        /// </summary>
         public ObservableCollection<string> SourceColumnCollection
         {
             get { return _sourceColumnCollection; }
             set { SetProperty(ref _sourceColumnCollection, value); }
         }
         private ObservableCollection<string> _sourceColumnCollection = null;
+
+        /// <summary>
+        /// The collection of entity columns to search on
+        /// </summary>
+        public ObservableCollection<string> SearchEntityCollection
+        {
+            get { return _searchEntityCollection; }
+            set { SetProperty(ref _searchEntityCollection, value); }
+        }
+        private ObservableCollection<string> _searchEntityCollection = null;
 
         /// <summary>
         /// The collection of data columns to import to from the DataImportColumn enum
@@ -187,6 +182,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set { SetProperty(ref _destinationEntityCollection, value); }
         }
         private ObservableCollection<string> _destinationEntityCollection = null;
+
+        /// <summary>
+        /// The collection of company group entities from the database
+        /// </summary>
+        public ObservableCollection<CompanyGroup> DestinationCompanyCollection
+        {
+            get { return _destinationCompanyCollection; }
+            set { SetProperty(ref _destinationCompanyCollection, value); }
+        }
+        private ObservableCollection<CompanyGroup> _destinationCompanyCollection = null;
 
         #endregion
 
@@ -215,9 +220,33 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
         }
         private WorkSheetInfo _selectedImportSheet;
-        
+
         /// <summary>
-        /// The selected source sheet column to import from
+        /// The selected column to search on
+        /// </summary>
+        public string SelectedSearchColumn
+        {
+            get { return _selectedSearchColumn; }
+            set { SetProperty(ref _selectedSearchColumn, value); }
+        }
+        private string _selectedSearchColumn;
+
+        /// <summary>
+        /// The selected entity to search on
+        /// </summary>
+        public string SelectedSearchEntity
+        {
+            get { return _selectedSearchEntity; }
+            set
+            {
+                SetProperty(ref _selectedSearchEntity, value);
+                EnableDisableCompanySelection();
+            }
+        }
+        private string _selectedSearchEntity;
+
+        /// <summary>
+        /// The selected source column to import from
         /// </summary>
         public string SelectedSourceColumn
         {
@@ -235,12 +264,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set
             {
                 SetProperty(ref _selectedDestinationColumn, value);
-                FilterImportRuleData(value);
-
-                if (value == EnumHelper.GetDescriptionFromEnum(DataImportColumns.None))
-                    ImportUpdateDescription = string.Format("Importing {0} - {1} of {2}", "", 0, 0);
-                else
-                    ImportUpdateDescription = string.Format("Importing {0} - {1} of {2}", value, 0, 0);
+                FilterDestinationEntities();
             }
         }
         private string _selectedDestinationColumn;
@@ -251,14 +275,28 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         public string SelectedDestinationEntity
         {
             get { return _selectedDestinationEntity; }
-            set { SetProperty(ref _selectedDestinationEntity, value); }
+            set
+            {
+                SetProperty(ref _selectedDestinationEntity, value);
+                FilterDestinationSearchEntities();
+            }
         }
         private string _selectedDestinationEntity;
+        
+        /// <summary>
+        /// The selected destination company to import to
+        /// </summary>
+        public CompanyGroup SelectedDestinationCompany
+        {
+            get { return _selectedDestinationCompany; }
+            set {SetProperty(ref _selectedDestinationCompany, value);}
+        }
+        private CompanyGroup _selectedDestinationCompany;
 
         #endregion
 
         #region Input Validation  
-             
+
         /// <summary>
         /// Check if a valid data file was selected
         /// </summary>
@@ -270,6 +308,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private bool _validDataFile = false;
 
         /// <summary>
+        /// Check if the data import was valid
+        /// </summary>
+        public bool ValidDataImport
+        {
+            get { return _validDataImport; }
+            set { SetProperty(ref _validDataImport, value); }
+        }
+        private bool _validDataImport = false;
+
+        /// <summary>
         /// Check if a valid data file was selected
         /// </summary>
         public bool ValidSelectedDataSheet
@@ -278,6 +326,27 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set { SetProperty(ref _validSelectedDataSheet, value); }
         }
         private bool _validSelectedDataSheet = false;
+
+        /// <summary>
+        /// Check if a valid data file was selected
+        /// </summary>
+        public bool ValidSearchEntities
+        {
+            get { return _validSearchEntities; }
+            set { SetProperty(ref _validSearchEntities, value); }
+        }
+        private bool _validSearchEntities = false;
+        
+        /// <summary>
+        /// Check if a valid destination company was selected
+        /// only if the destination entity is linked to a company
+        /// </summary>
+        public bool DestinationCompanyLinked
+        {
+            get { return _destinationCompanyLinked; }
+            set { SetProperty(ref _destinationCompanyLinked, value); }
+        }
+        private bool _destinationCompanyLinked = false;
 
         /// <summary>
         /// Set the required field border colour
@@ -312,6 +381,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Set the required field border colour
         /// </summary>
+        public Brush ValidSearchColumn
+        {
+            get { return _validSearchColumn; }
+            set { SetProperty(ref _validSearchColumn, value); }
+        }
+        private Brush _validSearchColumn = Brushes.Red;
+
+        /// <summary>
+        /// Set the required field border colour
+        /// </summary>
         public Brush ValidDestinationColumn
         {
             get { return _validDestinationColumn; }
@@ -328,6 +407,26 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set { SetProperty(ref _validDestinationEntity, value); }
         }
         private Brush _validDestinationEntity = Brushes.Red;
+
+        /// <summary>
+        /// Set the required field border colour
+        /// </summary>
+        public Brush ValidSearchEntity
+        {
+            get { return _validSearchEntity; }
+            set { SetProperty(ref _validSearchEntity, value); }
+        }
+        private Brush _validSearchEntity = Brushes.Red;
+        
+        /// <summary>
+        /// Set the required field border colour
+        /// </summary>
+        public Brush ValidDestinationCompany
+        {
+            get { return _validDestinationCompany; }
+            set { SetProperty(ref _validDestinationCompany, value); }
+        }
+        private Brush _validDestinationCompany = Brushes.Red;
 
         /// <summary>
         /// Input validate error message
@@ -354,17 +453,22 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 switch (columnName)
                 {
                     case "SelectedImportFile":
-                        ValidImportFile = string.IsNullOrEmpty(SelectedImportFile) ? Brushes.Red : Brushes.Silver;
-                        ValidDataFile = string.IsNullOrEmpty(SelectedImportFile) ? false : true; break;
+                        ValidImportFile = string.IsNullOrEmpty(SelectedImportFile) ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedDataSheet":
                         ValidDataSheet = SelectedDataSheet == null || SelectedDataSheet.SheetName == "-- Please Select --" ? Brushes.Red : Brushes.Silver;
                         ValidSelectedDataSheet = SelectedDataSheet == null || SelectedDataSheet.SheetName == "-- Please Select --" ? false : true; break;
+                    case "SelectedSearchColumn":
+                        ValidSearchColumn = string.IsNullOrEmpty(SelectedSearchColumn) || SelectedSearchColumn == "-- Please Select --" ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedSourceColumn":
                         ValidSourceColumn = string.IsNullOrEmpty(SelectedSourceColumn) || SelectedSourceColumn == "-- Please Select --" ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedDestinationColumn":
                         ValidDestinationColumn = string.IsNullOrEmpty(SelectedDestinationColumn) || SelectedDestinationColumn == "-- Please Select --" ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedDestinationEntity":
                         ValidDestinationEntity = string.IsNullOrEmpty(SelectedDestinationEntity) || SelectedDestinationEntity == "-- Please Select --" ? Brushes.Red : Brushes.Silver; break;
+                    case "SelectedSearchEntity":
+                        ValidSearchEntity = string.IsNullOrEmpty(SelectedSearchEntity) || SelectedSearchEntity == "-- Please Select --" ? Brushes.Red : Brushes.Silver; break;
+                    case "SelectedDestinationCompany":
+                        ValidDestinationCompany = SelectedDestinationCompany == null || SelectedDestinationCompany.pkCompanyGroupID == 0 ? Brushes.Red : Brushes.Silver; break;
                 }
 
                 return result;
@@ -378,24 +482,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         #endregion
 
         #region Event Handlers
-
-        /// <summary>
-        /// This event gets received to update the progressbar
-        /// </summary>
-        /// <param name="sender">The error message.</param>
-        private void ProgressBarInfo_Event(object sender)
-        {
-            Application.Current.Dispatcher.Invoke(() => { UpdateProgressBarValues(sender); });
-        }
-
-        /// <summary>
-        /// This event gets received to display the data import/update result info
-        /// </summary>
-        /// <param name="sender">The error message.</param>
-        private void DataImportUpdateResult_Event(object sender)
-        {
-            Application.Current.Dispatcher.Invoke(() => { DisplayDataImportUpdateResults(sender); });
-        }
 
         #endregion
 
@@ -422,19 +508,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             // Initialise the view commands
             OpenFileCommand = new DelegateCommand(ExecuteOpenFileCommand);
             UpdateCommand = new DelegateCommand(ExecuteUpdate, CanUpdate).ObservesProperty(() => SelectedDataSheet)
+                                                                         .ObservesProperty(() => SelectedSearchColumn)
                                                                          .ObservesProperty(() => SelectedSourceColumn)
                                                                          .ObservesProperty(() => SelectedDestinationColumn)
-                                                                         .ObservesProperty(() => SelectedDestinationEntity);
-
-            // Subscribe to this event to update the progressbar
-            _eventAggregator.GetEvent<ProgressBarInfoEvent>().Subscribe(ProgressBarInfo_Event, true);
-
-            // Subscribe to this event to display the data validation errors
-            _eventAggregator.GetEvent<DataImportUpdateResultEvent>().Subscribe(DataImportUpdateResult_Event, true);
-
+                                                                         .ObservesProperty(() => SelectedDestinationEntity)
+                                                                         .ObservesProperty(() => SelectedSearchEntity)
+                                                                         .ObservesProperty(() => SelectedDestinationCompany);
             // Load the view data
             ReadDataDestinationColumns();
             await ReadImportRuleDataAsync();
+            await ReadCompanyGroupsAsync();
         }
 
         /// <summary>
@@ -442,21 +525,27 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void InitialiseViewControls()
         {
+            ImportUpdateDescription = string.Format("Importing - {0} of {1}", 0, 0);
             ExceptionDescription = "Data Import Exceptions";
             SelectedImportFile = string.Empty;
             ImportUpdateCount = 1;
             ImportUpdateProgress = ImportUpdatesPassed = ImportUpdatesFailed = 0;
+            ValidDataFile = ValidDataImport = DestinationCompanyLinked = false;
 
             // Add the default items
             DataSheetCollection = new ObservableCollection<WorkSheetInfo>();
             WorkSheetInfo defaultInfo = new WorkSheetInfo();
-            defaultInfo.SheetName = EnumHelper.GetDescriptionFromEnum(DataImportColumns.None);
+            defaultInfo.SheetName = EnumHelper.GetDescriptionFromEnum(DataImportColumn.None);
             DataSheetCollection.Add(defaultInfo);
+            SearchColumnCollection = new ObservableCollection<string>();
+            SearchColumnCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportColumn.None));
             SourceColumnCollection = new ObservableCollection<string>();
-            SourceColumnCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportColumns.None));
+            SourceColumnCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportColumn.None));
             DestinationEntityCollection = new ObservableCollection<string>();
-            DestinationEntityCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportColumns.None));
-            SelectedDestinationEntity = EnumHelper.GetDescriptionFromEnum(DataImportColumns.None);
+            DestinationEntityCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportColumn.None));
+            SearchEntityCollection = new ObservableCollection<string>();
+            SearchEntityCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportColumn.None));
+            SelectedDestinationEntity = EnumHelper.GetDescriptionFromEnum(DataImportColumn.None);
         }
 
         /// <summary>
@@ -467,164 +556,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             try
             {
                 _importRules = await Task.Run(() => _model.ReadImportRuleData(true));
-            }
-            catch (Exception ex)
-            {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
-            }
-        }
-
-        /// <summary>
-        /// Add the data import or update error to the exception listview
-        /// </summary>
-        /// <param name="importUpdateResultInfo">The data import or update result info.</param>
-        private void DisplayDataImportUpdateResults(object importUpdateResultInfo)
-        {
-            try
-            {
-                //if (ValidationErrorCollection == null)
-                //    ValidationErrorCollection = new ObservableCollection<ValidationRuleException>();
-
-                //ValidationRuleException resultInfo = (ValidationRuleException)validationResultInfo;
-
-                //if (resultInfo.Result == true)
-                //{
-                //    ValidationRuleEntitiesPassed++;
-                //}
-                //else
-                //{
-                //    ValidationRuleEntitiesFailed++;
-                //    ValidationErrorCollection.Add(resultInfo);
-                //}
-            }
-            catch (Exception ex)
-            {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
-            }
-        }
-
-        /// <summary>
-        /// Update the progressbar values
-        /// </summary>
-        /// <param name="progressBarInfo">The progressbar info.</param>
-        private void UpdateProgressBarValues(object progressBarInfo)
-        {
-            try
-            {
-                ProgressBarInfo progressInfo = (ProgressBarInfo)progressBarInfo;
-                ImportUpdateCount = progressInfo.MaxValue;
-                ImportUpdateProgress = progressInfo.CurrentValue;
-                ImportUpdateDescription = string.Format("Importing {0} - {1} of {2}", "", progressInfo.CurrentValue,
-                                                                                          progressInfo.MaxValue);
-            }
-            catch (Exception ex)
-            {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
-            }
-        }
-
-        /// <summary>
-        /// Populate the selected exceptions to fix collection
-        /// </summary>
-        /// <param name="selectedExceptions">The Xceed CheckListBox selected items string.</param>
-        private void PopulateSelectedExceptions(string selectedExceptions)
-        {
-            try
-            {
-                //ObservableCollection<ValidationRuleException> resultInfosCollection = new ObservableCollection<ValidationRuleException>();
-                //ValidationRuleException resultInfo = null;
-
-                //// The Xceed CheckListBox return all the selected items in
-                //// a comma delimeted string, so get the number of selected 
-                //// items we need to split the string
-                //string[] exceptionsToFix = selectedExceptions.Split(',');
-
-                //// Find the last selected exception based on the exception message
-                //SelectedException = ValidationErrorCollection.Where(p => p.Message == exceptionsToFix.Last()).FirstOrDefault();
-
-                //// Convert all the string values to DataValidationResultInfo
-                //// and populate the ValidationErrorCollection
-                //foreach (string exception in exceptionsToFix)
-                //{
-                //    resultInfo = ValidationErrorCollection.Where(p => p.Message == exception).FirstOrDefault();
-
-                //    if (resultInfo != null)
-                //    {
-                //        resultInfosCollection.Add(resultInfo);
-                //    }
-                //}
-
-                //ExceptionsToFix = new ObservableCollection<ValidationRuleException>(resultInfosCollection);
-            }
-            catch (Exception ex)
-            {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
-            }
-        }
-
-        #region Lookup Data Loading
-
-        /// <summary>
-        /// Populate the data source column combobox from the selected data sheet
-        /// </summary>
-        private void ReadDataSourceColumns()
-        {
-            if (SelectedDataSheet != null && SelectedDataSheet.ColumnNames != null)
-            {
-                SourceColumnCollection = new ObservableCollection<string>();
-                SourceColumnCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportColumns.None));
-
-                foreach (string columnName in SelectedDataSheet.ColumnNames)
-                {
-                    SourceColumnCollection.Add(columnName);
-                }
-
-                SelectedSourceColumn = EnumHelper.GetDescriptionFromEnum(DataImportColumns.None);
-            }
-        }
-
-        /// <summary>
-        /// Populate the data destination column combobox from the DataImportColumns enum
-        /// </summary>
-        private void ReadDataDestinationColumns()
-        {
-            DestinationColumnCollection = new ObservableCollection<string>();
-
-            foreach (DataImportColumns source in Enum.GetValues(typeof(DataImportColumns)))
-            {
-                DestinationColumnCollection.Add(EnumHelper.GetDescriptionFromEnum(source));
-            }
-        }
-
-        /// <summary>
-        /// Filter the import destinations based on selected import rule source
-        /// </summary>
-        private void FilterImportRuleData(string enumDescription)
-        {
-            try
-            {
-                if (_importRules != null)
-                {
-                    DestinationEntityCollection.Clear();
-
-                    // Convert enum description back to the enum
-                    int importSourceID = EnumHelper.GetEnumFromDescription<DataImportColumns>(enumDescription).Value();
-
-                    // Filter the import destination data based on the import source
-                    IEnumerable<ImportRuleData> destinations = _importRules.Where(p => p.enImportSource == importSourceID).ToList();
-
-                    // Add the default enum description
-                    DestinationEntityCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportEntities.None));
-
-                    // Add all the import destination enum decriptions to the collection
-                    foreach (ImportRuleData rule in destinations)
-                    {
-                        DestinationEntityCollection.Add(EnumHelper.GetDescriptionFromEnum((DataImportEntities)rule.enImportDestination));
-                    }
-
-                    // Set the default value;
-                    SelectedDestinationEntity = EnumHelper.GetDescriptionFromEnum(DataImportEntities.None);
-                }
             }
             catch (Exception ex)
             {
@@ -649,14 +580,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
                     if (_officeHelper == null)
                         _officeHelper = new MSOfficeHelper();
-                    
+
                     // Import the worksheet data
                     sheetData = _officeHelper.ReadExcelIntoDataTable(SelectedDataSheet.WorkBookName, SelectedDataSheet.SheetName);
 
                     // This is to fake the progress bar for importing
                     for (int i = 1; i <= SelectedDataSheet.RowCount; i++)
                     {
-                        Application.Current.Dispatcher.Invoke(() => 
+                        Application.Current.Dispatcher.Invoke(() =>
                         {
                             ImportUpdateProgress = i;
                             ImportUpdatesPassed = i;
@@ -668,6 +599,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     }
 
                     ImportedDataCollection = sheetData;
+                    ValidDataImport = true;
 
                     // Read the data columns of the selected worksheet
                     ReadDataSourceColumns();
@@ -675,7 +607,180 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
+                if (ExceptionsCollection == null)
+                    ExceptionsCollection = new ObservableCollection<string>();
+
                 ++ImportUpdatesFailed;
+                ExceptionsCollection.Add(string.Format("Error importing data sheet {0} - {1} {2}.", SelectedDataSheet.SheetName, ex.Message, ex.InnerException.Message));
+            }
+        }
+
+        /// <summary>
+        /// Filter the import destinations based on selected import rule source
+        /// </summary>
+        private void FilterDestinationEntities()
+        {
+            try
+            {
+                if (_importRules != null)
+                {
+                    DestinationEntityCollection.Clear();
+
+                    // Convert enum description back to the enum
+                    int destinationColumnID = EnumHelper.GetEnumFromDescription<DataImportColumn>(SelectedDestinationColumn).Value();
+
+                    // Filter the import destination data based on the import source
+                    IEnumerable<ImportRuleData> destinations = _importRules.Where(p => p.enDataImportColumn == destinationColumnID).ToList();
+
+                    // Add the default enum description
+                    DestinationEntityCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportEntity.None));
+
+                    // Add all the import destination enum decriptions to the collection
+                    foreach (ImportRuleData rule in destinations)
+                    {
+                        DestinationEntityCollection.Add(EnumHelper.GetDescriptionFromEnum((DataImportEntity)rule.enDataImportEntity));
+                    }
+
+                    // Set the default value;
+                    SelectedDestinationEntity = EnumHelper.GetDescriptionFromEnum(DataImportEntity.None);
+                }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+            }
+        }
+
+        /// <summary>
+        /// Filter the import destination search entities based on selected destination entity
+        /// </summary>
+        private void FilterDestinationSearchEntities()
+        {
+            try
+            {
+                if (_importRules != null)
+                {
+                    SearchEntityCollection.Clear();
+
+                    // Convert enum description back to the enum
+                    int destinationEntityID = EnumHelper.GetEnumFromDescription<DataImportEntity>(SelectedDestinationEntity).Value();
+
+                    // Filter the import destination data based on the import source
+                    ImportRuleData destinationEntity = _importRules.Where(p => p.enDataImportEntity == destinationEntityID).FirstOrDefault();
+
+                    // Add the default enum description
+                    SearchEntityCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportEntity.None));
+
+                    if (destinationEntity != null)
+                    {
+                        string[] searchEntities = destinationEntity.SearchEntities.Split(';');
+
+                        // Add all the import destination enum decriptions to the collection
+                        foreach (string searchEntity in searchEntities)
+                        {
+                            SearchEntityCollection.Add(searchEntity);
+                        }
+                    }
+
+                    // Set the default value;
+                    SelectedSearchEntity = EnumHelper.GetDescriptionFromEnum(DataImportEntity.None);
+                    ValidSearchEntities = SearchEntityCollection.Count > 0 ? true : false;
+                }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+            }
+        }
+
+        /// <summary>
+        /// Enable/Disable the company combobox if the seleted
+        /// destination filed is linked to a company
+        /// </summary>
+        private void EnableDisableCompanySelection()
+        {
+            try
+            {
+                DestinationCompanyLinked = false;
+                ValidDestinationCompany = Brushes.Red;
+
+                if (DestinationCompanyCollection != null)
+                    SelectedDestinationCompany = DestinationCompanyCollection.Where(p => p.pkCompanyGroupID == 0).FirstOrDefault(); 
+
+                if (SelectedDestinationEntity != null)
+                {
+                    // Convert enum description back to the enum
+                    SearchEntity searchEntity = ((SearchEntity)Enum.Parse(typeof(SearchEntity), SelectedSearchEntity));
+
+                    // Enable/Disable the company combobox if the seleted
+                    // search entity is not not unique accros companies
+                    if (searchEntity == SearchEntity.EmployeeNumber)
+                    {
+                        DestinationCompanyLinked = true;
+                    }
+                    else
+                    {
+                        DestinationCompanyLinked = false;
+                        ValidDestinationCompany = Brushes.Silver;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+            }
+        }
+
+        #region Lookup Data Loading
+
+        /// <summary>
+        /// Populate the data source column combobox from the selected data sheet
+        /// </summary>
+        private void ReadDataSourceColumns()
+        {
+            if (SelectedDataSheet != null && SelectedDataSheet.ColumnNames != null)
+            {
+                SearchColumnCollection = new ObservableCollection<string>();
+                SearchColumnCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportColumn.None));
+                SourceColumnCollection = new ObservableCollection<string>();
+                SourceColumnCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportColumn.None));
+
+                foreach (string columnName in SelectedDataSheet.ColumnNames)
+                {
+                    SearchColumnCollection.Add(columnName);
+                    SourceColumnCollection.Add(columnName);
+                }
+
+                SelectedSearchColumn = EnumHelper.GetDescriptionFromEnum(DataImportColumn.None);
+                SelectedSourceColumn = EnumHelper.GetDescriptionFromEnum(DataImportColumn.None);
+            }
+        }
+
+        /// <summary>
+        /// Populate the data destination column combobox from the DataImportColumns enum
+        /// </summary>
+        private void ReadDataDestinationColumns()
+        {
+            DestinationColumnCollection = new ObservableCollection<string>();
+
+            foreach (DataImportColumn source in Enum.GetValues(typeof(DataImportColumn)))
+            {               
+                DestinationColumnCollection.Add(EnumHelper.GetDescriptionFromEnum(source));
+            }
+        }
+
+        /// <summary>
+        /// Load all the company groups from the database
+        /// </summary>
+        private async Task ReadCompanyGroupsAsync()
+        {
+            try
+            {
+                DestinationCompanyCollection = await Task.Run(() => new CompanyModel(_eventAggregator).ReadCompanyGroups(true));
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
             }
         }
 
@@ -693,12 +798,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 System.Windows.Forms.OpenFileDialog dialog = new System.Windows.Forms.OpenFileDialog();
                 dialog.Filter = "Excel files (*.xlsx)|*.xlsx";
                 System.Windows.Forms.DialogResult result = dialog.ShowDialog();
+                ValidDataImport = false;
 
                 if (result.ToString() == "OK")
                 {
                     MSOfficeHelper officeHelper = new MSOfficeHelper();
                     SelectedImportFile = dialog.FileName;
-                    ValidDataFile = true;
 
                     // Get all the excel workbook sheets
                     List<WorkSheetInfo> workSheets = officeHelper.ReadWorkBookInfoFromExcel(dialog.FileName).ToList();
@@ -710,6 +815,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     }
 
                     SelectedDataSheet = DataSheetCollection[0];
+                    ValidDataFile = true;
                 }
             }
             catch (Exception ex)
@@ -722,17 +828,80 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns></returns>
         private bool CanUpdate()
         {
-            return SelectedDataSheet != null && SelectedDataSheet.SheetName != "-- Please Select --" &&
-                   !string.IsNullOrEmpty(SelectedSourceColumn) && SelectedSourceColumn != EnumHelper.GetDescriptionFromEnum(DataImportColumns.None) &&
-                   !string.IsNullOrEmpty(SelectedDestinationColumn) && SelectedDestinationColumn != EnumHelper.GetDescriptionFromEnum(DataImportColumns.None) &&
-                   !string.IsNullOrEmpty(SelectedDestinationEntity) && SelectedDestinationEntity != EnumHelper.GetDescriptionFromEnum(DataImportEntities.None);
+            bool result = false;
+
+            result = SelectedDataSheet != null && SelectedDataSheet.SheetName != "-- Please Select --" &&
+                     !string.IsNullOrEmpty(SelectedSearchColumn) && SelectedSearchColumn != EnumHelper.GetDescriptionFromEnum(DataImportColumn.None) &&
+                     !string.IsNullOrEmpty(SelectedSourceColumn) && SelectedSourceColumn != EnumHelper.GetDescriptionFromEnum(DataImportColumn.None) &&
+                     !string.IsNullOrEmpty(SelectedDestinationColumn) && SelectedDestinationColumn != EnumHelper.GetDescriptionFromEnum(DataImportColumn.None) &&
+                     !string.IsNullOrEmpty(SelectedDestinationEntity) && SelectedDestinationEntity != EnumHelper.GetDescriptionFromEnum(DataImportEntity.None) &&
+                     !string.IsNullOrEmpty(SelectedSearchEntity) && SelectedSearchEntity != EnumHelper.GetDescriptionFromEnum(DataImportEntity.None);
+
+            if (result && DestinationCompanyLinked)
+                result = SelectedDestinationCompany != null && SelectedDestinationCompany.pkCompanyGroupID > 0;
+
+            return result;
         }
 
         /// <summary>
         /// Execute when the start command button is clicked 
         /// </summary>
-        private void ExecuteUpdate()
+        private async void ExecuteUpdate()
         {
+            try
+            {
+                ExceptionDescription = "Data Update Exceptions";
+                ImportUpdateDescription = string.Format("Updating {0} - {1} of {2}", "", 0, 0);
+                ImportUpdateProgress = ImportUpdatesPassed = ImportUpdatesFailed = 0;
+                ImportUpdateCount = ImportedDataCollection.Rows.Count;
+                string errorMessage = string.Empty;
+                string searchCriteria = string.Empty;
+                object updateValue = null;
+                bool result = false;
+                int rowIdx = 1;
+
+                // Convert enum description back to the enum
+                string destinationColumn = EnumHelper.GetEnumFromDescription<DataImportColumn>(SelectedDestinationColumn).ToString();
+                int destinationEntityID = EnumHelper.GetEnumFromDescription<DataImportEntity>(SelectedDestinationEntity).Value();
+                SearchEntity searchEntity = ((SearchEntity)Enum.Parse(typeof(SearchEntity), SelectedSearchEntity));
+                SelectedDestinationCompany = DestinationCompanyLinked && SelectedDestinationCompany.pkCompanyGroupID > 0 ? SelectedDestinationCompany : null;
+
+                foreach (DataRow row in ImportedDataCollection.Rows)
+                {
+                    ImportUpdateDescription = string.Format("Updating {0} - {1} of {2}", "", ++ImportUpdateProgress, ImportUpdateCount);
+                    searchCriteria = row[SelectedSearchColumn] as string;
+                    updateValue = row[SelectedSourceColumn];
+                    rowIdx = ImportedDataCollection.Rows.IndexOf(row);
+
+                    // Update the related entity data
+                    switch ((DataImportEntity)destinationEntityID)
+                    {
+                        case DataImportEntity.Client:
+                            result = await Task.Run(() => new ClientModel(_eventAggregator).UpdateClient(searchEntity, 
+                                                                                                         searchCriteria, 
+                                                                                                         destinationColumn, 
+                                                                                                         updateValue,
+                                                                                                         SelectedDestinationCompany, 
+                                                                                                         out errorMessage));
+                            break;
+                    }
+
+                    if (result)
+                    {
+                        ++ImportUpdatesPassed;
+                    }
+                    else
+                    {
+                        if (ExceptionsCollection == null)
+                            ExceptionsCollection = new ObservableCollection<string>();
+
+                        ++ImportUpdatesFailed;
+                        ExceptionsCollection.Add(string.Format("{0} in datasheet {1} row {2}.", errorMessage, SelectedDataSheet.SheetName, rowIdx + 2));
+                    }
+                }
+            }
+            catch (Exception ex)
+            { }
         }
 
         #endregion

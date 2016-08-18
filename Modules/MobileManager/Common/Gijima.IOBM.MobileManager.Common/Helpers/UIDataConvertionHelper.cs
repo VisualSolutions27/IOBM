@@ -66,7 +66,7 @@ namespace Gijima.IOBM.MobileManager.Common.Helpers
 
             if (direction == "DateCompareType")
             {
-                return ((DateCompareValue)Enum.Parse(typeof(DateCompareValue), val)).ToString();
+                return ((DateOperator)Enum.Parse(typeof(DateOperator), val)).ToString();
             }
             
             if (direction == "BoolToYesNo")

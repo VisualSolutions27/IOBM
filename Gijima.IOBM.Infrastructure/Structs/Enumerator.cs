@@ -23,6 +23,21 @@ namespace Gijima.IOBM.Infrastructure.Structs
     }
 
     /// <summary>
+    /// The <see cref="DataTypeName"/> enumeration a list of 
+    /// data types to validate on.
+    /// </summary>
+    public enum DataTypeName
+    {
+        None = 0,
+        String = 1,
+        Short = 2,
+        Integer = 3,
+        Decimal = 4,
+        DateTime = 5,
+        Bool = 6
+    }
+
+    /// <summary>
     /// The <see cref="StringOperator"/> enumeration a list of 
     /// string operator options to validate on.
     /// </summary>
@@ -54,17 +69,31 @@ namespace Gijima.IOBM.Infrastructure.Structs
     }
 
     /// <summary>
-    /// The <see cref="DateCompareValue"/> enumeration a list of 
+    /// The <see cref="DateOperator"/> enumeration a list of 
     /// date comapre values to validate on.
     /// </summary>
-    public enum DateCompareValue
+    public enum DateOperator
     {
         None = 0,
-        Current = 1,
+        Equal = 1,
+        Current,
         Min,
         Max,
         MonthStart,
         MonthEnd
+    }
+
+    /// <summary>
+    /// The <see cref="MathOperator"/> enumeration a list of 
+    /// math operators to validate on.
+    /// </summary>
+    public enum MathOperator
+    {
+        None = 0,
+        Multiply = 1,
+        Devide,
+        Add,
+        Subtract
     }
 
     /// <summary>
@@ -90,7 +119,15 @@ namespace Gijima.IOBM.Infrastructure.Structs
         {
             return Convert.ToInt16(type);
         }
-        public static short Value(this DateCompareValue type)
+        public static short Value(this DateOperator type)
+        {
+            return Convert.ToInt16(type);
+        }
+        public static short Value(this MathOperator type)
+        {
+            return Convert.ToInt16(type);
+        }
+        public static short Value(this DataTypeName type)
         {
             return Convert.ToInt16(type);
         }

@@ -18,7 +18,7 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public BillingProcess()
         {
             this.BillingProcessHistories = new HashSet<BillingProcessHistory>();
-            this.ValidationRuleExceptions = new HashSet<ValidationRuleException>();
+            this.DataValidationExceptions = new HashSet<DataValidationException>();
         }
     
         public int pkBillingProcessID { get; set; }
@@ -27,6 +27,6 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<BillingProcessHistory> BillingProcessHistories { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ValidationRuleException> ValidationRuleExceptions { get; set; }
+        public virtual ICollection<DataValidationException> DataValidationExceptions { get; set; }
     }
 }

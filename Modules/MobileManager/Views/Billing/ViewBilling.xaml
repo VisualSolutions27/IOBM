@@ -1,4 +1,5 @@
-﻿<UserControl x:Class="Gijima.IOBM.MobileManager.Views.ViewBilling"            
+﻿<UserControl xmlns:Billing="clr-namespace:Gijima.IOBM.MobileManager.Views"
+             x:Class="Gijima.IOBM.MobileManager.Views.ViewBilling"            
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -135,7 +136,7 @@
                     </Button>
                 </Grid>
             </xctk:WizardPage>
-            <xctk:WizardPage x:Name="WizardPage2" ExteriorPanelBackground="White" Title="Billing Wizard" Description="This Wizard page exposes functionality to execute the data validation process and to correct any resulting exceptions." 
+            <!--<xctk:WizardPage x:Name="WizardPage2" ExteriorPanelBackground="White" Title="Billing Wizard" Description="This Wizard page exposes functionality to execute the data validation process and to correct any resulting exceptions." 
                 CanSelectNextPage="{Binding DataValidationProcessCompleted, UpdateSourceTrigger=PropertyChanged}" NextPage="{Binding ElementName=WizardPage3}" PreviousPage="{Binding ElementName=WizardPage1}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -148,10 +149,21 @@
                     </Grid.ColumnDefinitions>
                     <local:ViewDataValidation Grid.Row="2" Grid.Column="0"/>
                 </Grid>                
+            </xctk:WizardPage>-->
+            <xctk:WizardPage x:Name="WizardPage3" ExteriorPanelBackground="White" Title="Billing Wizard" Description="This Wizard page exposes functionality to execute the supplier data import process and to correct any resulting exceptions." 
+                CanSelectNextPage="{Binding DataImportProcessCompleted, UpdateSourceTrigger=PropertyChanged}" NextPage="{Binding ElementName=WizardPage4}" PreviousPage="{Binding ElementName=WizardPage2}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Billing:ViewSupplierDataImport Grid.Row="2" Grid.Column="0"/>
+                </Grid>
             </xctk:WizardPage>
-            <xctk:WizardPage x:Name="Page2" PageType="Blank" Visibility="Collapsed" CanSelectNextPage="False"
-                                   Title="Page 2"
-                                   Description="This is the second page in the process"/>
             <xctk:WizardPage x:Name="LastPage" PageType="Blank" Visibility="Collapsed"
                                    Title="Last Page"
                                    Description="This is the last page in the process"

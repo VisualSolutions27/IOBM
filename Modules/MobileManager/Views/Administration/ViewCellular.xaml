@@ -51,7 +51,7 @@
                 </StackPanel>
             </Grid>
         </Border>
-        <GroupBox Grid.Row="1" Grid.Column="0" Header="Client Detail" Margin="5,0,5,0"  Style="{StaticResource UXGroupBoxStyle}" >
+        <GroupBox Grid.Row="1" Grid.Column="0" Header="Client Detail" Margin="5,0,5,0" Style="{StaticResource UXGroupBoxStyle}" >
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />

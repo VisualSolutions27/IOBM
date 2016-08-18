@@ -12,23 +12,21 @@ namespace Gijima.IOBM.MobileManager.Model.Data
     using System;
     using System.Collections.Generic;
     
-    public partial class ValidationRulesData
+    public partial class CompanyGroup
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public ValidationRulesData()
+        public CompanyGroup()
         {
-            this.ValidationRules = new HashSet<ValidationRule>();
+            this.Companies = new HashSet<Company>();
         }
     
-        public int pkValidationRulesDataID { get; set; }
-        public short enValidationRuleGroup { get; set; }
-        public string ValidationDataName { get; set; }
-        public short enValidationDataType { get; set; }
+        public int pkCompanyGroupID { get; set; }
+        public string GroupName { get; set; }
         public string ModifiedBy { get; set; }
         public System.DateTime ModifiedDate { get; set; }
         public bool IsActive { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ValidationRule> ValidationRules { get; set; }
+        public virtual ICollection<Company> Companies { get; set; }
     }
 }

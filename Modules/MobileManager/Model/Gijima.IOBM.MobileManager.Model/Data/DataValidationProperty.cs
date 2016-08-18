@@ -12,27 +12,26 @@ namespace Gijima.IOBM.MobileManager.Model.Data
     using System;
     using System.Collections.Generic;
     
-    public partial class ValidationRule
+    public partial class DataValidationProperty
     {
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
-        public ValidationRule()
+        public DataValidationProperty()
         {
-            this.ValidationRuleExceptions = new HashSet<ValidationRuleException>();
+            this.DataValidationExceptions = new HashSet<DataValidationException>();
+            this.DataValidationRules = new HashSet<DataValidationRule>();
         }
     
-        public int pkValidationRuleID { get; set; }
-        public short enValidationRuleGroup { get; set; }
-        public int fkValidationRulesDataID { get; set; }
-        public int EntityID { get; set; }
-        public string ValidationDataValue { get; set; }
-        public short enStringCompareType { get; set; }
-        public short enNumericCompareType { get; set; }
-        public short enDateCompareType { get; set; }
+        public int pkDataValidationPropertyID { get; set; }
+        public short enDataValidationEntity { get; set; }
+        public short enDataValidationProperty { get; set; }
+        public short enDataType { get; set; }
         public string ModifiedBy { get; set; }
         public System.DateTime ModifiedDate { get; set; }
+        public bool IsActive { get; set; }
     
-        public virtual ValidationRulesData ValidationRulesData { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<ValidationRuleException> ValidationRuleExceptions { get; set; }
+        public virtual ICollection<DataValidationException> DataValidationExceptions { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<DataValidationRule> DataValidationRules { get; set; }
     }
 }
