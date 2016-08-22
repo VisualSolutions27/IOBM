@@ -1,4 +1,5 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
+using Gijima.IOBM.Infrastructure.Helpers;
 using Gijima.IOBM.MobileManager.Model.Data;
 using Prism.Events;
 using System;
@@ -14,6 +15,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         #region Properties and Attributes
 
         private IEventAggregator _eventAggregator;
+        private AuditLogModel _activityLogger = null;
+        private DataActivityHelper _dataActivityHelper = null;
 
         #endregion
 
@@ -24,6 +27,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         public SimmCardModel(IEventAggregator eventAggreagator)
         {
             _eventAggregator = eventAggreagator;
+            _activityLogger = new AuditLogModel(_eventAggregator);
+            _dataActivityHelper = new DataActivityHelper(_eventAggregator);
         }
 
         /// <summary>
@@ -143,23 +148,16 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     }
                     else
                     {
+                        // Prevent primary key confilcts when using attach property
                         if (existingSimmCard != null)
-                        {
-                            existingSimmCard.fkStatusID = simmCard.fkStatusID;
-                            existingSimmCard.CellNumber = simmCard.CellNumber;
-                            existingSimmCard.CardNumber = simmCard.CardNumber;
-                            existingSimmCard.ReceiveDate = simmCard.ReceiveDate;
-                            existingSimmCard.PinNumber = simmCard.PinNumber;
-                            existingSimmCard.PUKNumber = simmCard.PUKNumber;
-                            existingSimmCard.ReceiveDate = simmCard.ReceiveDate;
-                            existingSimmCard.ModifiedBy = simmCard.ModifiedBy;
-                            existingSimmCard.ModifiedDate = simmCard.ModifiedDate;
-                            existingSimmCard.IsActive = simmCard.IsActive;
-                            db.SaveChanges();
-                            return true;
-                        }
+                            db.Entry(existingSimmCard).State = System.Data.Entity.EntityState.Detached;
 
-                        return false;
+                        db.SimmCards.Attach(simmCard);
+                        db.Entry(simmCard).State = System.Data.Entity.EntityState.Modified;
+                        db.SaveChanges();
+
+                        _activityLogger.CreateDataChangeAudits<SimmCard>(_dataActivityHelper.GetDataChangeActivities<SimmCard>(existingSimmCard, simmCard, simmCard.fkContractID.Value, db));
+                        return true;
                     }
                 }
             }

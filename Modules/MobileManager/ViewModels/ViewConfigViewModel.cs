@@ -51,9 +51,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             TabCollection = new ObservableCollection<TabItem>();
             if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()))
             {
-                TabCollection.Add(new TabItem() { Header = "Security Configuration" });
-                TabCollection.Add(new TabItem() { Header = "Billing Configuration" });
-                TabCollection.Add(new TabItem() { Header = "System Configuration" });
+                TabCollection.Add(new TabItem() { Header = "Security" });
+                TabCollection.Add(new TabItem() { Header = "Data Validation" });
+                TabCollection.Add(new TabItem() { Header = "System" });
             }
             TabCollection.Add(new TabItem() { Header = "Reference Data" });
         }
@@ -75,13 +75,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 switch (tabItem.Header.ToString())
                 {
-                    case "Security Configuration":
+                    case "Security":
                         SelectedTab.Content = new ViewSecurityCF(_eventAggregator);
                         break;
-                    case "Billing Configuration":
+                    case "Data Validation":
                         SelectedTab.Content = new ViewDataValidationCF();
                         break;
-                    case "System Configuration":
+                    case "System":
                         //SelectedTab.Content = new ViewAccount(_eventAggregator);
                         break;
                     case "Reference Data":

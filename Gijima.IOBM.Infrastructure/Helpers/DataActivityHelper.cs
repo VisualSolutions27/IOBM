@@ -35,9 +35,10 @@ namespace Gijima.IOBM.Infrastructure.Helpers
         /// <typeparam name="T">The entity to interrigate.</typeparam>
         /// <param name="originalData">The entity prior to changes,</param>
         /// <param name="currentData">The entity post changes.</param>
+        /// <param name="entityID">The entity (client) linked to the data activity.</param>
         /// <param name="context">The database context.</param>
         /// <returns>A list of DataActivityLog</returns>
-        public IEnumerable<DataActivityLog> GetDataChangeActivities<T>(object originalData, object currentData, DbContext context)
+        public IEnumerable<DataActivityLog> GetDataChangeActivities<T>(object originalData, object currentData, int entityID, DbContext context)
         {
             try
             { 
@@ -54,6 +55,8 @@ namespace Gijima.IOBM.Infrastructure.Helpers
                     if (property.Name != "ModifiedBy" && property.Name != "ModifiedDate")
                         if (originalValue != null && currentValue != null && !originalValue.Equals(currentValue))
                         {
+                            activity.EntityID = entityID;
+                            activity.ChangedValue = originalValue.ToString();
                             activity.ActivityDescription = string.Format("{0} changed from {1} to {2} by {3} on {4}.", property.Name.ToUpper(),
                                                                                                                        originalValue.ToString().ToUpper(),
                                                                                                                        currentValue.ToString().ToUpper(),

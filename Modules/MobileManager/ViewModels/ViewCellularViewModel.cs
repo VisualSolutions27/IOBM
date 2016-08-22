@@ -25,6 +25,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private ClientModel _model = null;
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
+        private DataActivityLog _activityLogInfo = null;
 
         #region Commands
 
@@ -815,6 +816,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             // Subscribe to this event to read the client data based on the search results
             _eventAggregator.GetEvent<SearchResultEvent>().Subscribe(SearchResult_Event, true);
 
+            // Initialise the data activity log info entity
+            _activityLogInfo = new DataActivityLog();
+            _activityLogInfo.ActivityProcess = ActivityProcess.Administration.Value();
+
             // Load the view data
             await ReadCompaniesAsync();
             await ReadClientLocationsAsync();
@@ -843,6 +848,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             try
             {
                 SelectedClient = await Task.Run(() => _model.ReadClient(clientID));
+                _activityLogInfo.EntityID = SelectedClient.fkContractID;
 
                 // Publish these event to populate the devices, simmcards and accounts linked to the contract
                 if (SelectedContract != null)
@@ -854,6 +860,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
                 // Publish this event to set the admin tab as default tab
                 _eventAggregator.GetEvent<NavigationEvent>().Publish(0);
+
+                // Publish the event to read the administartion activity logs
+                _eventAggregator.GetEvent<SetActivityLogProcessEvent>().Publish(_activityLogInfo);
             }
             catch (Exception ex)
             {
@@ -1081,7 +1090,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedClient.AdminFee = Convert.ToDecimal(SelectedClientAdminFee);
             SelectedClient.AddressLine1 = SelectedClientAddressLine.ToUpper().Trim();
             SelectedClient.fkSuburbID = SelectedSuburb.pkSuburbID;
-            SelectedClient.ModifiedBy = SecurityHelper.LoggedInDomainName;
+            SelectedClient.ModifiedBy = SecurityHelper.LoggedInUserFullName;
             SelectedClient.ModifiedDate = DateTime.Now;
             // Contract Data
             if (SelectedClient.Contract == null)
@@ -1094,7 +1103,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedClient.Contract.ContractEndDate = SelectedContractEndDate > DateTime.MinValue ? SelectedContractEndDate : (DateTime?)null;
             SelectedClient.Contract.ContractUpgradeDate = SelectedContract.ContractUpgradeDate;
             SelectedClient.Contract.PaymentCancelDate = SelectedContract.PaymentCancelDate;
-            SelectedClient.Contract.ModifiedBy = SecurityHelper.LoggedInDomainName;
+            SelectedClient.Contract.ModifiedBy = SecurityHelper.LoggedInUserFullName;
             SelectedClient.Contract.ModifiedDate = DateTime.Now;
             // Package Setup Data
             if (SelectedClient.Contract.PackageSetup == null)
@@ -1104,7 +1113,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedClient.Contract.PackageSetup.SMSNumber = SelectedContract.PackageSetup.SMSNumber;
             SelectedClient.Contract.PackageSetup.MBData = SelectedContract.PackageSetup.MBData;
             SelectedClient.Contract.PackageSetup.RandValue = SelectedContract.PackageSetup.RandValue;
-            SelectedClient.Contract.PackageSetup.ModifiedBy = SecurityHelper.LoggedInDomainName;
+            SelectedClient.Contract.PackageSetup.ModifiedBy = SecurityHelper.LoggedInUserFullName;
             SelectedClient.Contract.PackageSetup.ModifiedDate = DateTime.Now;
             // Billing Data
             if (SelectedClient.ClientBilling == null)
@@ -1120,16 +1129,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedClient.ClientBilling.RoamingToDate = SelectedRoamingToDate > DateTime.MinValue ? SelectedRoamingToDate : (DateTime?)null;
             SelectedClient.ClientBilling.StopBillingFromDate = SelectedClientBilling.StopBillingFromDate;
             SelectedClient.ClientBilling.StopBillingToDate = SelectedClientBilling.StopBillingToDate;
-            SelectedClient.ClientBilling.ModifiedBy = SecurityHelper.LoggedInDomainName;
+            SelectedClient.ClientBilling.ModifiedBy = SecurityHelper.LoggedInUserFullName;
             SelectedClient.ClientBilling.ModifiedDate = DateTime.Now;
 
             if (SelectedClient.pkClientID == 0)
                 result = _model.CreateClient(SelectedClient);
             else
-                result = _model.UpdateClient(SelectedClient, SecurityHelper.LoggedInDomainName);
+                result = _model.UpdateClient(SelectedClient);
 
             // Publish the event to read the administartion activity logs
-            _eventAggregator.GetEvent<SetActivityLogProcessEvent>().Publish(ActivityProcess.Administration);
+            _eventAggregator.GetEvent<SetActivityLogProcessEvent>().Publish(_activityLogInfo);
 
             if (result)
                 ExecuteCancel();

@@ -32,7 +32,7 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Text="Activity Log View" Style="{StaticResource UXHeaderTextStyle}"></TextBlock>
                 <TextBlock Text="Filter:" Grid.Column="1" Style="{StaticResource UXLabelTextStyle}" Foreground="White" FontWeight="Medium" FontSize="14"></TextBlock>
-                <ComboBox Grid.Column="2" ToolTip="Select a filter criteria." TabIndex="1" Height="20" Margin="0,3,0,2" IsSynchronizedWithCurrentItem="True"
+                <ComboBox Grid.Column="2" ToolTip="Select a filter criteria." TabIndex="1" Height="22" IsSynchronizedWithCurrentItem="True"
                     ItemsSource="{Binding ActivityLogFilterCollection}" SelectedItem="{Binding SelectedActivityLogFilter}">
                 </ComboBox>
                 <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,1,10,0">

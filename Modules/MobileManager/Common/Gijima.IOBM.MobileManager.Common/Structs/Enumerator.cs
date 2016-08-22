@@ -82,7 +82,7 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     /// </summary>
     public enum ActivityProcess
     {
-        Administration,
+        Administration = 1,
         Maintenance,
         Configuartion
     }
@@ -145,6 +145,26 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     #region Data Validation
 
     /// <summary>
+    /// The <see cref="DataValidationProcess"/> enumeration a list of 
+    /// data validation processes on.
+    /// </summary>
+    public enum DataValidationProcess
+    {
+        [Description("-- Please Select --")]
+        None = 0,
+        [Description("Single System Entity")]
+        SingleSystemEntity = 1,
+        [Description("Multiple System Entities")]
+        MultipleSystemEntities = 2,
+        [Description("Single Billing Entity")]
+        SingleBillingEntity = 3,
+        [Description("Multiple Billing Entities")]
+        MultipleBillingEntities = 4,
+        [Description("External Import Entities")]
+        ExternalImportEntities = 5
+    }
+
+    /// <summary>
     /// The <see cref="DataValidationEntityName"/> enumeration a list of 
     /// data entities to validate on.
     /// </summary>
@@ -202,7 +222,7 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         fkSuburbID = 12,
         [Description("Is Client Billable")]
         IsBillable = 13,
-        [Description("Has Client Got Split Billing")]
+        [Description("Has Split Billing")]
         IsSplitBilling = 14,
         [Description("Client Voice Allowance")]
         VoiceAllowance = 15,
@@ -249,6 +269,8 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     }
 
     #endregion
+
+    #region Data Validation
 
     /// <summary>
     /// The <see cref="DataImportColumn"/> enumeration a list of 
@@ -324,6 +346,8 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         Package = 6
     }
 
+    #endregion
+
     /// <summary>
     /// The below extension class can be used for all Enum types defined herein.
     /// Please not that you'll have to define each extension method per Enum type
@@ -331,11 +355,14 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     /// </summary>
     public static class EnumExtensions
     {
+        public static short Value(this ActivityProcess type)
+        {
+            return Convert.ToInt16(type);
+        }
         public static short Value(this StatusLink type)
         {
             return Convert.ToInt16(type);
         }
-
         public static short Value(this PackageType type)
         {
             return Convert.ToInt16(type);
@@ -365,6 +392,10 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
             return Convert.ToInt16(type);
         }
         public static short Value(this DataValidationPropertyName type)
+        {
+            return Convert.ToInt16(type);
+        }       
+        public static short Value(this DataValidationProcess type)
         {
             return Convert.ToInt16(type);
         }

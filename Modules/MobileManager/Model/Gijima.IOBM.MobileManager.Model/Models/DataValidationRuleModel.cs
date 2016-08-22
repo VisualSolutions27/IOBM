@@ -107,26 +107,26 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                             break;
                         case DataValidationEntityName.Company:
                             rules = (from validationRule in db.DataValidationRules
-                                     join validationRulesData in db.DataValidationProperties
-                                     on validationRule.fkDataValidationPropertyID equals validationRulesData.pkDataValidationPropertyID
+                                     join validationProperty in db.DataValidationProperties
+                                     on validationRule.fkDataValidationPropertyID equals validationProperty.pkDataValidationPropertyID
                                      join company in db.Companies
                                      on validationRule.DataValidationEntityID equals company.pkCompanyID
                                      where validationRule.enDataValidationEntity == entityID
                                      select new
                                      {
                                          pkDataValidationRuleID = validationRule.pkDataValidationRuleID,
+                                         enValidationProcess = validationRule.enValidationProcess,
                                          enDataValidationEntity = validationRule.enDataValidationEntity,
-                                         fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID,
-                                         enDataValidationProperty = validationRulesData.enDataValidationProperty,
-                                         enDataType = validationRulesData.enDataType,
                                          DataValidationEntityID = validationRule.DataValidationEntityID,
                                          DataDescription = company.CompanyName,
-                                         DataValidationValue = validationRule.DataValidationValue,
+                                         fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID,
+                                         enDataValidationProperty = validationProperty.enDataValidationProperty,
+                                         enDataType = validationProperty.enDataType,
                                          enDataValidationOperator = validationRule.enDataValidationOperator,
+                                         DataValidationValue = validationRule.DataValidationValue,
                                          ModifiedBy = validationRule.ModifiedBy,
                                          ModifiedDate = validationRule.ModifiedDate
                                      }).ToList();
-
                             break;
                     }
 

@@ -22,6 +22,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private AuditLogModel _model = null;
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
+        private int _entityID = 0;
 
         #region Commands
 
@@ -56,7 +57,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set
             {
                 SetProperty(ref _selectedActivityLogFilter, value);
-                Task.Run(() => ReadAuditLogsAsync());
+                if (_entityID > 0)
+                    Task.Run(() => ReadAuditLogsAsync(_entityID));
             }
         }
         private string _selectedActivityLogFilter = null;
@@ -125,7 +127,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <param name="sender">The selected contractID.</param>
         private void SetActivityLogProcess_Event(object sender)
         {
-            ReadActivityLogFilters(sender);
+            ReadActivityLogFilters((DataActivityLog)sender);
         }
 
         #endregion
@@ -156,8 +158,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
             // Subscribe to this event to read to activity logs from the database for the specified process
             _eventAggregator.GetEvent<SetActivityLogProcessEvent>().Subscribe(SetActivityLogProcess_Event, true);
-
-            ReadActivityLogFilters(ActivityProcess.Administration);
         }
 
         /// <summary>
@@ -173,11 +173,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Load all the activity logs based on the selected filter from the database
         /// </summary>
-        private async Task ReadAuditLogsAsync()
+        /// <param name="entityID">The entity linked to the activity log.</param>
+        private async Task ReadAuditLogsAsync(int entityID)
         {
             try
             {
-                AuditLogCollection = await Task.Run(() => new AuditLogModel(_eventAggregator).ReadAuditLogs(SelectedActivityLogFilter));
+                AuditLogCollection = await Task.Run(() => new AuditLogModel(_eventAggregator).ReadAuditLogs(SelectedActivityLogFilter, entityID));
             }
             catch (Exception ex)
             {
@@ -190,12 +191,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Populate the filter combobox from the admin activity filter enum
         /// </summary>
-        /// <param name="activityProcess">The activity process enum.</param> 
-        private async void ReadActivityLogFilters(object activityProcess)
+        /// <param name="dataActivityLog">The data activity log info.</param> 
+        private async void ReadActivityLogFilters(DataActivityLog dataActivityLog)
         {
             ActivityLogFilterCollection = new ObservableCollection<string>();
+            _entityID = dataActivityLog.EntityID;
 
-            switch ((ActivityProcess)activityProcess)
+            switch ((ActivityProcess)dataActivityLog.ActivityProcess)
             {
                 case ActivityProcess.Maintenance:
                     foreach (MaintActivityFilter source in Enum.GetValues(typeof(MaintActivityFilter)))
@@ -220,7 +222,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             if (ActivityLogFilterCollection.Count > 0)
             {
                 SelectedActivityLogFilter = AdminActivityFilter.None.ToString();
-                await ReadAuditLogsAsync();
+                await ReadAuditLogsAsync(_entityID);
             }
         }
 
@@ -271,7 +273,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 bool result = false;
                 SelectedAuditLog.AuditComment = SelectedComment;
-                SelectedAuditLog.ModifiedBy = SecurityHelper.LoggedInDomainName;
+                SelectedAuditLog.ModifiedBy = SecurityHelper.LoggedInUserFullName;
                 SelectedAuditLog.ModifiedDate = DateTime.Now;
 
                 result = await Task.Run(() => _model.UpdateAuditLog(SelectedAuditLog));
@@ -279,7 +281,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 if (result)
                 {
                     InitialiseViewControls();
-                    await ReadAuditLogsAsync();
+                    await ReadAuditLogsAsync(_entityID);
                 }
             }
             catch (Exception ex)

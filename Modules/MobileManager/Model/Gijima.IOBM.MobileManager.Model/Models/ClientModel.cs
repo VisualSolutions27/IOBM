@@ -164,9 +164,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// Update an existing client entity in the database
         /// </summary>
         /// <param name="client">The client entity to update.</param>
-        /// <param name="userName">The user name performing the action.</param>
         /// <returns>True if successfull</returns>
-        public bool UpdateClient(Client client, string userName)
+        public bool UpdateClient(Client client)
         {
             try
             {
@@ -204,10 +203,10 @@ namespace Gijima.IOBM.MobileManager.Model.Models
 
                             db.SaveChanges();
 
-                            result = _activityLogger.CreateDataChangeAudits<Client>(_dataActivityHelper.GetDataChangeActivities<Client>(existingClient, client, db));
-                            result = _activityLogger.CreateDataChangeAudits<Contract>(_dataActivityHelper.GetDataChangeActivities<Contract>(existingClient.Contract, client.Contract, db));
-                            result = _activityLogger.CreateDataChangeAudits<PackageSetup>(_dataActivityHelper.GetDataChangeActivities<PackageSetup>(existingClient.Contract.PackageSetup, client.Contract.PackageSetup, db));
-                            result = _activityLogger.CreateDataChangeAudits<ClientBilling>(_dataActivityHelper.GetDataChangeActivities<ClientBilling>(existingClient.ClientBilling, client.ClientBilling, db));
+                            _activityLogger.CreateDataChangeAudits<Client>(_dataActivityHelper.GetDataChangeActivities<Client>(existingClient, client, client.fkContractID, db));
+                            _activityLogger.CreateDataChangeAudits<Contract>(_dataActivityHelper.GetDataChangeActivities<Contract>(existingClient.Contract, client.Contract, client.fkContractID, db));
+                            _activityLogger.CreateDataChangeAudits<PackageSetup>(_dataActivityHelper.GetDataChangeActivities<PackageSetup>(existingClient.Contract.PackageSetup, client.Contract.PackageSetup, client.fkContractID, db));
+                            _activityLogger.CreateDataChangeAudits<ClientBilling>(_dataActivityHelper.GetDataChangeActivities<ClientBilling>(existingClient.ClientBilling, client.ClientBilling, client.fkContractID, db));
 
                             //// Commit changes
                             //tc.Complete();
@@ -309,7 +308,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
 
                                 db.SaveChanges();
 
-                                result = _activityLogger.CreateDataChangeAudits<Client>(_dataActivityHelper.GetDataChangeActivities<Client>(existingClient, clientToUpdate, db));
+                                result = _activityLogger.CreateDataChangeAudits<Client>(_dataActivityHelper.GetDataChangeActivities<Client>(existingClient, clientToUpdate, clientToUpdate.pkClientID, db));
 
                                 //// Commit changes
                                 //tc.Complete();

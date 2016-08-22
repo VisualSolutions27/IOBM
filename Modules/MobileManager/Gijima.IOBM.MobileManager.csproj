@@ -436,6 +436,10 @@
       <Project>{7177E3E6-4EF6-4B78-A0C9-CD926ED0FE8B}</Project>
       <Name>Gijima.IOBM.MobileManager.Security</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\Gijima.IOBM.Model\Gijima.IOBM.Model.csproj">
+      <Project>{68f8a3c2-fa68-4f34-8b8f-3dcf6f04a136}</Project>
+      <Name>Gijima.IOBM.Model</Name>
+    </ProjectReference>
     <ProjectReference Include="Common\Gijima.IOBM.MobileManager.Common\Gijima.IOBM.MobileManager.Common.csproj">
       <Project>{c8918bb0-9efb-4158-809b-4b374509f66b}</Project>
       <Name>Gijima.IOBM.MobileManager.Common</Name>

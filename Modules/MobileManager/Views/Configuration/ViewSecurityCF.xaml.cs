@@ -441,11 +441,18 @@ namespace Gijima.IOBM.MobileManager.Views
 
             if (result)
             {
+                // Create a IOBM user for the new Mobile Manager user and publish the 
+                // event to sync the application user with the system user
+                IOBM.Model.Data.User iobmUser = new IOBM.Model.Data.User();
+                iobmUser.UserName = SelectedUser.UserName;
+                iobmUser.UserFullName = SelectedUser.UserFullName;
+                iobmUser.LastActivityDate = DateTime.Now;
+                iobmUser.IsActive = UserState;
+                _eventAggregator.GetEvent<MobileManagerSecurityEvent>().Publish(iobmUser);
+
+                // Reload the application users
                 InitialiseViewControls();
                 await ReadUsersAsync();
-
-                // Publish this event to sync the application user with the system user
-                _eventAggregator.GetEvent<MobileManagerSecurityEvent>().Publish(SelectedUser);
             }
         }
 
@@ -456,6 +463,7 @@ namespace Gijima.IOBM.MobileManager.Views
         {
             _adUserSearch = new ADUserSearchUX();
             _adUserSearch.onADUserSelected += ADUserSearch_UserSelected;
+            UserState = true;
             PopupWindow popupWindow = new PopupWindow(_adUserSearch, "User Search", PopupWindow.PopupButtonType.Close);
             popupWindow.ShowDialog();
             await ReadUsersAsync();

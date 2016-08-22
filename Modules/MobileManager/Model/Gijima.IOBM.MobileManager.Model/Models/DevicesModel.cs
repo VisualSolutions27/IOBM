@@ -1,4 +1,5 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
+using Gijima.IOBM.Infrastructure.Helpers;
 using Gijima.IOBM.MobileManager.Model.Data;
 using Prism.Events;
 using System;
@@ -14,6 +15,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         #region Properties and Attributes
 
         private IEventAggregator _eventAggregator;
+        private AuditLogModel _activityLogger = null;
+        private DataActivityHelper _dataActivityHelper = null;
 
         #endregion
 
@@ -24,6 +27,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         public DevicesModel(IEventAggregator eventAggreagator)
         {
             _eventAggregator = eventAggreagator;
+            _activityLogger = new AuditLogModel(_eventAggregator);
+            _dataActivityHelper = new DataActivityHelper(_eventAggregator);
         }
 
         /// <summary>
@@ -145,25 +150,16 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     }
                     else
                     {
+                        // Prevent primary key confilcts when using attach property
                         if (existingDevice != null)
-                        {
-                            existingDevice.fkSimmCardID = device.fkSimmCardID;
-                            existingDevice.fkDeviceMakeID = device.fkDeviceMakeID;
-                            existingDevice.fkDeviceModelID = device.fkDeviceModelID;
-                            existingDevice.fkStatusID = device.fkStatusID;
-                            existingDevice.IMENumber = device.IMENumber;
-                            existingDevice.SerialNumber = device.SerialNumber;
-                            existingDevice.ReceiveDate = device.ReceiveDate;
-                            existingDevice.InsuranceCost = device.InsuranceCost;
-                            existingDevice.InsuranceValue = device.InsuranceValue;
-                            existingDevice.ModifiedBy = device.ModifiedBy;
-                            existingDevice.ModifiedDate = device.ModifiedDate;
-                            existingDevice.IsActive = device.IsActive;
-                            db.SaveChanges();
-                            return true;
-                        }
+                            db.Entry(existingDevice).State = System.Data.Entity.EntityState.Detached;
 
-                        return false;
+                        db.Devices.Attach(device);
+                        db.Entry(device).State = System.Data.Entity.EntityState.Modified;
+                        db.SaveChanges();
+
+                        _activityLogger.CreateDataChangeAudits<Device>(_dataActivityHelper.GetDataChangeActivities<Device>(existingDevice, device, device.fkContractID.Value, db));
+                        return true;
                     }
                 }
             }

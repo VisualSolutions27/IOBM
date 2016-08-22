@@ -71,8 +71,9 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// Read all audit logs for specified filter from the database
         /// </summary>
         /// <param name="activityFilter">The filter the activities are linked to.</param>
+        /// <param name="entityID">The contractID (client) linked to the audit entries.</param>
         /// <returns>Collection of AuditLogs</returns>
-        public ObservableCollection<AuditLog> ReadAuditLogs(string activityFilter)
+        public ObservableCollection<AuditLog> ReadAuditLogs(string activityFilter, int entityID)
         {
             try
             {
@@ -81,9 +82,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
 
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    logs = ((DbQuery<AuditLog>)(from AuditLog in db.AuditLogs
-                                                where filter != "NONE" ? AuditLog.AuditGroup == filter : true
-                                                select AuditLog)).OrderByDescending(p => p.AuditDate).ToList();
+                    logs = ((DbQuery<AuditLog>)(from auditLog in db.AuditLogs
+                                                where auditLog.EntityID == entityID
+                                                select auditLog)).OrderByDescending(p => p.AuditDate).ToList();
+
+                    if (filter != "NONE")
+                        logs = logs.Where(p => p.AuditGroup == filter);
 
                     return new ObservableCollection<AuditLog>(logs);
                 }
