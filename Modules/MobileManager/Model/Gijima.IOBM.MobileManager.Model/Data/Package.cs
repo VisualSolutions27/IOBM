@@ -34,8 +34,8 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public System.DateTime ModifiedDate { get; set; }
         public bool IsActive { get; set; }
     
-        public virtual ServiceProvider ServiceProvider { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Contract> Contracts { get; set; }
+        public virtual ServiceProvider ServiceProvider { get; set; }
     }
 }

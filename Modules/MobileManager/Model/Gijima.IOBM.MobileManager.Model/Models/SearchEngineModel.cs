@@ -64,15 +64,15 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                             clients = ((DbQuery<Client>)(from client in db.Clients
                                                          join device in db.Devices
                                                          on client.fkContractID equals device.fkContractID
-                                                         join simmCard in db.SimmCards
-                                                         on client.fkContractID equals simmCard.fkContractID
+                                                         join simCard in db.SimCards
+                                                         on client.fkContractID equals simCard.fkContractID
                                                          join contract in db.Contracts
                                                          on client.fkContractID equals contract.pkContractID
                                                          where client.ClientName.Contains(searchCriteria) ||
                                                                client.CostCode.Contains(searchCriteria) ||
                                                                contract.AccountNumber.Contains(searchCriteria) ||
                                                                device.IMENumber.Contains(searchCriteria) ||
-                                                               simmCard.PUKNumber.Contains(searchCriteria)
+                                                               simCard.PUKNumber.Contains(searchCriteria)
                                                          select client)).Distinct().ToList();
                             break;
                     }
@@ -122,15 +122,15 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                             clients = ((DbQuery<Client>)(from client in db.Clients
                                                          join device in db.Devices
                                                          on client.fkContractID equals device.fkContractID
-                                                         join simmCard in db.SimmCards
-                                                         on client.fkContractID equals simmCard.fkContractID
+                                                         join simCard in db.SimCards
+                                                         on client.fkContractID equals simCard.fkContractID
                                                          join contract in db.Contracts
                                                          on client.fkContractID equals contract.pkContractID
                                                          where client.ClientName.Contains(searchCriteria) ||
                                                                client.CostCode.Contains(searchCriteria) ||
                                                                contract.AccountNumber.Contains(searchCriteria) ||
                                                                device.IMENumber.Contains(searchCriteria) ||
-                                                               simmCard.PUKNumber.Contains(searchCriteria)
+                                                               simCard.PUKNumber.Contains(searchCriteria)
                                                          select client)).Distinct().ToList();
                             break;
                     }

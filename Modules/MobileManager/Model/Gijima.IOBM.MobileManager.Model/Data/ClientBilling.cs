@@ -21,7 +21,6 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         }
     
         public int pkClientBillingID { get; set; }
-        public string cellnumber { get; set; }
         public Nullable<int> fkCompanyBillingLevelID { get; set; }
         public bool IsBillable { get; set; }
         public bool IsSplitBilling { get; set; }

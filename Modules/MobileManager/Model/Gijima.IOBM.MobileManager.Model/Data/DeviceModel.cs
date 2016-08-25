@@ -27,8 +27,8 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public Nullable<System.DateTime> ModfiedDate { get; set; }
         public bool IsActive { get; set; }
     
+        public virtual DeviceMake DeviceMake { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Device> Devices { get; set; }
-        public virtual DeviceMake DeviceMake { get; set; }
     }
 }

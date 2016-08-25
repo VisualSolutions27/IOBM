@@ -3,11 +3,11 @@
 namespace Gijima.IOBM.MobileManager.Views
 {
     /// <summary>
-    /// Interaction logic for ViewSimmCard.xaml
+    /// Interaction logic for ViewDataUpdate.xaml
     /// </summary>
-    public partial class ViewSimmCard : UserControl
+    public partial class ViewDataUpdate : UserControl
     {
-        public ViewSimmCard()
+        public ViewDataUpdate()
         {
             InitializeComponent();
         }

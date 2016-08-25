@@ -31,6 +31,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
         public DelegateCommand CancelCommand { get; set; }
         public DelegateCommand AddCommand { get; set; }
+        public DelegateCommand DeleteCommand { get; set; }
         public DelegateCommand SaveCommand { get; set; }
         public DelegateCommand ClientCompanyCommand { get; set; }
         public DelegateCommand ClientSuburbCommand { get; set; }
@@ -53,7 +54,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 SetProperty(ref _selectedClient, value);
 
-                if (value != null)
+                if (value != null && value.pkClientID > 0)
                 {
                     SelectedContract = value.Contract != null ? value.Contract : null;
                     if (CompanyCollection != null)
@@ -80,6 +81,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     SelectedClientWBSNumber = !string.IsNullOrWhiteSpace(value.WBSNumber) ? value.WBSNumber : SelectedCompany != null ? SelectedCompany.WBSNumber : null;
                     SelectedClientCostCode = !string.IsNullOrWhiteSpace(value.CostCode) ? value.CostCode : SelectedCompany != null ? SelectedCompany.CostCode : null;
                     SelectedClientIPAddress = !string.IsNullOrWhiteSpace(value.IPAddress) ? value.IPAddress : SelectedCompany != null ? SelectedCompany.IPAddress : null;
+                    SelectedClientState = value.IsActive;
                     SelectedCostType = value.Contract != null ? ((CostType)value.Contract.enCostType).ToString() : "NONE";
                     SelectedPackageType = SelectedPackage != null ? ((PackageType)SelectedPackage.enPackageType).ToString() : "NONE";
                     SelectedContractAccNumber = value.Contract != null ? value.Contract.AccountNumber : null;
@@ -88,10 +90,46 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
                     MobileManagerEnvironment.SelectedClientID = value.pkClientID;
                     MobileManagerEnvironment.ClientCompanyID = value.fkCompanyID;
+                    MobileManagerEnvironment.SelectedContractID = value.fkContractID;
+
+                    // Publish these event to populate the devices, Simcards and accounts linked to the contract
+                    if (value.Contract != null)
+                    {
+                        _eventAggregator.GetEvent<ReadSimCardsEvent>().Publish(value.Contract.pkContractID);
+                        _eventAggregator.GetEvent<ReadDevicesEvent>().Publish(value.Contract.pkContractID);
+                        _eventAggregator.GetEvent<ReadInvoicesEvent>().Publish(value.pkClientID);
+                    }
+
+                    // Publish this event to set the admin tab as default tab
+                    _eventAggregator.GetEvent<NavigationEvent>().Publish(0);
                 }
             }
         }
         private Client _selectedClient = new Client();
+
+        /// <summary>
+        /// The selected client (Contract) state
+        /// </summary>
+        public bool SelectedClientState
+        {
+            get { return _selectedClientState; }
+            set
+            {
+                SetProperty(ref _selectedClientState, value);
+                ClientStateColour = value ? Brushes.Black : Brushes.Red;
+            }
+        }
+        private bool _selectedClientState;
+
+        /// <summary>
+        /// Set the required field fore colour
+        /// </summary>
+        public Brush ClientStateColour
+        {
+            get { return _clientStateColour; }
+            set { SetProperty(ref _clientStateColour, value); }
+        }
+        private Brush _clientStateColour;
 
         /// <summary>
         /// The entered IP Address
@@ -784,6 +822,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             // Initialise the view commands
             CancelCommand = new DelegateCommand(ExecuteCancel, CanExecuteCancel).ObservesProperty(() => SelectedCellNumber);
             AddCommand = new DelegateCommand(ExecuteAdd, CanExecuteAdd).ObservesProperty(() => SelectedClient);
+            DeleteCommand = new DelegateCommand(ExecuteDelete, CanExecuteDelete).ObservesProperty(() => SelectedClient)
+                                                                                .ObservesProperty(() => SelectedStatus);
             SaveCommand = new DelegateCommand(ExecuteSave, CanExecuteSave).ObservesProperty(() => SelectedCellNumber)
                                                                           .ObservesProperty(() => SelectedClientName)
                                                                           .ObservesProperty(() => SelectedClientIDNumber)
@@ -848,21 +888,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             try
             {
                 SelectedClient = await Task.Run(() => _model.ReadClient(clientID));
-                _activityLogInfo.EntityID = SelectedClient.fkContractID;
-
-                // Publish these event to populate the devices, simmcards and accounts linked to the contract
-                if (SelectedContract != null)
-                {
-                    _eventAggregator.GetEvent<ReadSimmCardsEvent>().Publish(SelectedContract.pkContractID);
-                    _eventAggregator.GetEvent<ReadDevicesEvent>().Publish(SelectedContract.pkContractID);
-                    _eventAggregator.GetEvent<ReadInvoicesEvent>().Publish(SelectedClient.pkClientID);
-                }
-
-                // Publish this event to set the admin tab as default tab
-                _eventAggregator.GetEvent<NavigationEvent>().Publish(0);
-
-                // Publish the event to read the administartion activity logs
-                _eventAggregator.GetEvent<SetActivityLogProcessEvent>().Publish(_activityLogInfo);
             }
             catch (Exception ex)
             {
@@ -1013,8 +1038,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             // Publish the event to clear the device view
             _eventAggregator.GetEvent<ReadDevicesEvent>().Publish(0);
 
-            // Publish the event to clear the simm card view
-            _eventAggregator.GetEvent<ReadSimmCardsEvent>().Publish(0);
+            // Publish the event to clear the Sim card view
+            _eventAggregator.GetEvent<ReadSimCardsEvent>().Publish(0);
         }
 
         /// <summary>
@@ -1034,6 +1059,26 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             ExecuteCancel();
             SelectedContractStartDate = SelectedContractEndDate = DateTime.Now;
+        }
+
+        /// <summary>
+        /// Validate if the delete client can be executed
+        /// </summary>
+        /// <returns>True if can execute</returns>
+        private bool CanExecuteDelete()
+        {
+            // Validate if the logged-in user can administrate the company the client is linked to
+            return SelectedClient != null && SelectedStatus != null && (SelectedStatus.StatusDescription == "CANCELLED" ||
+                                                                        SelectedStatus.StatusDescription == "TRANSFERED" ||
+                                                                        SelectedStatus.StatusDescription == "REALLOCATED") ? true : false;
+        }
+
+        /// <summary>
+        /// Execute the delete new client process
+        /// </summary>
+        private void ExecuteDelete()
+        {
+            SelectedClientState = false;
         }
 
         /// <summary>
@@ -1092,6 +1137,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedClient.fkSuburbID = SelectedSuburb.pkSuburbID;
             SelectedClient.ModifiedBy = SecurityHelper.LoggedInUserFullName;
             SelectedClient.ModifiedDate = DateTime.Now;
+            SelectedClient.IsActive = SelectedClientState;
             // Contract Data
             if (SelectedClient.Contract == null)
                 SelectedClient.Contract = new Contract();
@@ -1105,6 +1151,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedClient.Contract.PaymentCancelDate = SelectedContract.PaymentCancelDate;
             SelectedClient.Contract.ModifiedBy = SecurityHelper.LoggedInUserFullName;
             SelectedClient.Contract.ModifiedDate = DateTime.Now;
+            SelectedClient.Contract.IsActive = SelectedClientState;
             // Package Setup Data
             if (SelectedClient.Contract.PackageSetup == null)
                 SelectedClient.Contract.PackageSetup = new PackageSetup();
@@ -1115,6 +1162,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedClient.Contract.PackageSetup.RandValue = SelectedContract.PackageSetup.RandValue;
             SelectedClient.Contract.PackageSetup.ModifiedBy = SecurityHelper.LoggedInUserFullName;
             SelectedClient.Contract.PackageSetup.ModifiedDate = DateTime.Now;
+            SelectedClient.Contract.PackageSetup.IsActive = SelectedClientState;
             // Billing Data
             if (SelectedClient.ClientBilling == null)
                 SelectedClient.ClientBilling = new ClientBilling();
@@ -1131,6 +1179,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedClient.ClientBilling.StopBillingToDate = SelectedClientBilling.StopBillingToDate;
             SelectedClient.ClientBilling.ModifiedBy = SecurityHelper.LoggedInUserFullName;
             SelectedClient.ClientBilling.ModifiedDate = DateTime.Now;
+            SelectedClient.ClientBilling.IsActive = SelectedClientState;
 
             if (SelectedClient.pkClientID == 0)
                 result = _model.CreateClient(SelectedClient);

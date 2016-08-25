@@ -23,6 +23,6 @@
         <local:ViewCellular Grid.RowSpan="2"/>
         <Border Grid.Column="1" Grid.RowSpan="2" BorderBrush="Silver" BorderThickness="1"/>
         <local:ViewDevice Grid.Column="2"/>
-        <local:ViewSimmCard Grid.Row="1" Grid.Column="2"/>
+        <local:ViewSimCard Grid.Row="1" Grid.Column="2"/>
     </Grid>
 </UserControl>

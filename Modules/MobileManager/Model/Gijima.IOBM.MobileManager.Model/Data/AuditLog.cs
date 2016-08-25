@@ -20,8 +20,8 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public string AuditComment { get; set; }
         public Nullable<int> EntityID { get; set; }
         public string ChangedValue { get; set; }
-        public System.DateTime AuditDate { get; set; }
+        public Nullable<System.DateTime> AuditDate { get; set; }
         public string ModifiedBy { get; set; }
-        public System.DateTime ModifiedDate { get; set; }
+        public Nullable<System.DateTime> ModifiedDate { get; set; }
     }
 }

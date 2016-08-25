@@ -160,7 +160,7 @@
     <Compile Include="Data\ServiceProvider.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Data\SimmCard.cs">
+    <Compile Include="Data\SimCard.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
     <Compile Include="Data\sp_report_Invoice_Result.cs">
@@ -200,7 +200,7 @@
     <Compile Include="Models\SearchEngineModel.cs" />
     <Compile Include="Models\SecurityModel.cs" />
     <Compile Include="Models\ServiceProviderModel.cs" />
-    <Compile Include="Models\SimmCardModel.cs" />
+    <Compile Include="Models\SimCardModel.cs" />
     <Compile Include="Models\StatusModel.cs" />
     <Compile Include="Models\SuburbModel.cs" />
     <Compile Include="Models\DataValidationExceptionModel.cs" />
@@ -227,17 +227,18 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="App.Config" />
     <EntityDeploy Include="Data\MobileManagerEntities.edmx">
       <Generator>EntityModelCodeGenerator</Generator>
       <LastGenOutput>MobileManagerEntities.Designer.cs</LastGenOutput>
     </EntityDeploy>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.Config" />
     <None Include="Data\MobileManagerEntities.edmx.diagram">
       <DependentUpon>MobileManagerEntities.edmx</DependentUpon>
     </None>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Data\MobileManagerEntities.Context.tt">
@@ -250,9 +251,6 @@
       <DependentUpon>MobileManagerEntities.edmx</DependentUpon>
       <LastGenOutput>MobileManagerEntities.cs</LastGenOutput>
     </Content>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

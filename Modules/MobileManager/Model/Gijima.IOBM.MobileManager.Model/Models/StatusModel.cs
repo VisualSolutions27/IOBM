@@ -73,10 +73,10 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 short allID = StatusLink.All.Value();
                 short contractID = StatusLink.Contract.Value();
                 short deviceID = StatusLink.Device.Value();
-                short simmID = StatusLink.Contract.Value();
+                short SimID = StatusLink.Contract.Value();
                 short contractDeviceID = StatusLink.ContractDevice.Value();
-                short contractSimmID = StatusLink.ContractSimm.Value();
-                short deviceSimmID = StatusLink.DeviceSimm.Value();
+                short contractSimID = StatusLink.ContractSim.Value();
+                short deviceSimID = StatusLink.DeviceSim.Value();
                 IEnumerable<Status> statuses = null;
 
                 using (var db = MobileManagerEntities.GetContext())
@@ -88,15 +88,15 @@ namespace Gijima.IOBM.MobileManager.Model.Models
 
                     if (enLinkedTo == StatusLink.Contract)
                         statuses = statuses.Where(p => p.enStatusLink == allID || p.enStatusLink == contractID || 
-                                                       p.enStatusLink == contractDeviceID || p.enStatusLink == contractSimmID);
+                                                       p.enStatusLink == contractDeviceID || p.enStatusLink == contractSimID);
 
                     if (enLinkedTo == StatusLink.Device)
                         statuses = statuses.Where(p => p.enStatusLink == allID || p.enStatusLink == deviceID || 
-                                                       p.enStatusLink == contractDeviceID || p.enStatusLink == deviceSimmID);
+                                                       p.enStatusLink == contractDeviceID || p.enStatusLink == deviceSimID);
 
-                    if (enLinkedTo == StatusLink.Simm)
-                        statuses = statuses.Where(p => p.enStatusLink == allID || p.enStatusLink == simmID || 
-                                                       p.enStatusLink == contractSimmID || p.enStatusLink == deviceSimmID);
+                    if (enLinkedTo == StatusLink.Sim)
+                        statuses = statuses.Where(p => p.enStatusLink == allID || p.enStatusLink == SimID || 
+                                                       p.enStatusLink == contractSimID || p.enStatusLink == deviceSimID);
 
                     return new ObservableCollection<Status>(statuses);
                 }

@@ -60,11 +60,11 @@
       <Name>Gijima.IOBM.Model</Name>
     </ProjectReference>
     <ProjectReference Include="..\Modules\MobileManager\Common\Gijima.IOBM.MobileManager.Common\Gijima.IOBM.MobileManager.Common.csproj">
-      <Project>{C8918BB0-9EFB-4158-809B-4B374509F66B}</Project>
+      <Project>{c8918bb0-9efb-4158-809b-4b374509f66b}</Project>
       <Name>Gijima.IOBM.MobileManager.Common</Name>
     </ProjectReference>
     <ProjectReference Include="..\Modules\MobileManager\Model\Gijima.IOBM.MobileManager.Model\Gijima.IOBM.MobileManager.Model.csproj">
-      <Project>{81BD54B6-C1A3-417E-B8AB-51451197717A}</Project>
+      <Project>{81bd54b6-c1a3-417e-b8ab-51451197717a}</Project>
       <Name>Gijima.IOBM.MobileManager.Model</Name>
     </ProjectReference>
   </ItemGroup>

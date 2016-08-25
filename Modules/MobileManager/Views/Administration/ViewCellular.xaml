@@ -43,8 +43,12 @@
                     <Button x:Name="ButtonCellularAdd" ToolTip="Add new cellular data." TabIndex="42" Margin="0,0,2,0"
                         Style="{StaticResource UXHeaderImageButtonStyle}" Command="{Binding AddCommand}">
                         <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/508.png" Margin="2,2,2,2"/>
+                    </Button>                    
+                    <Button x:Name="ButtonCellularDelete" ToolTip="Set the selected user as in-active." TabIndex="43" Margin="0,0,2,0"
+                        Style="{StaticResource UXHeaderImageButtonStyle}" Command="{Binding DeleteCommand}">
+                        <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/278.png" Margin="2,2,2,2"/>
                     </Button>
-                    <Button x:Name="ButtonCellularSave" ToolTip="Save the cellular data." TabIndex="43" Margin="0"
+                    <Button x:Name="ButtonCellularSave" ToolTip="Save the cellular data." TabIndex="44" Margin="0"
                         Style="{StaticResource UXHeaderImageButtonStyle}" Command="{Binding SaveCommand}">
                         <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/save_32.ico" Margin="2"/>
                     </Button>
@@ -153,8 +157,9 @@
                     Text="{Binding SelectedClientAdminFee, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" BorderBrush="{Binding ValidAdminFee}">
                 </TextBox>
                 <TextBlock Grid.Row="12" Grid.Column="6" Text="State:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-                <TextBox x:Name="TextBoxClientState" Grid.Row="12" Grid.Column="7" IsTabStop="False" ToolTip="Enter the value of the admin fee." Style="{StaticResource UXTextBoxStyle}"
-                    Text="{Binding SelectedClient.IsActive, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource UIDataConvertionHelper}, ConverterParameter='State'}" IsReadOnly="True">
+                <TextBox x:Name="TextBoxClientState" Grid.Row="12" Grid.Column="7" IsTabStop="False" ToolTip="Enter the value of the admin fee." Style="{StaticResource UXTextBoxStyle}" IsReadOnly="True"
+                    Text="{Binding SelectedClientState, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource UIDataConvertionHelper}, ConverterParameter='State'}"
+                    Foreground="{Binding ClientStateColour, UpdateSourceTrigger=PropertyChanged}">
                 </TextBox>                
                 <GroupBox Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="8" Header="RICA Address" Style="{StaticResource UXGroupBoxStyle}" Margin="0">
                     <Grid>

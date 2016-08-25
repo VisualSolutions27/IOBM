@@ -157,19 +157,19 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 ObservableCollection<Client> results = ClientResults = null;
 
                 if (SearchCriteria.Length == 8)
-                    results = await Task.Run(() => _model.SearchForClient(SearchCriteria.ToUpper().Trim(), SearchEntity.EmployeeNumber));
+                    results = await Task.Run(() => _model.SearchForClient(SearchCriteria.ToUpper().Trim(), SearchEntity.EmployeeNumber, false));
 
                 if ((results == null || results.Count == 0) && SearchCriteria.Length == 10)
-                    results = await Task.Run(() => _model.SearchForClient(SearchCriteria.ToUpper().Trim(), SearchEntity.PrimaryCellNumber));
+                    results = await Task.Run(() => _model.SearchForClient(SearchCriteria.ToUpper().Trim(), SearchEntity.PrimaryCellNumber, false));
 
                 if ((results == null || results.Count == 0) && SearchCriteria.Length == 13)
-                    results = await Task.Run(() => _model.SearchForClient(SearchCriteria.ToUpper().Trim(), SearchEntity.IDNumber));
+                    results = await Task.Run(() => _model.SearchForClient(SearchCriteria.ToUpper().Trim(), SearchEntity.IDNumber, false));
 
                 if ((results == null || results.Count == 0) && SearchCriteria.Contains("@"))
-                    results = await Task.Run(() => _model.SearchForClient(SearchCriteria.ToUpper().Trim(), SearchEntity.Email));
+                    results = await Task.Run(() => _model.SearchForClient(SearchCriteria.ToUpper().Trim(), SearchEntity.Email, false));
 
                 if (results == null || results.Count == 0)
-                    results = await Task.Run(() => _model.SearchForClient(SearchCriteria.ToUpper().Trim(), SearchEntity.Other));
+                    results = await Task.Run(() => _model.SearchForClient(SearchCriteria.ToUpper().Trim(), SearchEntity.Other, false));
 
                 // Publish the event so the cellular view can load the client data if found else send no sults found message
                 if (results != null && results.Count == 1)

@@ -50,6 +50,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Gijima.Controls.WPF\bin\Debug\EntityFramework.dll</HintPath>
     </Reference>
+    <Reference Include="Gijima.IOBM.MobileManager.Security">
+      <HintPath>..\..\..\Gijima\IOBM\Modules\MobileManager\Common\Gijima.IOBM.MobileManager.Security\bin\Debug\Gijima.IOBM.MobileManager.Security.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.Practices.Unity, Version=1.2.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.dll</HintPath>
@@ -120,7 +123,7 @@
     <Compile Include="ViewModels\ViewCityViewModel.cs" />
     <Compile Include="ViewModels\ViewClientSiteViewModel.cs" />
     <Compile Include="ViewModels\ViewCompanyBillingLevelViewModel.cs" />
-    <Compile Include="ViewModels\ViewDataImportViewModel.cs" />
+    <Compile Include="ViewModels\ViewDataUpdateViewModel.cs" />
     <Compile Include="ViewModels\ViewDataValidationCFViewModel.cs" />
     <Compile Include="ViewModels\ViewCompanyViewModel.cs" />
     <Compile Include="ViewModels\ViewConfigViewModel.cs" />
@@ -137,7 +140,7 @@
     <Compile Include="ViewModels\ViewProvinceViewModel.cs" />
     <Compile Include="ViewModels\ViewSecurityCFViewModel.cs" />
     <Compile Include="ViewModels\ViewServiceProviderViewModel.cs" />
-    <Compile Include="ViewModels\ViewSimmCardViewModel.cs" />
+    <Compile Include="ViewModels\ViewSimCardViewModel.cs" />
     <Compile Include="ViewModels\ViewStatusViewModel.cs" />
     <Compile Include="ViewModels\ViewSuburbViewModel.cs" />
     <Compile Include="ViewModels\ViewSupplierDataImportViewModel.cs" />
@@ -184,8 +187,8 @@
     <Compile Include="Views\Configuration\ViewSecurityCF.xaml.cs">
       <DependentUpon>ViewSecurityCF.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Administration\ViewSimmCard.xaml.cs">
-      <DependentUpon>ViewSimmCard.xaml</DependentUpon>
+    <Compile Include="Views\Administration\ViewSimCard.xaml.cs">
+      <DependentUpon>ViewSimCard.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Maintenance\ViewBillingLevel.xaml.cs">
       <DependentUpon>ViewBillingLevel.xaml</DependentUpon>
@@ -202,8 +205,8 @@
     <Compile Include="Views\SystemTools\ViewSystemTools.xaml.cs">
       <DependentUpon>ViewSystemTools.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\SystemTools\ViewDataImport.xaml.cs">
-      <DependentUpon>ViewDataImport.xaml</DependentUpon>
+    <Compile Include="Views\SystemTools\ViewDataUpdate.xaml.cs">
+      <DependentUpon>ViewDataUpdate.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\ViewMobileManager.xaml.cs">
       <DependentUpon>ViewMobileManager.xaml</DependentUpon>
@@ -293,7 +296,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Administration\ViewSimmCard.xaml">
+    <Page Include="Views\Administration\ViewSimCard.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -317,7 +320,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Views\SystemTools\ViewDataImport.xaml">
+    <Page Include="Views\SystemTools\ViewDataUpdate.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -431,10 +434,6 @@
     <ProjectReference Include="..\..\Gijima.IOBM.Infrastructure\Gijima.IOBM.Infrastructure.csproj">
       <Project>{55b7d4d2-9f8d-4c92-9fea-97f5f58ded4a}</Project>
       <Name>Gijima.IOBM.Infrastructure</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Gijima.IOBM.MobileManager.Security\Gijima.IOBM.MobileManager.Security.csproj">
-      <Project>{7177E3E6-4EF6-4B78-A0C9-CD926ED0FE8B}</Project>
-      <Name>Gijima.IOBM.MobileManager.Security</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\Gijima.IOBM.Model\Gijima.IOBM.Model.csproj">
       <Project>{68f8a3c2-fa68-4f34-8b8f-3dcf6f04a136}</Project>

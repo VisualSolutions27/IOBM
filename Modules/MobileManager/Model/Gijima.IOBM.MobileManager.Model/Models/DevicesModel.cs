@@ -111,8 +111,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                                  where device.fkContractID == contractID
                                                  select device)).Include("DeviceMake")
                                                                 .Include("DeviceModel")
-                                                                .Include("SimmCard")
-                                                                .Include("Status1")
+                                                                .Include("SimCard")
+                                                                .Include("Status")
                                                                 .OrderBy(p => p.DeviceMake.MakeDescription).ToList();
 
                     if (activeOnly)
@@ -158,7 +158,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                         db.Entry(device).State = System.Data.Entity.EntityState.Modified;
                         db.SaveChanges();
 
-                        _activityLogger.CreateDataChangeAudits<Device>(_dataActivityHelper.GetDataChangeActivities<Device>(existingDevice, device, device.fkContractID.Value, db));
+                        _activityLogger.CreateDataChangeAudits<Device>(_dataActivityHelper.GetDataChangeActivities<Device>(existingDevice, device, device.fkContractID, db));
                         return true;
                     }
                 }

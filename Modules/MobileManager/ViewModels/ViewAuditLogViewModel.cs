@@ -146,7 +146,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Initialise all the view dependencies
         /// </summary>
-        private void InitialiseAuditLogView()
+        private async void InitialiseAuditLogView()
         {
             _model = new AuditLogModel(_eventAggregator);
             _securityHelper = new SecurityHelper(_eventAggregator);
@@ -158,6 +158,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
             // Subscribe to this event to read to activity logs from the database for the specified process
             _eventAggregator.GetEvent<SetActivityLogProcessEvent>().Subscribe(SetActivityLogProcess_Event, true);
+
+            // Load all the activity logs for the client
+            SelectedActivityLogFilter = AdminActivityFilter.None.ToString();
+            await ReadAuditLogsAsync(MobileManagerEnvironment.SelectedContractID);
         }
 
         /// <summary>

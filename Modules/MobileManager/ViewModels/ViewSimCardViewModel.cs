@@ -18,11 +18,11 @@ using System.Windows.Media;
 
 namespace Gijima.IOBM.MobileManager.ViewModels
 {
-    public class ViewSimmCardViewModel : BindableBase, IDataErrorInfo
+    public class ViewSimCardViewModel : BindableBase, IDataErrorInfo
     {
         #region Properties & Attributes
 
-        private SimmCardModel _model = null;
+        private SimCardModel _model = null;
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
         private int _selectedContractID = 0;
@@ -32,57 +32,67 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         public DelegateCommand CancelCommand { get; set; }
         public DelegateCommand AddCommand { get; set; }
         public DelegateCommand SaveCommand { get; set; }
-        public DelegateCommand SimmCardStatusCommand { get; set; }
+        public DelegateCommand SimCardStatusCommand { get; set; }
         #endregion
 
         #region Properties
 
         /// <summary>
-        /// Holds the selected (current) simm card entity
+        /// Holds the selected (current) Sim card entity
         /// </summary>
-        public SimmCard SelectedSimmCard
+        public SimCard SelectedSimCard
         {
-            get { return _selectedSimmCard; }
+            get { return _selectedSimCard; }
             set
             {
                 // Prevent circullar action
-                if (value != null && value.pkSimmCardID != _selectedSimmCard.pkSimmCardID)
+                if (value != null)
                 {
                     SelectedStatus = StatusCollection != null ? StatusCollection.Where(p => p.pkStatusID == value.fkStatusID).FirstOrDefault() : null;
                     SelectedCellNumber = value.CellNumber;
                     SelectedCardNumber = value.CardNumber;
                     SelectedPinNumber = value.PinNumber;
                     SelectedPUKNumber = value.PUKNumber;
-                    SimmCardState = value.IsActive;
+                    SimCardState = value.IsActive;
 
-                    SetProperty(ref _selectedSimmCard, value);
+                    SetProperty(ref _selectedSimCard, value);
 
-                    // Link the simmcard to its device on the device view
-                    LinkSimmCardToDevice();
+                    // Link the Simcard to its device on the device view
+                    LinkSimCardToDevice();
                 }
             }
         }
-        private SimmCard _selectedSimmCard = new SimmCard();
+        private SimCard _selectedSimCard = new SimCard();
+        
+        /// <summary>
+        /// The selected Sim card index
+        /// </summary>
+        public int SelectedSimCardIndex
+        {
+            get { return _selectedSimCardIndex; }
+            set { SetProperty(ref _selectedSimCardIndex, value); }
+        }
+        private int _selectedSimCardIndex;
 
         /// <summary>
-        /// The selected simm card state
+        /// The selected Sim card state
         /// </summary>
-        public bool SimmCardState
+        public bool SimCardState
         {
-            get { return _simmCardState; }
-            set { SetProperty(ref _simmCardState, value); }
+            get { return _simCardState; }
+            set { SetProperty(ref _simCardState, value); }
         }
-        private bool _simmCardState;
+        private bool _simCardState;
 
         /// <summary>
-        /// The collection of simm cards from the database
+        /// The collection of Sim cards from the database
         /// </summary>
-        public ObservableCollection<SimmCard> SimmCardCollection
+        public ObservableCollection<SimCard> SimCardCollection
         {
-            get { return _simmCardCollection; }
-            set { SetProperty(ref _simmCardCollection, value); }
+            get { return _simCardCollection; }
+            set { SetProperty(ref _simCardCollection, value); }
         }
-        private ObservableCollection<SimmCard> _simmCardCollection = null;
+        private ObservableCollection<SimCard> _simCardCollection = null;
 
         #region View Lookup Data Collections
 
@@ -253,36 +263,36 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Constructor
         /// </summary>
-        public ViewSimmCardViewModel(IEventAggregator eventAggreagator)
+        public ViewSimCardViewModel(IEventAggregator eventAggreagator)
         {
             _eventAggregator = eventAggreagator;
-            InitialiseSimmCardView();
+            InitialiseSimCardView();
         }
 
         /// <summary>
         /// Initialise all the view dependencies
         /// </summary>
-        private async void InitialiseSimmCardView()
+        private async void InitialiseSimCardView()
         {
-            _model = new SimmCardModel(_eventAggregator);
+            _model = new SimCardModel(_eventAggregator);
             _securityHelper = new SecurityHelper(_eventAggregator);
             InitialiseViewControls();
 
             // Initialise the view commands
             CancelCommand = new DelegateCommand(ExecuteCancel, CanExecuteCancel).ObservesProperty(() => SelectedCellNumber);
-            AddCommand = new DelegateCommand(ExecuteAdd, CanExecuteAdd).ObservesProperty(() => SelectedSimmCard);
+            AddCommand = new DelegateCommand(ExecuteAdd, CanExecuteAdd).ObservesProperty(() => SelectedSimCard);
             SaveCommand = new DelegateCommand(ExecuteSave, CanExecuteSave).ObservesProperty(() => SelectedCellNumber)
                                                                           .ObservesProperty(() => SelectedCardNumber)
                                                                           .ObservesProperty(() => SelectedPinNumber)
                                                                           .ObservesProperty(() => SelectedPUKNumber)
                                                                           .ObservesProperty(() => SelectedStatus);
-            SimmCardStatusCommand = new DelegateCommand(ExecuteShowStatusView, CanExecuteMaintenace);
+            SimCardStatusCommand = new DelegateCommand(ExecuteShowStatusView, CanExecuteMaintenace);
 
-            // Subscribe to this event to read simmCards linked to selected contract
-            _eventAggregator.GetEvent<ReadSimmCardsEvent>().Subscribe(ReadContractSimmCardsAsync, true);
+            // Subscribe to this event to read SimCards linked to selected contract
+            _eventAggregator.GetEvent<ReadSimCardsEvent>().Subscribe(ReadContractSimCardsAsync, true);
             
-            // Subscribe to this event to link the selected device to a simmcard
-            _eventAggregator.GetEvent<LinkDeviceSimmCardEvent>().Subscribe(LinkDeviceToSimmCard, true);
+            // Subscribe to this event to link the selected device to a Simcard
+            _eventAggregator.GetEvent<LinkDeviceSimCardEvent>().Subscribe(LinkDeviceToSimCard, true);
 
             // Load the view data
             await ReadStatusesAsync();
@@ -293,15 +303,18 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void InitialiseViewControls()
         {
-            SelectedSimmCard = new SimmCard();
-            SimmCardState = true;
+            SelectedSimCard = null;
+            SelectedSimCardIndex = -1;
+            SelectedStatus = StatusCollection != null ? StatusCollection.Where(p => p.pkStatusID == 0).FirstOrDefault() : null;
+            SelectedCellNumber = SelectedCardNumber = SelectedPinNumber = SelectedPUKNumber = string.Empty;
+            SimCardState = true; 
         }
 
         /// <summary>
-        /// Load all the simm cards linked to the selected contract from the database
+        /// Load all the Sim cards linked to the selected contract from the database
         /// </summary>
         /// <param name="contractID">The selected contract ID.</param>
-        private async void ReadContractSimmCardsAsync(int contractID)
+        private async void ReadContractSimCardsAsync(int contractID)
         {
             try
             {
@@ -309,16 +322,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
                 if (contractID > 0)
                 {
-                    SimmCardCollection = await Task.Run(() => new SimmCardModel(_eventAggregator).ReadSimmCardsForContract(contractID));
+                    SimCardCollection = await Task.Run(() => new SimCardModel(_eventAggregator).ReadSimCardsForContract(contractID));
 
-                    // Publish this event to tell the Device view to link the device to its simmcard
-                    if (SimmCardCollection != null && SimmCardCollection.Count > 0)
-                        _eventAggregator.GetEvent<ActionCompletedEvent>().Publish(ActionCompleted.ReadContractSimmCards);
+                    // Publish this event to tell the Device view to link the device to its Simcard
+                    if (SimCardCollection != null && SimCardCollection.Count > 0)
+                        _eventAggregator.GetEvent<ActionCompletedEvent>().Publish(ActionCompleted.ReadContractSimCards);
                 }
                 else
                 {
                     ExecuteCancel();
-                    SimmCardCollection = null;
+                    SimCardCollection = null;
                 }
             }
             catch (Exception ex)
@@ -328,17 +341,17 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         }
 
         /// <summary>
-        /// Link the selected device to a simmcard
+        /// Link the selected device to a Simcard
         /// </summary>
-        /// <param name="simmCardID">The seleted simm card.</param>
-        private void LinkDeviceToSimmCard(int simmCardID)
+        /// <param name="simCardID">The seleted Sim card.</param>
+        private void LinkDeviceToSimCard(int simCardID)
         {
             try
             {
-                if (SimmCardCollection != null && SimmCardCollection.Count > 0)
+                if (SimCardCollection != null && SimCardCollection.Count > 0)
                 {
-                    if (simmCardID > 0)
-                        SelectedSimmCard = SimmCardCollection.Where(p => p.pkSimmCardID == simmCardID && p.IsActive).FirstOrDefault();
+                    if (simCardID > 0)
+                        SelectedSimCard = SimCardCollection.Where(p => p.pkSimCardID == simCardID && p.IsActive).FirstOrDefault();
                     else
                         ExecuteCancel();
                 }
@@ -350,15 +363,15 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         }
 
         /// <summary>
-        /// Link the selected simm card to its device on the device view
+        /// Link the selected Sim card to its device on the device view
         /// </summary>
-        private void LinkSimmCardToDevice()
+        private void LinkSimCardToDevice()
         {
-            // Publish the event so the simmcard view can link the simmcard to the device
-            if (SelectedSimmCard.CellNumber != null && !string.IsNullOrEmpty(SelectedSimmCard.CellNumber))
-                _eventAggregator.GetEvent<LinkSimmCardDeviceEvent>().Publish(SelectedSimmCard.pkSimmCardID);
+            // Publish the event so the Simcard view can link the Simcard to the device
+            if (SelectedSimCard.CellNumber != null && !string.IsNullOrEmpty(SelectedSimCard.CellNumber))
+                _eventAggregator.GetEvent<LinkSimCardDeviceEvent>().Publish(SelectedSimCard.pkSimCardID);
             else
-                _eventAggregator.GetEvent<LinkSimmCardDeviceEvent>().Publish(0);
+                _eventAggregator.GetEvent<LinkSimCardDeviceEvent>().Publish(0);
         }
 
         #region Lookup Data Loading
@@ -370,7 +383,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             try
             {
-                StatusCollection = await Task.Run(() => new StatusModel(_eventAggregator).ReadStatuses(StatusLink.Simm, true));
+                StatusCollection = await Task.Run(() => new StatusModel(_eventAggregator).ReadStatuses(StatusLink.Sim, true));
             }
             catch (Exception ex)
             {
@@ -408,7 +421,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             bool result = false;
 
             // Validate if the logged-in user can administrate the company the client is linked to
-            result = SelectedSimmCard != null && SelectedSimmCard.pkSimmCardID > 0 && 
+            result = SelectedSimCard != null && SelectedSimCard.pkSimCardID > 0 && 
                      (MobileManagerEnvironment.ClientCompanyID == 0 || _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false);
 
             if (result)
@@ -418,7 +431,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         }
 
         /// <summary>
-        /// Execute the add new simmCard process
+        /// Execute the add new SimCard process
         /// </summary>
         private void ExecuteAdd()
         {
@@ -426,7 +439,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         }
 
         /// <summary>
-        /// Validate if the save simmCard data can be executed
+        /// Validate if the save SimCard data can be executed
         /// </summary>
         /// <returns>True if can execute</returns>
         private bool CanExecuteSave()
@@ -448,25 +461,25 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void ExecuteSave()
         {
-            int selectedSimmCardID = 0;
+            int selectedSimCardID = 0;
             bool result = false;
-            SelectedSimmCard.fkContractID = selectedSimmCardID = _selectedContractID;
-            SelectedSimmCard.fkStatusID = SelectedStatus.pkStatusID;
-            SelectedSimmCard.CellNumber = SelectedCellNumber.Trim();
-            SelectedSimmCard.CardNumber = SelectedCardNumber.ToUpper().Trim();
-            SelectedSimmCard.PinNumber = SelectedPinNumber.ToUpper().Trim();
-            SelectedSimmCard.PUKNumber = SelectedPUKNumber.ToUpper().Trim();
-            SelectedSimmCard.ModifiedBy = SecurityHelper.LoggedInDomainName;
-            SelectedSimmCard.ModifiedDate = DateTime.Now;
-            SelectedSimmCard.IsActive = SimmCardState;
+            SelectedSimCard.fkContractID = selectedSimCardID = _selectedContractID;
+            SelectedSimCard.fkStatusID = SelectedStatus.pkStatusID;
+            SelectedSimCard.CellNumber = SelectedCellNumber.Trim();
+            SelectedSimCard.CardNumber = SelectedCardNumber.ToUpper().Trim();
+            SelectedSimCard.PinNumber = SelectedPinNumber.ToUpper().Trim();
+            SelectedSimCard.PUKNumber = SelectedPUKNumber.ToUpper().Trim();
+            SelectedSimCard.ModifiedBy = SecurityHelper.LoggedInDomainName;
+            SelectedSimCard.ModifiedDate = DateTime.Now;
+            SelectedSimCard.IsActive = SimCardState;
 
-            if (SelectedSimmCard.pkSimmCardID == 0)
-                result = _model.CreateSimmCard(SelectedSimmCard);
+            if (SelectedSimCard.pkSimCardID == 0)
+                result = _model.CreateSimCard(SelectedSimCard);
             else
-                result = _model.UpdateSimmCard(SelectedSimmCard);
+                result = _model.UpdateSimCard(SelectedSimCard);
 
             if (result)
-                ReadContractSimmCardsAsync(_selectedContractID);
+                ReadContractSimCardsAsync(_selectedContractID);
         }
 
         /// <summary>

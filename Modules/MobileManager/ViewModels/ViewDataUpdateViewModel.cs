@@ -22,7 +22,7 @@ using System.Windows.Media;
 
 namespace Gijima.IOBM.MobileManager.ViewModels
 {
-    public class ViewDataImportViewModel : BindableBase, IDataErrorInfo
+    public class ViewDataUpdateViewModel : BindableBase, IDataErrorInfo
     {
         #region Properties & Attributes
 
@@ -42,7 +42,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         #region Properties       
 
         /// <summary>
-        /// The data import/update exception description
+        /// The data update exception description
         /// </summary>
         public string ExceptionDescription
         {
@@ -52,7 +52,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private string _exceptionDescription;
 
         /// <summary>
-        /// The data import/update progessbar description
+        /// The data update progessbar description
         /// </summary>
         public string ImportUpdateDescription
         {
@@ -62,7 +62,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private string _importUpdateDescription;
 
         /// <summary>
-        /// The data import/update progessbar value
+        /// The data update progessbar value
         /// </summary>
         public int ImportUpdateProgress
         {
@@ -72,7 +72,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private int _ImportUpdateProgress;
 
         /// <summary>
-        /// The number of import/update data items
+        /// The number of update data items
         /// </summary>
         public int ImportUpdateCount
         {
@@ -82,7 +82,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private int _importUpdateCount;
 
         /// <summary>
-        /// The number of imported/updated data that passed validation
+        /// The number of updated data that passed validation
         /// </summary>
         public int ImportUpdatesPassed
         {
@@ -92,7 +92,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private int _importUpdatesPassed;
 
         /// <summary>
-        /// The number of imported/updated data that failed
+        /// The number of updated data that failed
         /// </summary>
         public int ImportUpdatesFailed
         {
@@ -112,7 +112,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private DataTable _importDataCollection = null;
         
         /// <summary>
-        /// The collection of data import/update exceptions
+        /// The collection of data update exceptions
         /// </summary>
         public ObservableCollection<string> ExceptionsCollection
         {
@@ -164,7 +164,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private ObservableCollection<string> _searchEntityCollection = null;
 
         /// <summary>
-        /// The collection of data columns to import to from the DataImportColumn enum
+        /// The collection of data columns to update to from the DataUpdateColumn enum
         /// </summary>
         public ObservableCollection<string> DestinationColumnCollection
         {
@@ -174,7 +174,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private ObservableCollection<string> _destinationColumnCollection = null;
 
         /// <summary>
-        /// The collection of data entities to import to from the DataImportEntities enum
+        /// The collection of data entities to update to from the DataUpdateEntities enum
         /// </summary>
         public ObservableCollection<string> DestinationEntityCollection
         {
@@ -246,7 +246,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private string _selectedSearchEntity;
 
         /// <summary>
-        /// The selected source column to import from
+        /// The selected source column to update from
         /// </summary>
         public string SelectedSourceColumn
         {
@@ -256,7 +256,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private string _selectedSourceColumn;
 
         /// <summary>
-        /// The selected destination column to import to
+        /// The selected destination column to update to
         /// </summary>
         public string SelectedDestinationColumn
         {
@@ -270,7 +270,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private string _selectedDestinationColumn;
 
         /// <summary>
-        /// The selected destination entity to import to
+        /// The selected destination entity to update to
         /// </summary>
         public string SelectedDestinationEntity
         {
@@ -284,7 +284,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private string _selectedDestinationEntity;
         
         /// <summary>
-        /// The selected destination company to import to
+        /// The selected destination company to update to
         /// </summary>
         public CompanyGroup SelectedDestinationCompany
         {
@@ -308,7 +308,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private bool _validDataFile = false;
 
         /// <summary>
-        /// Check if the data import was valid
+        /// Check if the data update was valid
         /// </summary>
         public bool ValidDataImport
         {
@@ -490,17 +490,17 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Constructor
         /// </summary>
-        public ViewDataImportViewModel(IEventAggregator eventAggregator)
+        public ViewDataUpdateViewModel(IEventAggregator eventAggregator)
         {
             _eventAggregator = eventAggregator;
             _securityHelper = new SecurityHelper(eventAggregator);
-            InitialiseDataImportView();
+            InitialiseDataUpdateView();
         }
 
         /// <summary>
         /// Initialise all the view dependencies
         /// </summary>
-        private async void InitialiseDataImportView()
+        private async void InitialiseDataUpdateView()
         {
             _model = new ImportRuleDataModel(_eventAggregator);
             InitialiseViewControls();
@@ -516,7 +516,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                                          .ObservesProperty(() => SelectedDestinationCompany);
             // Load the view data
             ReadDataDestinationColumns();
-            await ReadImportRuleDataAsync();
+            await ReadUpdateRuleDataAsync();
             await ReadCompanyGroupsAsync();
         }
 
@@ -549,9 +549,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         }
 
         /// <summary>
-        /// Read all the active import rule data from the database
+        /// Read all the active update rule data from the database
         /// </summary>
-        private async Task ReadImportRuleDataAsync()
+        private async Task ReadUpdateRuleDataAsync()
         {
             try
             {
@@ -581,7 +581,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     if (_officeHelper == null)
                         _officeHelper = new MSOfficeHelper();
 
-                    // Import the worksheet data
+                    // Update the worksheet data
                     sheetData = _officeHelper.ReadExcelIntoDataTable(SelectedDataSheet.WorkBookName, SelectedDataSheet.SheetName);
 
                     // This is to fake the progress bar for importing
@@ -616,7 +616,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         }
 
         /// <summary>
-        /// Filter the import destinations based on selected import rule source
+        /// Filter the update destinations based on selected update rule source
         /// </summary>
         private void FilterDestinationEntities()
         {
@@ -629,13 +629,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     // Convert enum description back to the enum
                     int destinationColumnID = EnumHelper.GetEnumFromDescription<DataImportColumn>(SelectedDestinationColumn).Value();
 
-                    // Filter the import destination data based on the import source
+                    // Filter the update destination data based on the update source
                     IEnumerable<ImportRuleData> destinations = _importRules.Where(p => p.enDataImportColumn == destinationColumnID).ToList();
 
                     // Add the default enum description
                     DestinationEntityCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportEntity.None));
 
-                    // Add all the import destination enum decriptions to the collection
+                    // Add all the update destination enum decriptions to the collection
                     foreach (ImportRuleData rule in destinations)
                     {
                         DestinationEntityCollection.Add(EnumHelper.GetDescriptionFromEnum((DataImportEntity)rule.enDataImportEntity));
@@ -652,7 +652,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         }
 
         /// <summary>
-        /// Filter the import destination search entities based on selected destination entity
+        /// Filter the update destination search entities based on selected destination entity
         /// </summary>
         private void FilterDestinationSearchEntities()
         {
@@ -665,7 +665,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     // Convert enum description back to the enum
                     int destinationEntityID = EnumHelper.GetEnumFromDescription<DataImportEntity>(SelectedDestinationEntity).Value();
 
-                    // Filter the import destination data based on the import source
+                    // Filter the update destination data based on the update source
                     ImportRuleData destinationEntity = _importRules.Where(p => p.enDataImportEntity == destinationEntityID).FirstOrDefault();
 
                     // Add the default enum description
@@ -675,7 +675,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     {
                         string[] searchEntities = destinationEntity.SearchEntities.Split(';');
 
-                        // Add all the import destination enum decriptions to the collection
+                        // Add all the update destination enum decriptions to the collection
                         foreach (string searchEntity in searchEntities)
                         {
                             SearchEntityCollection.Add(searchEntity);

@@ -4,20 +4,20 @@
   <edmx:Runtime>
     <!-- SSDL content -->
     <edmx:StorageModels>
-    <Schema Namespace="MobileManagerModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2005" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+    <Schema Namespace="MobileManagerModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
         <EntityType Name="AuditLog">
           <Key>
             <PropertyRef Name="pkAuditLogID" />
           </Key>
           <Property Name="pkAuditLogID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="AuditGroup" Type="varchar" MaxLength="50" Nullable="false" />
-          <Property Name="AuditDescription" Type="varchar" MaxLength="255" Nullable="false" />
+          <Property Name="AuditGroup" Type="varchar" MaxLength="50" />
+          <Property Name="AuditDescription" Type="varchar" MaxLength="255" />
           <Property Name="AuditComment" Type="varchar" MaxLength="255" />
           <Property Name="EntityID" Type="int" />
           <Property Name="ChangedValue" Type="varchar" MaxLength="100" />
-          <Property Name="AuditDate" Type="datetime" Nullable="false" />
-          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
-          <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+          <Property Name="AuditDate" Type="datetime" />
+          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" />
+          <Property Name="ModifiedDate" Type="datetime" />
         </EntityType>
         <EntityType Name="BillingLevel">
           <Key>
@@ -95,7 +95,6 @@
             <PropertyRef Name="pkClientBillingID" />
           </Key>
           <Property Name="pkClientBillingID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="cellnumber" Type="varchar" MaxLength="50" />
           <Property Name="fkCompanyBillingLevelID" Type="int" />
           <Property Name="IsBillable" Type="bit" Nullable="false" />
           <Property Name="IsSplitBilling" Type="bit" Nullable="false" />
@@ -164,10 +163,6 @@
             <PropertyRef Name="pkContractID" />
           </Key>
           <Property Name="pkContractID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="imenumber" Type="varchar" MaxLength="50" />
-          <Property Name="statusname" Type="varchar" MaxLength="50" />
-          <Property Name="oldpackage" Type="varchar" MaxLength="50" />
-          <Property Name="newpackage" Type="varchar" MaxLength="50" />
           <Property Name="enCostType" Type="smallint" />
           <Property Name="CellNumber" Type="varchar" MaxLength="50" />
           <Property Name="fkStatusID" Type="int" Nullable="false" />
@@ -227,15 +222,10 @@
             <PropertyRef Name="pkDeviceID" />
           </Key>
           <Property Name="pkDeviceID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="fkContractID" Type="int" />
-          <Property Name="fkSimmCardID" Type="int" />
-          <Property Name="tmpimeno" Type="varchar" MaxLength="50" />
-          <Property Name="cellnumber" Type="varchar" MaxLength="50" />
-          <Property Name="make" Type="varchar" MaxLength="50" />
-          <Property Name="model" Type="varchar" MaxLength="50" />
-          <Property Name="status" Type="varchar" MaxLength="50" />
-          <Property Name="fkDeviceMakeID" Type="int" />
-          <Property Name="fkDeviceModelID" Type="int" />
+          <Property Name="fkContractID" Type="int" Nullable="false" />
+          <Property Name="fkSimCardID" Type="int" />
+          <Property Name="fkDeviceMakeID" Type="int" Nullable="false" />
+          <Property Name="fkDeviceModelID" Type="int" Nullable="false" />
           <Property Name="fkStatusID" Type="int" Nullable="false" />
           <Property Name="IMENumber" Type="varchar" MaxLength="20" Nullable="false" />
           <Property Name="SerialNumber" Type="varchar" MaxLength="20" />
@@ -387,12 +377,11 @@
           <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
         </EntityType>
-        <EntityType Name="SimmCard">
+        <EntityType Name="SimCard">
           <Key>
-            <PropertyRef Name="pkSimmCardID" />
+            <PropertyRef Name="pkSimCardID" />
           </Key>
-          <Property Name="pkSimmCardID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="statusname" Type="varchar" MaxLength="50" />
+          <Property Name="pkSimCardID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
           <Property Name="fkContractID" Type="int" />
           <Property Name="fkStatusID" Type="int" />
           <Property Name="CellNumber" Type="varchar" MaxLength="20" Nullable="false" />
@@ -658,7 +647,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Device_Contract">
-          <End Role="Contract" Type="Self.Contract" Multiplicity="0..1" />
+          <End Role="Contract" Type="Self.Contract" Multiplicity="1" />
           <End Role="Device" Type="Self.Device" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Contract">
@@ -670,7 +659,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Device_DeviceMake">
-          <End Role="DeviceMake" Type="Self.DeviceMake" Multiplicity="0..1" />
+          <End Role="DeviceMake" Type="Self.DeviceMake" Multiplicity="1" />
           <End Role="Device" Type="Self.Device" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="DeviceMake">
@@ -682,7 +671,7 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_Device_DeviceModel">
-          <End Role="DeviceModel" Type="Self.DeviceModel" Multiplicity="0..1" />
+          <End Role="DeviceModel" Type="Self.DeviceModel" Multiplicity="1" />
           <End Role="Device" Type="Self.Device" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="DeviceModel">
@@ -693,15 +682,15 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Device_SimmCard">
-          <End Role="SimmCard" Type="Self.SimmCard" Multiplicity="0..1" />
+        <Association Name="FK_Device_SimCard">
+          <End Role="SimCard" Type="Self.SimCard" Multiplicity="0..1" />
           <End Role="Device" Type="Self.Device" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="SimmCard">
-              <PropertyRef Name="pkSimmCardID" />
+            <Principal Role="SimCard">
+              <PropertyRef Name="pkSimCardID" />
             </Principal>
             <Dependent Role="Device">
-              <PropertyRef Name="fkSimmCardID" />
+              <PropertyRef Name="fkSimCardID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -789,26 +778,26 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_SimmCard_Contract">
+        <Association Name="FK_SimCard_Contract">
           <End Role="Contract" Type="Self.Contract" Multiplicity="0..1" />
-          <End Role="SimmCard" Type="Self.SimmCard" Multiplicity="*" />
+          <End Role="SimCard" Type="Self.SimCard" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Contract">
               <PropertyRef Name="pkContractID" />
             </Principal>
-            <Dependent Role="SimmCard">
+            <Dependent Role="SimCard">
               <PropertyRef Name="fkContractID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_SimmCard_Status">
+        <Association Name="FK_SimCard_Status">
           <End Role="Status" Type="Self.Status" Multiplicity="0..1" />
-          <End Role="SimmCard" Type="Self.SimmCard" Multiplicity="*" />
+          <End Role="SimCard" Type="Self.SimCard" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Status">
               <PropertyRef Name="pkStatusID" />
             </Principal>
-            <Dependent Role="SimmCard">
+            <Dependent Role="SimCard">
               <PropertyRef Name="fkStatusID" />
             </Dependent>
           </ReferentialConstraint>
@@ -904,7 +893,7 @@
           <EntitySet Name="Role" EntityType="Self.Role" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Service" EntityType="Self.Service" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="ServiceProvider" EntityType="Self.ServiceProvider" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="SimmCard" EntityType="Self.SimmCard" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="SimCard" EntityType="Self.SimCard" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Status" EntityType="Self.Status" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Suburb" EntityType="Self.Suburb" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="User" EntityType="Self.User" Schema="dbo" store:Type="Tables" />
@@ -990,8 +979,8 @@
             <End Role="DeviceModel" EntitySet="DeviceModel" />
             <End Role="Device" EntitySet="Device" />
           </AssociationSet>
-          <AssociationSet Name="FK_Device_SimmCard" Association="Self.FK_Device_SimmCard">
-            <End Role="SimmCard" EntitySet="SimmCard" />
+          <AssociationSet Name="FK_Device_SimCard" Association="Self.FK_Device_SimCard">
+            <End Role="SimCard" EntitySet="SimCard" />
             <End Role="Device" EntitySet="Device" />
           </AssociationSet>
           <AssociationSet Name="FK_Device_Status" Association="Self.FK_Device_Status">
@@ -1022,13 +1011,13 @@
             <End Role="ServiceProvider" EntitySet="ServiceProvider" />
             <End Role="Package" EntitySet="Package" />
           </AssociationSet>
-          <AssociationSet Name="FK_SimmCard_Contract" Association="Self.FK_SimmCard_Contract">
+          <AssociationSet Name="FK_SimCard_Contract" Association="Self.FK_SimCard_Contract">
             <End Role="Contract" EntitySet="Contract" />
-            <End Role="SimmCard" EntitySet="SimmCard" />
+            <End Role="SimCard" EntitySet="SimCard" />
           </AssociationSet>
-          <AssociationSet Name="FK_SimmCard_Status" Association="Self.FK_SimmCard_Status">
+          <AssociationSet Name="FK_SimCard_Status" Association="Self.FK_SimCard_Status">
             <End Role="Status" EntitySet="Status" />
-            <End Role="SimmCard" EntitySet="SimmCard" />
+            <End Role="SimCard" EntitySet="SimCard" />
           </AssociationSet>
           <AssociationSet Name="FK_Suburb_City" Association="Self.FK_Suburb_City">
             <End Role="City" EntitySet="City" />
@@ -1055,6 +1044,57 @@
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="MobileManagerModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityType Name="AuditLog">
+          <Key>
+            <PropertyRef Name="pkAuditLogID" />
+          </Key>
+          <Property Name="pkAuditLogID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="AuditGroup" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="AuditDescription" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="AuditComment" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="EntityID" Type="Int32" />
+          <Property Name="ChangedValue" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="AuditDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="BillingLevel">
+          <Key>
+            <PropertyRef Name="pkBillingLevelID" />
+          </Key>
+          <Property Name="pkBillingLevelID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="LevelDescription" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="CompanyBillingLevels" Relationship="Self.FK_CompanyBillingLevel_BillingLevel" FromRole="BillingLevel" ToRole="CompanyBillingLevel" />
+        </EntityType>
+        <EntityType Name="BillingProcess">
+          <Key>
+            <PropertyRef Name="pkBillingProcessID" />
+          </Key>
+          <Property Name="pkBillingProcessID" Type="Int32" Nullable="false" />
+          <Property Name="ProcessDescription" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <NavigationProperty Name="BillingProcessHistories" Relationship="Self.FK_BillingProcessHistory_BillingProcess" FromRole="BillingProcess" ToRole="BillingProcessHistory" />
+          <NavigationProperty Name="DataValidationExceptions" Relationship="Self.FK_DataValidationException_BillingProcess1" FromRole="BillingProcess" ToRole="DataValidationException" />
+        </EntityType>
+        <EntityType Name="BillingProcessHistory">
+          <Key>
+            <PropertyRef Name="pkBillingProcessHistoryID" />
+          </Key>
+          <Property Name="pkBillingProcessHistoryID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="fkBillingProcessID" Type="Int32" Nullable="false" />
+          <Property Name="BillingPeriod" Type="String" MaxLength="6" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ProcessStartDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="ProcessEndDate" Type="DateTime" Precision="3" />
+          <Property Name="ProcessCurrent" Type="Boolean" Nullable="false" />
+          <Property Name="ProcessResult" Type="Boolean" />
+          <Property Name="ProcessDuration" Type="Double" />
+          <Property Name="BillingComment" Type="Binary" MaxLength="255" FixedLength="false" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="DateModified" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="BillingProcess" Relationship="Self.FK_BillingProcessHistory_BillingProcess" FromRole="BillingProcessHistory" ToRole="BillingProcess" />
+        </EntityType>
         <EntityType Name="City">
           <Key>
             <PropertyRef Name="pkCityID" />
@@ -1068,6 +1108,30 @@
           <NavigationProperty Name="Province" Relationship="Self.FK_City_Province" FromRole="City" ToRole="Province" />
           <NavigationProperty Name="Suburbs" Relationship="Self.FK_Suburb_City" FromRole="City" ToRole="Suburb" />
         </EntityType>
+        <EntityType Name="ClientBilling">
+          <Key>
+            <PropertyRef Name="pkClientBillingID" />
+          </Key>
+          <Property Name="pkClientBillingID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="fkCompanyBillingLevelID" Type="Int32" />
+          <Property Name="IsBillable" Type="Boolean" Nullable="false" />
+          <Property Name="IsSplitBilling" Type="Boolean" Nullable="false" />
+          <Property Name="WDPAllowance" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="VoiceAllowance" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="SPLimit" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="InternationalDailing" Type="Boolean" Nullable="false" />
+          <Property Name="InternationalRoaming" Type="Boolean" Nullable="false" />
+          <Property Name="CountryVisiting" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="RoamingFromDate" Type="DateTime" Precision="3" />
+          <Property Name="RoamingToDate" Type="DateTime" Precision="3" />
+          <Property Name="StopBillingFromDate" Type="DateTime" Precision="3" />
+          <Property Name="StopBillingToDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="CompanyBillingLevel" Relationship="Self.FK_ClientBilling_CompanyBillingLevel" FromRole="ClientBilling" ToRole="CompanyBillingLevel" />
+          <NavigationProperty Name="Clients" Relationship="MobileManagerModel.FK_Client_ClientBilling" FromRole="ClientBilling" ToRole="Client" />
+        </EntityType>
         <EntityType Name="ClientLocation">
           <Key>
             <PropertyRef Name="pkClientLocationID" />
@@ -1079,34 +1143,119 @@
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="Clients" Relationship="MobileManagerModel.FK_Client_ClientLocation" FromRole="ClientLocation" ToRole="Client" />
         </EntityType>
-        <EntityType Name="Device">
+        <EntityType Name="Company">
           <Key>
-            <PropertyRef Name="pkDeviceID" />
+            <PropertyRef Name="pkCompanyID" />
           </Key>
-          <Property Name="pkDeviceID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="fkContractID" Type="Int32" />
-          <Property Name="fkSimmCardID" Type="Int32" />
-          <Property Name="tmpimeno" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="cellnumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="make" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="model" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="status" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="fkDeviceMakeID" Type="Int32" />
-          <Property Name="fkDeviceModelID" Type="Int32" />
-          <Property Name="fkStatusID" Type="Int32" Nullable="false" />
-          <Property Name="IMENumber" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="SerialNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="ReceiveDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="InsuranceCost" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="InsuranceValue" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="pkCompanyID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="fkCompanyGroupID" Type="Int32" Nullable="false" />
+          <Property Name="CompanyName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="WBSNumber" Type="String" MaxLength="25" FixedLength="false" Unicode="false" />
+          <Property Name="CostCode" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="AdminFee" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="IPAddress" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
           <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="DeviceMake" Relationship="Self.FK_Device_DeviceMake" FromRole="Device" ToRole="DeviceMake" />
-          <NavigationProperty Name="DeviceModel" Relationship="Self.FK_Device_DeviceModel" FromRole="Device" ToRole="DeviceModel" />
-          <NavigationProperty Name="SimmCard" Relationship="Self.FK_Device_SimmCard" FromRole="Device" ToRole="SimmCard" />
-          <NavigationProperty Name="Status1" Relationship="Self.FK_Device_Status" FromRole="Device" ToRole="Status" />
-          <NavigationProperty Name="Contract" Relationship="MobileManagerModel.FK_Device_Contract" FromRole="Device" ToRole="Contract" />
+          <NavigationProperty Name="CompanyGroup" Relationship="Self.FK_Company_CompanyGroup" FromRole="Company" ToRole="CompanyGroup" />
+          <NavigationProperty Name="CompanyBillingLevels" Relationship="Self.FK_CompanyBillingLevel_Company" FromRole="Company" ToRole="CompanyBillingLevel" />
+          <NavigationProperty Name="UserInCompanies" Relationship="Self.FK_UserInCompany_UserInCompany" FromRole="Company" ToRole="UserInCompany" />
+          <NavigationProperty Name="Clients" Relationship="MobileManagerModel.FK_Client_Company" FromRole="Company" ToRole="Client" />
+        </EntityType>
+        <EntityType Name="CompanyBillingLevel">
+          <Key>
+            <PropertyRef Name="pkCompanyBillingLevelID" />
+          </Key>
+          <Property Name="pkCompanyBillingLevelID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="fkCompanyID" Type="Int32" Nullable="false" />
+          <Property Name="fkBillingLevelID" Type="Int32" Nullable="false" />
+          <Property Name="Amount" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="BillingLevel" Relationship="Self.FK_CompanyBillingLevel_BillingLevel" FromRole="CompanyBillingLevel" ToRole="BillingLevel" />
+          <NavigationProperty Name="ClientBillings" Relationship="Self.FK_ClientBilling_CompanyBillingLevel" FromRole="CompanyBillingLevel" ToRole="ClientBilling" />
+          <NavigationProperty Name="Company" Relationship="Self.FK_CompanyBillingLevel_Company" FromRole="CompanyBillingLevel" ToRole="Company" />
+        </EntityType>
+        <EntityType Name="CompanyGroup">
+          <Key>
+            <PropertyRef Name="pkCompanyGroupID" />
+          </Key>
+          <Property Name="pkCompanyGroupID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="GroupName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Companies" Relationship="Self.FK_Company_CompanyGroup" FromRole="CompanyGroup" ToRole="Company" />
+        </EntityType>
+        <EntityType Name="Contract">
+          <Key>
+            <PropertyRef Name="pkContractID" />
+          </Key>
+          <Property Name="pkContractID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="enCostType" Type="Int16" />
+          <Property Name="CellNumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="fkStatusID" Type="Int32" Nullable="false" />
+          <Property Name="fkPackageID" Type="Int32" Nullable="false" />
+          <Property Name="fkPackageSetupID" Type="Int32" />
+          <Property Name="AccountNumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ContractStartDate" Type="DateTime" Precision="3" />
+          <Property Name="ContractUpgradeDate" Type="DateTime" Precision="3" />
+          <Property Name="ContractEndDate" Type="DateTime" Precision="3" />
+          <Property Name="PaymentCancelDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Package" Relationship="Self.FK_Contract_Package" FromRole="Contract" ToRole="Package" />
+          <NavigationProperty Name="PackageSetup" Relationship="Self.FK_Contract_PackageSetup" FromRole="Contract" ToRole="PackageSetup" />
+          <NavigationProperty Name="Status" Relationship="Self.FK_Contract_Status" FromRole="Contract" ToRole="Status" />
+          <NavigationProperty Name="Clients" Relationship="MobileManagerModel.FK_Client_Contract" FromRole="Contract" ToRole="Client" />
+          <NavigationProperty Name="Devices" Relationship="MobileManagerModel.FK_Device_Contract" FromRole="Contract" ToRole="Device" />
+          <NavigationProperty Name="SimCards" Relationship="MobileManagerModel.FK_SimCard_Contract" FromRole="Contract" ToRole="SimCard" />
+        </EntityType>
+        <EntityType Name="DataValidationException">
+          <Key>
+            <PropertyRef Name="pkDataValidationExceptionID" />
+          </Key>
+          <Property Name="pkDataValidationExceptionID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="BillingPeriod" Type="String" MaxLength="6" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="fkBillingProcessID" Type="Int32" Nullable="false" />
+          <Property Name="fkDataValidationPropertyID" Type="Int32" Nullable="false" />
+          <Property Name="enDataValidationEntity" Type="Int16" Nullable="false" />
+          <Property Name="DataValidationEntityID" Type="Int32" Nullable="false" />
+          <Property Name="Message" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
+          <Property Name="CanApplyRule" Type="Boolean" />
+          <Property Name="Result" Type="Boolean" />
+          <NavigationProperty Name="BillingProcess" Relationship="Self.FK_DataValidationException_BillingProcess1" FromRole="DataValidationException" ToRole="BillingProcess" />
+          <NavigationProperty Name="DataValidationProperty" Relationship="Self.FK_DataValidationException_DataValidationProperty" FromRole="DataValidationException" ToRole="DataValidationProperty" />
+        </EntityType>
+        <EntityType Name="DataValidationProperty">
+          <Key>
+            <PropertyRef Name="pkDataValidationPropertyID" />
+          </Key>
+          <Property Name="pkDataValidationPropertyID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="enDataValidationEntity" Type="Int16" Nullable="false" />
+          <Property Name="enDataValidationProperty" Type="Int16" Nullable="false" />
+          <Property Name="enDataType" Type="Int16" Nullable="false" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="DataValidationExceptions" Relationship="Self.FK_DataValidationException_DataValidationProperty" FromRole="DataValidationProperty" ToRole="DataValidationException" />
+          <NavigationProperty Name="DataValidationRules" Relationship="Self.FK_DataValidationRule_DataValidationProperty" FromRole="DataValidationProperty" ToRole="DataValidationRule" />
+        </EntityType>
+        <EntityType Name="DataValidationRule">
+          <Key>
+            <PropertyRef Name="pkDataValidationRuleID" />
+          </Key>
+          <Property Name="pkDataValidationRuleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="enValidationProcess" Type="Int16" Nullable="false" />
+          <Property Name="enDataValidationEntity" Type="Int16" Nullable="false" />
+          <Property Name="DataValidationEntityID" Type="Int32" Nullable="false" />
+          <Property Name="fkDataValidationPropertyID" Type="Int32" Nullable="false" />
+          <Property Name="enDataValidationOperator" Type="Int16" Nullable="false" />
+          <Property Name="DataValidationValue" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="DataValidationProperty" Relationship="Self.FK_DataValidationRule_DataValidationProperty" FromRole="DataValidationRule" ToRole="DataValidationProperty" />
         </EntityType>
         <EntityType Name="DeviceMake">
           <Key>
@@ -1117,8 +1266,8 @@
           <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="Devices" Relationship="Self.FK_Device_DeviceMake" FromRole="DeviceMake" ToRole="Device" />
           <NavigationProperty Name="DeviceModels" Relationship="Self.FK_DeviceModel_DeviceMake" FromRole="DeviceMake" ToRole="DeviceModel" />
+          <NavigationProperty Name="Devices" Relationship="MobileManagerModel.FK_Device_DeviceMake" FromRole="DeviceMake" ToRole="Device" />
         </EntityType>
         <EntityType Name="DeviceModel">
           <Key>
@@ -1130,8 +1279,97 @@
           <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="ModfiedDate" Type="DateTime" Precision="3" />
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="Devices" Relationship="Self.FK_Device_DeviceModel" FromRole="DeviceModel" ToRole="Device" />
           <NavigationProperty Name="DeviceMake" Relationship="Self.FK_DeviceModel_DeviceMake" FromRole="DeviceModel" ToRole="DeviceMake" />
+          <NavigationProperty Name="Devices" Relationship="MobileManagerModel.FK_Device_DeviceModel" FromRole="DeviceModel" ToRole="Device" />
+        </EntityType>
+        <EntityType Name="ImportRuleData">
+          <Key>
+            <PropertyRef Name="pkImportRuleDataID" />
+          </Key>
+          <Property Name="pkImportRuleDataID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="enDataImportColumn" Type="Int16" Nullable="false" />
+          <Property Name="enDataImportEntity" Type="Int16" Nullable="false" />
+          <Property Name="SearchEntities" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="DateModified" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <EntityType Name="Invoice">
+          <Key>
+            <PropertyRef Name="pkInvoiceID" />
+          </Key>
+          <Property Name="pkInvoiceID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="AccID" Type="Decimal" Precision="18" Scale="0" />
+          <Property Name="CellNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="EmpNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="Service" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ImeNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="fkClientID" Type="Int32" />
+          <Property Name="fkServiceID" Type="Int32" />
+          <Property Name="InvoicePeriod" Type="String" MaxLength="9" FixedLength="false" Unicode="false" />
+          <Property Name="InvoiceNumber" Type="String" MaxLength="60" FixedLength="false" Unicode="false" />
+          <Property Name="InvoiceDate" Type="DateTime" Precision="3" />
+          <Property Name="CompanyDue" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="PrivateDue" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="InvoiceTotal" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="IsPeriodClosed" Type="Boolean" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
+          <NavigationProperty Name="Service1" Relationship="Self.FK_Invoice_Service" FromRole="Invoice" ToRole="Service" />
+          <NavigationProperty Name="InvoiceDetails" Relationship="Self.FK_InvoiceDetail_Invoice" FromRole="Invoice" ToRole="InvoiceDetail" />
+          <NavigationProperty Name="Client" Relationship="MobileManagerModel.FK_Invoice_Client" FromRole="Invoice" ToRole="Client" />
+        </EntityType>
+        <EntityType Name="InvoiceDetail">
+          <Key>
+            <PropertyRef Name="pkInvoiceItemID" />
+          </Key>
+          <Property Name="pkInvoiceItemID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="fkInvoiceID" Type="Int32" Nullable="false" />
+          <Property Name="fkServiceProviderID" Type="Int32" Nullable="false" />
+          <Property Name="ItemDescription" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ReferenceNumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ItemAmount" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="IsPrivate" Type="Boolean" Nullable="false" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <NavigationProperty Name="Invoice" Relationship="Self.FK_InvoiceDetail_Invoice" FromRole="InvoiceDetail" ToRole="Invoice" />
+          <NavigationProperty Name="ServiceProvider" Relationship="Self.FK_InvoiceDetail_ServiceProvider" FromRole="InvoiceDetail" ToRole="ServiceProvider" />
+        </EntityType>
+        <EntityType Name="Package">
+          <Key>
+            <PropertyRef Name="pkPackageID" />
+          </Key>
+          <Property Name="pkPackageID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="fkServiceProviderID" Type="Int32" />
+          <Property Name="enPackageType" Type="Int16" />
+          <Property Name="PackageName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Cost" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="MBData" Type="Int32" Nullable="false" />
+          <Property Name="TalkTimeMinutes" Type="Int32" Nullable="false" />
+          <Property Name="SMSNumber" Type="Int32" Nullable="false" />
+          <Property Name="RandValue" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="SPULValue" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Contracts" Relationship="Self.FK_Contract_Package" FromRole="Package" ToRole="Contract" />
+          <NavigationProperty Name="ServiceProvider" Relationship="Self.FK_Package_ServiceProvider" FromRole="Package" ToRole="ServiceProvider" />
+        </EntityType>
+        <EntityType Name="PackageSetup">
+          <Key>
+            <PropertyRef Name="pkPackageSetupID" />
+          </Key>
+          <Property Name="pkPackageSetupID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Cost" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="MBData" Type="Int32" Nullable="false" />
+          <Property Name="TalkTimeMinutes" Type="Int32" Nullable="false" />
+          <Property Name="SMSNumber" Type="Int32" Nullable="false" />
+          <Property Name="RandValue" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="SPULValue" Type="Decimal" Precision="18" Scale="2" Nullable="false" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Contracts" Relationship="Self.FK_Contract_PackageSetup" FromRole="PackageSetup" ToRole="Contract" />
         </EntityType>
         <EntityType Name="Province">
           <Key>
@@ -1144,6 +1382,27 @@
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="Cities" Relationship="Self.FK_City_Province" FromRole="Province" ToRole="City" />
         </EntityType>
+        <EntityType Name="Role">
+          <Key>
+            <PropertyRef Name="pkRoleID" />
+          </Key>
+          <Property Name="pkRoleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="RoleName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="Description" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <NavigationProperty Name="UserInRoles" Relationship="Self.FK_UserInRole_Role" FromRole="Role" ToRole="UserInRole" />
+        </EntityType>
+        <EntityType Name="Service">
+          <Key>
+            <PropertyRef Name="pkServiceID" />
+          </Key>
+          <Property Name="pkServiceID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ServicePreFix" Type="String" MaxLength="3" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ServiceDescription" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Invoices" Relationship="Self.FK_Invoice_Service" FromRole="Service" ToRole="Invoice" />
+        </EntityType>
         <EntityType Name="ServiceProvider">
           <Key>
             <PropertyRef Name="pkServiceProviderID" />
@@ -1153,28 +1412,8 @@
           <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="InvoiceDetails" Relationship="MobileManagerModel.FK_InvoiceDetail_ServiceProvider" FromRole="ServiceProvider" ToRole="InvoiceDetail" />
-          <NavigationProperty Name="Packages" Relationship="MobileManagerModel.FK_Package_ServiceProvider" FromRole="ServiceProvider" ToRole="Package" />
-        </EntityType>
-        <EntityType Name="SimmCard">
-          <Key>
-            <PropertyRef Name="pkSimmCardID" />
-          </Key>
-          <Property Name="pkSimmCardID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="statusname" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="fkContractID" Type="Int32" />
-          <Property Name="fkStatusID" Type="Int32" />
-          <Property Name="CellNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="CardNumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="PinNumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="PUKNumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ReceiveDate" Type="DateTime" Precision="3" />
-          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="Devices" Relationship="Self.FK_Device_SimmCard" FromRole="SimmCard" ToRole="Device" />
-          <NavigationProperty Name="Status" Relationship="Self.FK_SimmCard_Status" FromRole="SimmCard" ToRole="Status" />
-          <NavigationProperty Name="Contract" Relationship="MobileManagerModel.FK_SimmCard_Contract" FromRole="SimmCard" ToRole="Contract" />
+          <NavigationProperty Name="InvoiceDetails" Relationship="Self.FK_InvoiceDetail_ServiceProvider" FromRole="ServiceProvider" ToRole="InvoiceDetail" />
+          <NavigationProperty Name="Packages" Relationship="Self.FK_Package_ServiceProvider" FromRole="ServiceProvider" ToRole="Package" />
         </EntityType>
         <EntityType Name="Status">
           <Key>
@@ -1186,9 +1425,9 @@
           <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
           <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="Devices" Relationship="Self.FK_Device_Status" FromRole="Status" ToRole="Device" />
-          <NavigationProperty Name="SimmCards" Relationship="Self.FK_SimmCard_Status" FromRole="Status" ToRole="SimmCard" />
-          <NavigationProperty Name="Contracts" Relationship="MobileManagerModel.FK_Contract_Status" FromRole="Status" ToRole="Contract" />
+          <NavigationProperty Name="Contracts" Relationship="Self.FK_Contract_Status" FromRole="Status" ToRole="Contract" />
+          <NavigationProperty Name="Devices" Relationship="MobileManagerModel.FK_Device_Status" FromRole="Status" ToRole="Device" />
+          <NavigationProperty Name="SimCards" Relationship="MobileManagerModel.FK_SimCard_Status" FromRole="Status" ToRole="SimCard" />
         </EntityType>
         <EntityType Name="Suburb">
           <Key>
@@ -1204,6 +1443,74 @@
           <NavigationProperty Name="City" Relationship="Self.FK_Suburb_City" FromRole="Suburb" ToRole="City" />
           <NavigationProperty Name="Clients" Relationship="MobileManagerModel.FK_Client_Suburb" FromRole="Suburb" ToRole="Client" />
         </EntityType>
+        <EntityType Name="User">
+          <Key>
+            <PropertyRef Name="pkUserID" />
+          </Key>
+          <Property Name="pkUserID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
+          <Property Name="UserFullName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
+          <Property Name="LastActivityDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="UserInCompanies" Relationship="Self.FK_UserInCompany_User" FromRole="User" ToRole="UserInCompany" />
+          <NavigationProperty Name="UserInRoles" Relationship="Self.FK_UserInRole_User" FromRole="User" ToRole="UserInRole" />
+        </EntityType>
+        <EntityType Name="UserInCompany">
+          <Key>
+            <PropertyRef Name="pkUserInCompanyID" />
+          </Key>
+          <Property Name="pkUserInCompanyID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="fkUserID" Type="Int32" Nullable="false" />
+          <Property Name="fkCompanyID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Company" Relationship="Self.FK_UserInCompany_UserInCompany" FromRole="UserInCompany" ToRole="Company" />
+          <NavigationProperty Name="User" Relationship="Self.FK_UserInCompany_User" FromRole="UserInCompany" ToRole="User" />
+        </EntityType>
+        <EntityType Name="UserInRole">
+          <Key>
+            <PropertyRef Name="pkUserInRoleID" />
+          </Key>
+          <Property Name="pkUserInRoleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="fkUserID" Type="Int32" Nullable="false" />
+          <Property Name="fkRoleID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="Role" Relationship="Self.FK_UserInRole_Role" FromRole="UserInRole" ToRole="Role" />
+          <NavigationProperty Name="User" Relationship="Self.FK_UserInRole_User" FromRole="UserInRole" ToRole="User" />
+        </EntityType>
+        <Association Name="FK_CompanyBillingLevel_BillingLevel">
+          <End Role="BillingLevel" Type="Self.BillingLevel" Multiplicity="1" />
+          <End Role="CompanyBillingLevel" Type="Self.CompanyBillingLevel" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BillingLevel">
+              <PropertyRef Name="pkBillingLevelID" />
+            </Principal>
+            <Dependent Role="CompanyBillingLevel">
+              <PropertyRef Name="fkBillingLevelID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_BillingProcessHistory_BillingProcess">
+          <End Role="BillingProcess" Type="Self.BillingProcess" Multiplicity="1" />
+          <End Role="BillingProcessHistory" Type="Self.BillingProcessHistory" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BillingProcess">
+              <PropertyRef Name="pkBillingProcessID" />
+            </Principal>
+            <Dependent Role="BillingProcessHistory">
+              <PropertyRef Name="fkBillingProcessID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_DataValidationException_BillingProcess1">
+          <End Role="BillingProcess" Type="Self.BillingProcess" Multiplicity="1" />
+          <End Role="DataValidationException" Type="Self.DataValidationException" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="BillingProcess">
+              <PropertyRef Name="pkBillingProcessID" />
+            </Principal>
+            <Dependent Role="DataValidationException">
+              <PropertyRef Name="fkBillingProcessID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
         <Association Name="FK_City_Province">
           <End Role="Province" Type="Self.Province" Multiplicity="1" />
           <End Role="City" Type="Self.City" Multiplicity="*" />
@@ -1228,51 +1535,111 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Device_DeviceMake">
-          <End Role="DeviceMake" Type="Self.DeviceMake" Multiplicity="0..1" />
-          <End Role="Device" Type="Self.Device" Multiplicity="*" />
+        <Association Name="FK_ClientBilling_CompanyBillingLevel">
+          <End Role="CompanyBillingLevel" Type="Self.CompanyBillingLevel" Multiplicity="0..1" />
+          <End Role="ClientBilling" Type="Self.ClientBilling" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="DeviceMake">
-              <PropertyRef Name="pkDeviceMakeID" />
+            <Principal Role="CompanyBillingLevel">
+              <PropertyRef Name="pkCompanyBillingLevelID" />
             </Principal>
-            <Dependent Role="Device">
-              <PropertyRef Name="fkDeviceMakeID" />
+            <Dependent Role="ClientBilling">
+              <PropertyRef Name="fkCompanyBillingLevelID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Device_DeviceModel">
-          <End Role="DeviceModel" Type="Self.DeviceModel" Multiplicity="0..1" />
-          <End Role="Device" Type="Self.Device" Multiplicity="*" />
+        <Association Name="FK_Company_CompanyGroup">
+          <End Role="CompanyGroup" Type="Self.CompanyGroup" Multiplicity="1" />
+          <End Role="Company" Type="Self.Company" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="DeviceModel">
-              <PropertyRef Name="pkDeviceModelID" />
+            <Principal Role="CompanyGroup">
+              <PropertyRef Name="pkCompanyGroupID" />
             </Principal>
-            <Dependent Role="Device">
-              <PropertyRef Name="fkDeviceModelID" />
+            <Dependent Role="Company">
+              <PropertyRef Name="fkCompanyGroupID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Device_SimmCard">
-          <End Role="SimmCard" Type="Self.SimmCard" Multiplicity="0..1" />
-          <End Role="Device" Type="Self.Device" Multiplicity="*" />
+        <Association Name="FK_CompanyBillingLevel_Company">
+          <End Role="Company" Type="Self.Company" Multiplicity="1" />
+          <End Role="CompanyBillingLevel" Type="Self.CompanyBillingLevel" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="SimmCard">
-              <PropertyRef Name="pkSimmCardID" />
+            <Principal Role="Company">
+              <PropertyRef Name="pkCompanyID" />
             </Principal>
-            <Dependent Role="Device">
-              <PropertyRef Name="fkSimmCardID" />
+            <Dependent Role="CompanyBillingLevel">
+              <PropertyRef Name="fkCompanyID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Device_Status">
+        <Association Name="FK_UserInCompany_UserInCompany">
+          <End Role="Company" Type="Self.Company" Multiplicity="1" />
+          <End Role="UserInCompany" Type="Self.UserInCompany" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="pkCompanyID" />
+            </Principal>
+            <Dependent Role="UserInCompany">
+              <PropertyRef Name="fkCompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Contract_Package">
+          <End Role="Package" Type="Self.Package" Multiplicity="1" />
+          <End Role="Contract" Type="Self.Contract" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Package">
+              <PropertyRef Name="pkPackageID" />
+            </Principal>
+            <Dependent Role="Contract">
+              <PropertyRef Name="fkPackageID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Contract_PackageSetup">
+          <End Role="PackageSetup" Type="Self.PackageSetup" Multiplicity="0..1" />
+          <End Role="Contract" Type="Self.Contract" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="PackageSetup">
+              <PropertyRef Name="pkPackageSetupID" />
+            </Principal>
+            <Dependent Role="Contract">
+              <PropertyRef Name="fkPackageSetupID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Contract_Status">
           <End Role="Status" Type="Self.Status" Multiplicity="1" />
-          <End Role="Device" Type="Self.Device" Multiplicity="*" />
+          <End Role="Contract" Type="Self.Contract" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Status">
               <PropertyRef Name="pkStatusID" />
             </Principal>
-            <Dependent Role="Device">
+            <Dependent Role="Contract">
               <PropertyRef Name="fkStatusID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_DataValidationException_DataValidationProperty">
+          <End Role="DataValidationProperty" Type="Self.DataValidationProperty" Multiplicity="1" />
+          <End Role="DataValidationException" Type="Self.DataValidationException" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DataValidationProperty">
+              <PropertyRef Name="pkDataValidationPropertyID" />
+            </Principal>
+            <Dependent Role="DataValidationException">
+              <PropertyRef Name="fkDataValidationPropertyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_DataValidationRule_DataValidationProperty">
+          <End Role="DataValidationProperty" Type="Self.DataValidationProperty" Multiplicity="1" />
+          <End Role="DataValidationRule" Type="Self.DataValidationRule" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="DataValidationProperty">
+              <PropertyRef Name="pkDataValidationPropertyID" />
+            </Principal>
+            <Dependent Role="DataValidationRule">
+              <PropertyRef Name="fkDataValidationPropertyID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1288,341 +1655,9 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_SimmCard_Status">
-          <End Role="Status" Type="Self.Status" Multiplicity="0..1" />
-          <End Role="SimmCard" Type="Self.SimmCard" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Status">
-              <PropertyRef Name="pkStatusID" />
-            </Principal>
-            <Dependent Role="SimmCard">
-              <PropertyRef Name="fkStatusID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <EntityContainer Name="MobileManagerEntities" annotation:LazyLoadingEnabled="true">
-          <EntitySet Name="Cities" EntityType="Self.City" />
-          <EntitySet Name="ClientLocations" EntityType="Self.ClientLocation" />
-          <EntitySet Name="Devices" EntityType="Self.Device" />
-          <EntitySet Name="DeviceMakes" EntityType="Self.DeviceMake" />
-          <EntitySet Name="DeviceModels" EntityType="Self.DeviceModel" />
-          <EntitySet Name="Provinces" EntityType="Self.Province" />
-          <EntitySet Name="ServiceProviders" EntityType="Self.ServiceProvider" />
-          <EntitySet Name="SimmCards" EntityType="Self.SimmCard" />
-          <EntitySet Name="Status" EntityType="Self.Status" />
-          <EntitySet Name="Suburbs" EntityType="Self.Suburb" />
-          <AssociationSet Name="FK_City_Province" Association="Self.FK_City_Province">
-            <End Role="Province" EntitySet="Provinces" />
-            <End Role="City" EntitySet="Cities" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Suburb_City" Association="Self.FK_Suburb_City">
-            <End Role="City" EntitySet="Cities" />
-            <End Role="Suburb" EntitySet="Suburbs" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Device_DeviceMake" Association="Self.FK_Device_DeviceMake">
-            <End Role="DeviceMake" EntitySet="DeviceMakes" />
-            <End Role="Device" EntitySet="Devices" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Device_DeviceModel" Association="Self.FK_Device_DeviceModel">
-            <End Role="DeviceModel" EntitySet="DeviceModels" />
-            <End Role="Device" EntitySet="Devices" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Device_SimmCard" Association="Self.FK_Device_SimmCard">
-            <End Role="SimmCard" EntitySet="SimmCards" />
-            <End Role="Device" EntitySet="Devices" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Device_Status" Association="Self.FK_Device_Status">
-            <End Role="Status" EntitySet="Status" />
-            <End Role="Device" EntitySet="Devices" />
-          </AssociationSet>
-          <AssociationSet Name="FK_DeviceModel_DeviceMake" Association="Self.FK_DeviceModel_DeviceMake">
-            <End Role="DeviceMake" EntitySet="DeviceMakes" />
-            <End Role="DeviceModel" EntitySet="DeviceModels" />
-          </AssociationSet>
-          <AssociationSet Name="FK_SimmCard_Status" Association="Self.FK_SimmCard_Status">
-            <End Role="Status" EntitySet="Status" />
-            <End Role="SimmCard" EntitySet="SimmCards" />
-          </AssociationSet>
-          <EntitySet Name="Roles" EntityType="MobileManagerModel.Role" />
-          <EntitySet Name="Users" EntityType="MobileManagerModel.User" />
-          <EntitySet Name="UserInCompanies" EntityType="MobileManagerModel.UserInCompany" />
-          <EntitySet Name="UserInRoles" EntityType="MobileManagerModel.UserInRole" />
-          <AssociationSet Name="FK_UserInRole_Role" Association="MobileManagerModel.FK_UserInRole_Role">
-            <End Role="Role" EntitySet="Roles" />
-            <End Role="UserInRole" EntitySet="UserInRoles" />
-          </AssociationSet>
-          <AssociationSet Name="FK_UserInCompany_User" Association="MobileManagerModel.FK_UserInCompany_User">
-            <End Role="User" EntitySet="Users" />
-            <End Role="UserInCompany" EntitySet="UserInCompanies" />
-          </AssociationSet>
-          <AssociationSet Name="FK_UserInRole_User" Association="MobileManagerModel.FK_UserInRole_User">
-            <End Role="User" EntitySet="Users" />
-            <End Role="UserInRole" EntitySet="UserInRoles" />
-          </AssociationSet>
-          <EntitySet Name="InvoiceDetails" EntityType="MobileManagerModel.InvoiceDetail" />
-          <AssociationSet Name="FK_InvoiceDetail_ServiceProvider" Association="MobileManagerModel.FK_InvoiceDetail_ServiceProvider">
-            <End Role="ServiceProvider" EntitySet="ServiceProviders" />
-            <End Role="InvoiceDetail" EntitySet="InvoiceDetails" />
-          </AssociationSet>
-          <EntitySet Name="Services" EntityType="MobileManagerModel.Service" />
-          <EntitySet Name="Invoices" EntityType="MobileManagerModel.Invoice" />
-          <AssociationSet Name="FK_Invoice_Service" Association="MobileManagerModel.FK_Invoice_Service">
-            <End EntitySet="Services" Role="Service" />
-            <End EntitySet="Invoices" Role="Invoice" />
-          </AssociationSet>
-          <AssociationSet Name="FK_InvoiceDetail_Invoice" Association="MobileManagerModel.FK_InvoiceDetail_Invoice">
-            <End Role="Invoice" EntitySet="Invoices" />
-            <End Role="InvoiceDetail" EntitySet="InvoiceDetails" />
-          </AssociationSet>
-          <FunctionImport Name="sp_report_Invoice" ReturnType="Collection(MobileManagerModel.sp_report_Invoice_Result)">
-          <Parameter Name="invoiceID" Mode="In" Type="Int32" />
-          </FunctionImport>
-          <EntitySet Name="BillingLevels" EntityType="MobileManagerModel.BillingLevel" />
-          <EntitySet Name="ClientBillings" EntityType="MobileManagerModel.ClientBilling" />
-          <EntitySet Name="CompanyBillingLevels" EntityType="MobileManagerModel.CompanyBillingLevel" />
-          <AssociationSet Name="FK_CompanyBillingLevel_BillingLevel" Association="MobileManagerModel.FK_CompanyBillingLevel_BillingLevel">
-            <End Role="BillingLevel" EntitySet="BillingLevels" />
-            <End Role="CompanyBillingLevel" EntitySet="CompanyBillingLevels" />
-          </AssociationSet>
-          <AssociationSet Name="FK_ClientBilling_CompanyBillingLevel" Association="MobileManagerModel.FK_ClientBilling_CompanyBillingLevel">
-            <End Role="CompanyBillingLevel" EntitySet="CompanyBillingLevels" />
-            <End Role="ClientBilling" EntitySet="ClientBillings" />
-          </AssociationSet>
-          <EntitySet Name="Clients" EntityType="MobileManagerModel.Client" />
-          <EntitySet Name="Packages" EntityType="MobileManagerModel.Package" />
-          <AssociationSet Name="FK_Client_ClientBilling" Association="MobileManagerModel.FK_Client_ClientBilling">
-            <End Role="ClientBilling" EntitySet="ClientBillings" />
-            <End Role="Client" EntitySet="Clients" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Client_ClientLocation" Association="MobileManagerModel.FK_Client_ClientLocation">
-            <End Role="ClientLocation" EntitySet="ClientLocations" />
-            <End Role="Client" EntitySet="Clients" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Client_Suburb" Association="MobileManagerModel.FK_Client_Suburb">
-            <End Role="Suburb" EntitySet="Suburbs" />
-            <End Role="Client" EntitySet="Clients" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Invoice_Client" Association="MobileManagerModel.FK_Invoice_Client">
-            <End Role="Client" EntitySet="Clients" />
-            <End Role="Invoice" EntitySet="Invoices" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Package_ServiceProvider" Association="MobileManagerModel.FK_Package_ServiceProvider">
-            <End Role="ServiceProvider" EntitySet="ServiceProviders" />
-            <End Role="Package" EntitySet="Packages" />
-          </AssociationSet>
-          <EntitySet Name="Contracts" EntityType="MobileManagerModel.Contract" />
-          <EntitySet Name="PackageSetups" EntityType="MobileManagerModel.PackageSetup" />
-          <AssociationSet Name="FK_Client_Contract" Association="MobileManagerModel.FK_Client_Contract">
-            <End Role="Contract" EntitySet="Contracts" />
-            <End Role="Client" EntitySet="Clients" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Contract_Package" Association="MobileManagerModel.FK_Contract_Package">
-            <End Role="Package" EntitySet="Packages" />
-            <End Role="Contract" EntitySet="Contracts" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Contract_PackageSetup" Association="MobileManagerModel.FK_Contract_PackageSetup">
-            <End Role="PackageSetup" EntitySet="PackageSetups" />
-            <End Role="Contract" EntitySet="Contracts" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Contract_Status" Association="MobileManagerModel.FK_Contract_Status">
-            <End Role="Status" EntitySet="Status" />
-            <End Role="Contract" EntitySet="Contracts" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Device_Contract" Association="MobileManagerModel.FK_Device_Contract">
-            <End Role="Contract" EntitySet="Contracts" />
-            <End Role="Device" EntitySet="Devices" />
-          </AssociationSet>
-          <AssociationSet Name="FK_SimmCard_Contract" Association="MobileManagerModel.FK_SimmCard_Contract">
-            <End Role="Contract" EntitySet="Contracts" />
-            <End Role="SimmCard" EntitySet="SimmCards" />
-          </AssociationSet>
-          <EntitySet Name="BillingProcesses" EntityType="MobileManagerModel.BillingProcess" />
-          <EntitySet Name="BillingProcessHistories" EntityType="MobileManagerModel.BillingProcessHistory" />
-          <AssociationSet Name="FK_BillingProcessHistory_BillingProcess" Association="MobileManagerModel.FK_BillingProcessHistory_BillingProcess">
-            <End Role="BillingProcess" EntitySet="BillingProcesses" />
-            <End Role="BillingProcessHistory" EntitySet="BillingProcessHistories" />
-          </AssociationSet>
-          <EntitySet Name="AuditLogs" EntityType="MobileManagerModel.AuditLog" />
-          <EntitySet Name="CompanyGroups" EntityType="MobileManagerModel.CompanyGroup" />
-          <EntitySet Name="Companies" EntityType="MobileManagerModel.Company" />
-          <AssociationSet Name="FK_Client_Company" Association="MobileManagerModel.FK_Client_Company">
-            <End Role="Company" EntitySet="Companies" />
-            <End Role="Client" EntitySet="Clients" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Company_CompanyGroup" Association="MobileManagerModel.FK_Company_CompanyGroup">
-            <End Role="CompanyGroup" EntitySet="CompanyGroups" />
-            <End Role="Company" EntitySet="Companies" />
-          </AssociationSet>
-          <AssociationSet Name="FK_CompanyBillingLevel_Company" Association="MobileManagerModel.FK_CompanyBillingLevel_Company">
-            <End Role="Company" EntitySet="Companies" />
-            <End Role="CompanyBillingLevel" EntitySet="CompanyBillingLevels" />
-          </AssociationSet>
-          <AssociationSet Name="FK_UserInCompany_UserInCompany" Association="MobileManagerModel.FK_UserInCompany_UserInCompany">
-            <End Role="Company" EntitySet="Companies" />
-            <End Role="UserInCompany" EntitySet="UserInCompanies" />
-          </AssociationSet>
-          <EntitySet Name="DataValidationExceptions" EntityType="MobileManagerModel.DataValidationException" />
-          <EntitySet Name="DataValidationProperties" EntityType="MobileManagerModel.DataValidationProperty" />
-          <EntitySet Name="DataValidationRules" EntityType="MobileManagerModel.DataValidationRule" />
-          <EntitySet Name="ImportRuleDatas" EntityType="MobileManagerModel.ImportRuleData" />
-          <AssociationSet Name="FK_DataValidationException_BillingProcess1" Association="MobileManagerModel.FK_DataValidationException_BillingProcess1">
-            <End Role="BillingProcess" EntitySet="BillingProcesses" />
-            <End Role="DataValidationException" EntitySet="DataValidationExceptions" />
-          </AssociationSet>
-          <AssociationSet Name="FK_DataValidationException_DataValidationProperty" Association="MobileManagerModel.FK_DataValidationException_DataValidationProperty">
-            <End Role="DataValidationProperty" EntitySet="DataValidationProperties" />
-            <End Role="DataValidationException" EntitySet="DataValidationExceptions" />
-          </AssociationSet>
-          <AssociationSet Name="FK_DataValidationRule_DataValidationProperty" Association="MobileManagerModel.FK_DataValidationRule_DataValidationProperty">
-            <End Role="DataValidationProperty" EntitySet="DataValidationProperties" />
-            <End Role="DataValidationRule" EntitySet="DataValidationRules" />
-          </AssociationSet>
-          </EntityContainer>
-        <EntityType Name="Role">
-          <Key>
-            <PropertyRef Name="pkRoleID" />
-          </Key>
-          <Property Name="pkRoleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="RoleName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="Description" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <NavigationProperty Name="UserInRoles" Relationship="MobileManagerModel.FK_UserInRole_Role" FromRole="Role" ToRole="UserInRole" />
-        </EntityType>
-        <EntityType Name="User">
-          <Key>
-            <PropertyRef Name="pkUserID" />
-          </Key>
-          <Property Name="pkUserID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="UserName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="UserFullName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="LastActivityDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="UserInCompanies" Relationship="MobileManagerModel.FK_UserInCompany_User" FromRole="User" ToRole="UserInCompany" />
-          <NavigationProperty Name="UserInRoles" Relationship="MobileManagerModel.FK_UserInRole_User" FromRole="User" ToRole="UserInRole" />
-        </EntityType>
-        <EntityType Name="UserInCompany">
-          <Key>
-            <PropertyRef Name="pkUserInCompanyID" />
-          </Key>
-          <Property Name="pkUserInCompanyID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="fkUserID" Type="Int32" Nullable="false" />
-          <Property Name="fkCompanyID" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="User" Relationship="MobileManagerModel.FK_UserInCompany_User" FromRole="UserInCompany" ToRole="User" />
-          <NavigationProperty Name="Company" Relationship="MobileManagerModel.FK_UserInCompany_UserInCompany" FromRole="UserInCompany" ToRole="Company" />
-        </EntityType>
-        <EntityType Name="UserInRole">
-          <Key>
-            <PropertyRef Name="pkUserInRoleID" />
-          </Key>
-          <Property Name="pkUserInRoleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="fkUserID" Type="Int32" Nullable="false" />
-          <Property Name="fkRoleID" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="Role" Relationship="MobileManagerModel.FK_UserInRole_Role" FromRole="UserInRole" ToRole="Role" />
-          <NavigationProperty Name="User" Relationship="MobileManagerModel.FK_UserInRole_User" FromRole="UserInRole" ToRole="User" />
-        </EntityType>
-        <Association Name="FK_UserInRole_Role">
-          <End Type="MobileManagerModel.Role" Role="Role" Multiplicity="1" />
-          <End Type="MobileManagerModel.UserInRole" Role="UserInRole" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Role">
-              <PropertyRef Name="pkRoleID" />
-            </Principal>
-            <Dependent Role="UserInRole">
-              <PropertyRef Name="fkRoleID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_UserInCompany_User">
-          <End Type="MobileManagerModel.User" Role="User" Multiplicity="1" />
-          <End Type="MobileManagerModel.UserInCompany" Role="UserInCompany" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="User">
-              <PropertyRef Name="pkUserID" />
-            </Principal>
-            <Dependent Role="UserInCompany">
-              <PropertyRef Name="fkUserID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_UserInRole_User">
-          <End Type="MobileManagerModel.User" Role="User" Multiplicity="1" />
-          <End Type="MobileManagerModel.UserInRole" Role="UserInRole" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="User">
-              <PropertyRef Name="pkUserID" />
-            </Principal>
-            <Dependent Role="UserInRole">
-              <PropertyRef Name="fkUserID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <EntityType Name="InvoiceDetail">
-          <Key>
-            <PropertyRef Name="pkInvoiceItemID" />
-          </Key>
-          <Property Name="pkInvoiceItemID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="fkInvoiceID" Type="Int32" Nullable="false" />
-          <Property Name="fkServiceProviderID" Type="Int32" Nullable="false" />
-          <Property Name="ItemDescription" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ReferenceNumber" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ItemAmount" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
-          <Property Name="IsPrivate" Type="Boolean" Nullable="false" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="ServiceProvider" Relationship="MobileManagerModel.FK_InvoiceDetail_ServiceProvider" FromRole="InvoiceDetail" ToRole="ServiceProvider" />
-          <NavigationProperty Name="Invoice" Relationship="MobileManagerModel.FK_InvoiceDetail_Invoice" FromRole="InvoiceDetail" ToRole="Invoice" />
-        </EntityType>
-        <Association Name="FK_InvoiceDetail_ServiceProvider">
-          <End Type="MobileManagerModel.ServiceProvider" Role="ServiceProvider" Multiplicity="1" />
-          <End Type="MobileManagerModel.InvoiceDetail" Role="InvoiceDetail" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="ServiceProvider">
-              <PropertyRef Name="pkServiceProviderID" />
-            </Principal>
-            <Dependent Role="InvoiceDetail">
-              <PropertyRef Name="fkServiceProviderID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <EntityType Name="Service">
-          <Key>
-            <PropertyRef Name="pkServiceID" />
-          </Key>
-          <Property Name="pkServiceID" Nullable="false" annotation:StoreGeneratedPattern="Identity" Type="Int32" />
-          <Property Name="ServicePreFix" Nullable="false" MaxLength="3" FixedLength="false" Unicode="false" Type="String" />
-          <Property Name="ServiceDescription" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" Type="String" />
-          <Property Name="ModifiedBy" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" Type="String" />
-          <Property Name="ModifiedDate" Nullable="false" Precision="3" Type="DateTime" />
-          <Property Name="IsActive" Nullable="false" Type="Boolean" />
-          <NavigationProperty Name="Invoices" Relationship="MobileManagerModel.FK_Invoice_Service" FromRole="Service" ToRole="Invoice" />
-        </EntityType>
-        <EntityType Name="Invoice">
-          <Key>
-            <PropertyRef Name="pkInvoiceID" />
-          </Key>
-          <Property Name="pkInvoiceID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="AccID" Type="Decimal" Precision="18" Scale="0" />
-          <Property Name="CellNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="EmpNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="Service" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ImeNo" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="fkClientID" Type="Int32" />
-          <Property Name="fkServiceID" Type="Int32" />
-          <Property Name="InvoicePeriod" Type="String" MaxLength="9" FixedLength="false" Unicode="false" />
-          <Property Name="InvoiceNumber" Type="String" MaxLength="60" FixedLength="false" Unicode="false" />
-          <Property Name="InvoiceDate" Type="DateTime" Precision="3" />
-          <Property Name="CompanyDue" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="PrivateDue" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="InvoiceTotal" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="IsPeriodClosed" Type="Boolean" />
-          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
-          <NavigationProperty Name="Service1" Relationship="MobileManagerModel.FK_Invoice_Service" FromRole="Invoice" ToRole="Service" />
-          <NavigationProperty Name="InvoiceDetails" Relationship="MobileManagerModel.FK_InvoiceDetail_Invoice" FromRole="Invoice" ToRole="InvoiceDetail" />
-          <NavigationProperty Name="Client" Relationship="MobileManagerModel.FK_Invoice_Client" FromRole="Invoice" ToRole="Client" />
-        </EntityType>
         <Association Name="FK_Invoice_Service">
-          <End Type="MobileManagerModel.Service" Multiplicity="0..1" Role="Service" />
-          <End Type="MobileManagerModel.Invoice" Multiplicity="*" Role="Invoice" />
+          <End Role="Service" Type="Self.Service" Multiplicity="0..1" />
+          <End Role="Invoice" Type="Self.Invoice" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Service">
               <PropertyRef Name="pkServiceID" />
@@ -1633,8 +1668,8 @@
           </ReferentialConstraint>
         </Association>
         <Association Name="FK_InvoiceDetail_Invoice">
-          <End Type="MobileManagerModel.Invoice" Role="Invoice" Multiplicity="1" />
-          <End Type="MobileManagerModel.InvoiceDetail" Role="InvoiceDetail" Multiplicity="*" />
+          <End Role="Invoice" Type="Self.Invoice" Multiplicity="1" />
+          <End Role="InvoiceDetail" Type="Self.InvoiceDetail" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Invoice">
               <PropertyRef Name="pkInvoiceID" />
@@ -1644,6 +1679,244 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <Association Name="FK_InvoiceDetail_ServiceProvider">
+          <End Role="ServiceProvider" Type="Self.ServiceProvider" Multiplicity="1" />
+          <End Role="InvoiceDetail" Type="Self.InvoiceDetail" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ServiceProvider">
+              <PropertyRef Name="pkServiceProviderID" />
+            </Principal>
+            <Dependent Role="InvoiceDetail">
+              <PropertyRef Name="fkServiceProviderID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Package_ServiceProvider">
+          <End Role="ServiceProvider" Type="Self.ServiceProvider" Multiplicity="0..1" />
+          <End Role="Package" Type="Self.Package" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ServiceProvider">
+              <PropertyRef Name="pkServiceProviderID" />
+            </Principal>
+            <Dependent Role="Package">
+              <PropertyRef Name="fkServiceProviderID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UserInRole_Role">
+          <End Role="Role" Type="Self.Role" Multiplicity="1" />
+          <End Role="UserInRole" Type="Self.UserInRole" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Role">
+              <PropertyRef Name="pkRoleID" />
+            </Principal>
+            <Dependent Role="UserInRole">
+              <PropertyRef Name="fkRoleID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UserInCompany_User">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="UserInCompany" Type="Self.UserInCompany" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="pkUserID" />
+            </Principal>
+            <Dependent Role="UserInCompany">
+              <PropertyRef Name="fkUserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UserInRole_User">
+          <End Role="User" Type="Self.User" Multiplicity="1" />
+          <End Role="UserInRole" Type="Self.UserInRole" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="pkUserID" />
+            </Principal>
+            <Dependent Role="UserInRole">
+              <PropertyRef Name="fkUserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="MobileManagerEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="AuditLogs" EntityType="Self.AuditLog" />
+          <EntitySet Name="BillingLevels" EntityType="Self.BillingLevel" />
+          <EntitySet Name="BillingProcesses" EntityType="Self.BillingProcess" />
+          <EntitySet Name="BillingProcessHistories" EntityType="Self.BillingProcessHistory" />
+          <EntitySet Name="Cities" EntityType="Self.City" />
+          <EntitySet Name="ClientBillings" EntityType="Self.ClientBilling" />
+          <EntitySet Name="ClientLocations" EntityType="Self.ClientLocation" />
+          <EntitySet Name="Companies" EntityType="Self.Company" />
+          <EntitySet Name="CompanyBillingLevels" EntityType="Self.CompanyBillingLevel" />
+          <EntitySet Name="CompanyGroups" EntityType="Self.CompanyGroup" />
+          <EntitySet Name="Contracts" EntityType="Self.Contract" />
+          <EntitySet Name="DataValidationExceptions" EntityType="Self.DataValidationException" />
+          <EntitySet Name="DataValidationProperties" EntityType="Self.DataValidationProperty" />
+          <EntitySet Name="DataValidationRules" EntityType="Self.DataValidationRule" />
+          <EntitySet Name="DeviceMakes" EntityType="Self.DeviceMake" />
+          <EntitySet Name="DeviceModels" EntityType="Self.DeviceModel" />
+          <EntitySet Name="ImportRuleDatas" EntityType="Self.ImportRuleData" />
+          <EntitySet Name="Invoices" EntityType="Self.Invoice" />
+          <EntitySet Name="InvoiceDetails" EntityType="Self.InvoiceDetail" />
+          <EntitySet Name="Packages" EntityType="Self.Package" />
+          <EntitySet Name="PackageSetups" EntityType="Self.PackageSetup" />
+          <EntitySet Name="Provinces" EntityType="Self.Province" />
+          <EntitySet Name="Roles" EntityType="Self.Role" />
+          <EntitySet Name="Services" EntityType="Self.Service" />
+          <EntitySet Name="ServiceProviders" EntityType="Self.ServiceProvider" />
+          <EntitySet Name="Status" EntityType="Self.Status" />
+          <EntitySet Name="Suburbs" EntityType="Self.Suburb" />
+          <EntitySet Name="Users" EntityType="Self.User" />
+          <EntitySet Name="UserInCompanies" EntityType="Self.UserInCompany" />
+          <EntitySet Name="UserInRoles" EntityType="Self.UserInRole" />
+          <AssociationSet Name="FK_CompanyBillingLevel_BillingLevel" Association="Self.FK_CompanyBillingLevel_BillingLevel">
+            <End Role="BillingLevel" EntitySet="BillingLevels" />
+            <End Role="CompanyBillingLevel" EntitySet="CompanyBillingLevels" />
+          </AssociationSet>
+          <AssociationSet Name="FK_BillingProcessHistory_BillingProcess" Association="Self.FK_BillingProcessHistory_BillingProcess">
+            <End Role="BillingProcess" EntitySet="BillingProcesses" />
+            <End Role="BillingProcessHistory" EntitySet="BillingProcessHistories" />
+          </AssociationSet>
+          <AssociationSet Name="FK_DataValidationException_BillingProcess1" Association="Self.FK_DataValidationException_BillingProcess1">
+            <End Role="BillingProcess" EntitySet="BillingProcesses" />
+            <End Role="DataValidationException" EntitySet="DataValidationExceptions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_City_Province" Association="Self.FK_City_Province">
+            <End Role="Province" EntitySet="Provinces" />
+            <End Role="City" EntitySet="Cities" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Suburb_City" Association="Self.FK_Suburb_City">
+            <End Role="City" EntitySet="Cities" />
+            <End Role="Suburb" EntitySet="Suburbs" />
+          </AssociationSet>
+          <AssociationSet Name="FK_ClientBilling_CompanyBillingLevel" Association="Self.FK_ClientBilling_CompanyBillingLevel">
+            <End Role="CompanyBillingLevel" EntitySet="CompanyBillingLevels" />
+            <End Role="ClientBilling" EntitySet="ClientBillings" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Company_CompanyGroup" Association="Self.FK_Company_CompanyGroup">
+            <End Role="CompanyGroup" EntitySet="CompanyGroups" />
+            <End Role="Company" EntitySet="Companies" />
+          </AssociationSet>
+          <AssociationSet Name="FK_CompanyBillingLevel_Company" Association="Self.FK_CompanyBillingLevel_Company">
+            <End Role="Company" EntitySet="Companies" />
+            <End Role="CompanyBillingLevel" EntitySet="CompanyBillingLevels" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UserInCompany_UserInCompany" Association="Self.FK_UserInCompany_UserInCompany">
+            <End Role="Company" EntitySet="Companies" />
+            <End Role="UserInCompany" EntitySet="UserInCompanies" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Contract_Package" Association="Self.FK_Contract_Package">
+            <End Role="Package" EntitySet="Packages" />
+            <End Role="Contract" EntitySet="Contracts" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Contract_PackageSetup" Association="Self.FK_Contract_PackageSetup">
+            <End Role="PackageSetup" EntitySet="PackageSetups" />
+            <End Role="Contract" EntitySet="Contracts" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Contract_Status" Association="Self.FK_Contract_Status">
+            <End Role="Status" EntitySet="Status" />
+            <End Role="Contract" EntitySet="Contracts" />
+          </AssociationSet>
+          <AssociationSet Name="FK_DataValidationException_DataValidationProperty" Association="Self.FK_DataValidationException_DataValidationProperty">
+            <End Role="DataValidationProperty" EntitySet="DataValidationProperties" />
+            <End Role="DataValidationException" EntitySet="DataValidationExceptions" />
+          </AssociationSet>
+          <AssociationSet Name="FK_DataValidationRule_DataValidationProperty" Association="Self.FK_DataValidationRule_DataValidationProperty">
+            <End Role="DataValidationProperty" EntitySet="DataValidationProperties" />
+            <End Role="DataValidationRule" EntitySet="DataValidationRules" />
+          </AssociationSet>
+          <AssociationSet Name="FK_DeviceModel_DeviceMake" Association="Self.FK_DeviceModel_DeviceMake">
+            <End Role="DeviceMake" EntitySet="DeviceMakes" />
+            <End Role="DeviceModel" EntitySet="DeviceModels" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Invoice_Service" Association="Self.FK_Invoice_Service">
+            <End Role="Service" EntitySet="Services" />
+            <End Role="Invoice" EntitySet="Invoices" />
+          </AssociationSet>
+          <AssociationSet Name="FK_InvoiceDetail_Invoice" Association="Self.FK_InvoiceDetail_Invoice">
+            <End Role="Invoice" EntitySet="Invoices" />
+            <End Role="InvoiceDetail" EntitySet="InvoiceDetails" />
+          </AssociationSet>
+          <AssociationSet Name="FK_InvoiceDetail_ServiceProvider" Association="Self.FK_InvoiceDetail_ServiceProvider">
+            <End Role="ServiceProvider" EntitySet="ServiceProviders" />
+            <End Role="InvoiceDetail" EntitySet="InvoiceDetails" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Package_ServiceProvider" Association="Self.FK_Package_ServiceProvider">
+            <End Role="ServiceProvider" EntitySet="ServiceProviders" />
+            <End Role="Package" EntitySet="Packages" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UserInRole_Role" Association="Self.FK_UserInRole_Role">
+            <End Role="Role" EntitySet="Roles" />
+            <End Role="UserInRole" EntitySet="UserInRoles" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UserInCompany_User" Association="Self.FK_UserInCompany_User">
+            <End Role="User" EntitySet="Users" />
+            <End Role="UserInCompany" EntitySet="UserInCompanies" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UserInRole_User" Association="Self.FK_UserInRole_User">
+            <End Role="User" EntitySet="Users" />
+            <End Role="UserInRole" EntitySet="UserInRoles" />
+          </AssociationSet>
+          <FunctionImport Name="sp_report_Invoice" ReturnType="Collection(MobileManagerModel.sp_report_Invoice_Result)">
+          <Parameter Name="invoiceID" Mode="In" Type="Int32" />
+          </FunctionImport>
+          <EntitySet Name="Clients" EntityType="MobileManagerModel.Client" />
+          <AssociationSet Name="FK_Client_ClientBilling" Association="MobileManagerModel.FK_Client_ClientBilling">
+            <End Role="ClientBilling" EntitySet="ClientBillings" />
+            <End Role="Client" EntitySet="Clients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Client_ClientLocation" Association="MobileManagerModel.FK_Client_ClientLocation">
+            <End Role="ClientLocation" EntitySet="ClientLocations" />
+            <End Role="Client" EntitySet="Clients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Client_Company" Association="MobileManagerModel.FK_Client_Company">
+            <End Role="Company" EntitySet="Companies" />
+            <End Role="Client" EntitySet="Clients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Client_Contract" Association="MobileManagerModel.FK_Client_Contract">
+            <End Role="Contract" EntitySet="Contracts" />
+            <End Role="Client" EntitySet="Clients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Client_Suburb" Association="MobileManagerModel.FK_Client_Suburb">
+            <End Role="Suburb" EntitySet="Suburbs" />
+            <End Role="Client" EntitySet="Clients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Invoice_Client" Association="MobileManagerModel.FK_Invoice_Client">
+            <End Role="Client" EntitySet="Clients" />
+            <End Role="Invoice" EntitySet="Invoices" />
+          </AssociationSet>
+          <EntitySet Name="Devices" EntityType="MobileManagerModel.Device" />
+          <EntitySet Name="SimCards" EntityType="MobileManagerModel.SimCard" />
+          <AssociationSet Name="FK_Device_Contract" Association="MobileManagerModel.FK_Device_Contract">
+            <End Role="Contract" EntitySet="Contracts" />
+            <End Role="Device" EntitySet="Devices" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SimCard_Contract" Association="MobileManagerModel.FK_SimCard_Contract">
+            <End Role="Contract" EntitySet="Contracts" />
+            <End Role="SimCard" EntitySet="SimCards" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Device_DeviceMake" Association="MobileManagerModel.FK_Device_DeviceMake">
+            <End Role="DeviceMake" EntitySet="DeviceMakes" />
+            <End Role="Device" EntitySet="Devices" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Device_DeviceModel" Association="MobileManagerModel.FK_Device_DeviceModel">
+            <End Role="DeviceModel" EntitySet="DeviceModels" />
+            <End Role="Device" EntitySet="Devices" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Device_SimCard" Association="MobileManagerModel.FK_Device_SimCard">
+            <End Role="SimCard" EntitySet="SimCards" />
+            <End Role="Device" EntitySet="Devices" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Device_Status" Association="MobileManagerModel.FK_Device_Status">
+            <End Role="Status" EntitySet="Status" />
+            <End Role="Device" EntitySet="Devices" />
+          </AssociationSet>
+          <AssociationSet Name="FK_SimCard_Status" Association="MobileManagerModel.FK_SimCard_Status">
+            <End Role="Status" EntitySet="Status" />
+            <End Role="SimCard" EntitySet="SimCards" />
+          </AssociationSet>
+          </EntityContainer>
         <ComplexType Name="sp_report_Invoice_Result">
           <Property Type="String" Name="ClientName" Nullable="false" MaxLength="100" />
           <Property Type="String" Name="PrimaryCellNumber" Nullable="false" MaxLength="20" />
@@ -1653,7 +1926,7 @@
           <Property Type="String" Name="PostalCode" Nullable="false" MaxLength="10" />
           <Property Type="String" Name="CityName" Nullable="false" MaxLength="100" />
           <Property Type="String" Name="ProvinceName" Nullable="false" MaxLength="100" />
-          <Property Type="String" Name="CompanyName" Nullable="false" MaxLength="50" />
+          <Property Type="String" Name="CompanyName" Nullable="true" MaxLength="50" />
           <Property Type="String" Name="ServiceProviderName" Nullable="false" MaxLength="50" />
           <Property Type="String" Name="InvoiceNumber" Nullable="true" MaxLength="60" />
           <Property Type="DateTime" Name="InvoiceDate" Nullable="true" Precision="23" />
@@ -1662,80 +1935,6 @@
           <Property Type="Decimal" Name="ItemAmount" Nullable="false" Precision="18" Scale="2" />
           <Property Type="Boolean" Name="IsPrivate" Nullable="false" />
         </ComplexType>
-        <EntityType Name="BillingLevel">
-          <Key>
-            <PropertyRef Name="pkBillingLevelID" />
-          </Key>
-          <Property Name="pkBillingLevelID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="LevelDescription" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="CompanyBillingLevels" Relationship="MobileManagerModel.FK_CompanyBillingLevel_BillingLevel" FromRole="BillingLevel" ToRole="CompanyBillingLevel" />
-        </EntityType>
-        <EntityType Name="ClientBilling">
-          <Key>
-            <PropertyRef Name="pkClientBillingID" />
-          </Key>
-          <Property Name="pkClientBillingID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="cellnumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="fkCompanyBillingLevelID" Type="Int32" />
-          <Property Name="IsBillable" Type="Boolean" Nullable="false" />
-          <Property Name="IsSplitBilling" Type="Boolean" Nullable="false" />
-          <Property Name="WDPAllowance" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="VoiceAllowance" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
-          <Property Name="SPLimit" Type="Decimal" Precision="18" Scale="2" />
-          <Property Name="InternationalDailing" Type="Boolean" Nullable="false" />
-          <Property Name="InternationalRoaming" Type="Boolean" Nullable="false" />
-          <Property Name="CountryVisiting" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="RoamingFromDate" Type="DateTime" Precision="3" />
-          <Property Name="RoamingToDate" Type="DateTime" Precision="3" />
-          <Property Name="StopBillingFromDate" Type="DateTime" Precision="3" />
-          <Property Name="StopBillingToDate" Type="DateTime" Precision="3" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="CompanyBillingLevel" Relationship="MobileManagerModel.FK_ClientBilling_CompanyBillingLevel" FromRole="ClientBilling" ToRole="CompanyBillingLevel" />
-          <NavigationProperty Name="Clients" Relationship="MobileManagerModel.FK_Client_ClientBilling" FromRole="ClientBilling" ToRole="Client" />
-        </EntityType>
-        <EntityType Name="CompanyBillingLevel">
-          <Key>
-            <PropertyRef Name="pkCompanyBillingLevelID" />
-          </Key>
-          <Property Name="pkCompanyBillingLevelID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="fkCompanyID" Type="Int32" Nullable="false" />
-          <Property Name="fkBillingLevelID" Type="Int32" Nullable="false" />
-          <Property Name="Amount" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="BillingLevel" Relationship="MobileManagerModel.FK_CompanyBillingLevel_BillingLevel" FromRole="CompanyBillingLevel" ToRole="BillingLevel" />
-          <NavigationProperty Name="ClientBillings" Relationship="MobileManagerModel.FK_ClientBilling_CompanyBillingLevel" FromRole="CompanyBillingLevel" ToRole="ClientBilling" />
-          <NavigationProperty Name="Company" Relationship="MobileManagerModel.FK_CompanyBillingLevel_Company" FromRole="CompanyBillingLevel" ToRole="Company" />
-        </EntityType>
-        <Association Name="FK_CompanyBillingLevel_BillingLevel">
-          <End Type="MobileManagerModel.BillingLevel" Role="BillingLevel" Multiplicity="1" />
-          <End Type="MobileManagerModel.CompanyBillingLevel" Role="CompanyBillingLevel" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="BillingLevel">
-              <PropertyRef Name="pkBillingLevelID" />
-            </Principal>
-            <Dependent Role="CompanyBillingLevel">
-              <PropertyRef Name="fkBillingLevelID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_ClientBilling_CompanyBillingLevel">
-          <End Type="MobileManagerModel.CompanyBillingLevel" Role="CompanyBillingLevel" Multiplicity="0..1" />
-          <End Type="MobileManagerModel.ClientBilling" Role="ClientBilling" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="CompanyBillingLevel">
-              <PropertyRef Name="pkCompanyBillingLevelID" />
-            </Principal>
-            <Dependent Role="ClientBilling">
-              <PropertyRef Name="fkCompanyBillingLevelID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <EntityType Name="Client">
           <Key>
             <PropertyRef Name="pkClientID" />
@@ -1764,30 +1963,10 @@
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="ClientBilling" Relationship="MobileManagerModel.FK_Client_ClientBilling" FromRole="Client" ToRole="ClientBilling" />
           <NavigationProperty Name="ClientLocation" Relationship="MobileManagerModel.FK_Client_ClientLocation" FromRole="Client" ToRole="ClientLocation" />
+          <NavigationProperty Name="Company" Relationship="MobileManagerModel.FK_Client_Company" FromRole="Client" ToRole="Company" />
+          <NavigationProperty Name="Contract" Relationship="MobileManagerModel.FK_Client_Contract" FromRole="Client" ToRole="Contract" />
           <NavigationProperty Name="Suburb" Relationship="MobileManagerModel.FK_Client_Suburb" FromRole="Client" ToRole="Suburb" />
           <NavigationProperty Name="Invoices" Relationship="MobileManagerModel.FK_Invoice_Client" FromRole="Client" ToRole="Invoice" />
-          <NavigationProperty Name="Contract" Relationship="MobileManagerModel.FK_Client_Contract" FromRole="Client" ToRole="Contract" />
-          <NavigationProperty Name="Company" Relationship="MobileManagerModel.FK_Client_Company" FromRole="Client" ToRole="Company" />
-        </EntityType>
-        <EntityType Name="Package">
-          <Key>
-            <PropertyRef Name="pkPackageID" />
-          </Key>
-          <Property Name="pkPackageID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="fkServiceProviderID" Type="Int32" />
-          <Property Name="enPackageType" Type="Int16" />
-          <Property Name="PackageName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="Cost" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
-          <Property Name="MBData" Type="Int32" Nullable="false" />
-          <Property Name="TalkTimeMinutes" Type="Int32" Nullable="false" />
-          <Property Name="SMSNumber" Type="Int32" Nullable="false" />
-          <Property Name="RandValue" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
-          <Property Name="SPULValue" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="ServiceProvider" Relationship="MobileManagerModel.FK_Package_ServiceProvider" FromRole="Package" ToRole="ServiceProvider" />
-          <NavigationProperty Name="Contracts" Relationship="MobileManagerModel.FK_Contract_Package" FromRole="Package" ToRole="Contract" />
         </EntityType>
         <Association Name="FK_Client_ClientBilling">
           <End Type="MobileManagerModel.ClientBilling" Role="ClientBilling" Multiplicity="1" />
@@ -1810,6 +1989,30 @@
             </Principal>
             <Dependent Role="Client">
               <PropertyRef Name="fkClientLocationID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Client_Company">
+          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="1" />
+          <End Type="MobileManagerModel.Client" Role="Client" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="pkCompanyID" />
+            </Principal>
+            <Dependent Role="Client">
+              <PropertyRef Name="fkCompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Client_Contract">
+          <End Type="MobileManagerModel.Contract" Role="Contract" Multiplicity="1" />
+          <End Type="MobileManagerModel.Client" Role="Client" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Contract">
+              <PropertyRef Name="pkContractID" />
+            </Principal>
+            <Dependent Role="Client">
+              <PropertyRef Name="fkContractID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -1837,113 +2040,51 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Package_ServiceProvider">
-          <End Type="MobileManagerModel.ServiceProvider" Role="ServiceProvider" Multiplicity="0..1" />
-          <End Type="MobileManagerModel.Package" Role="Package" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="ServiceProvider">
-              <PropertyRef Name="pkServiceProviderID" />
-            </Principal>
-            <Dependent Role="Package">
-              <PropertyRef Name="fkServiceProviderID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <EntityType Name="Contract">
+        <EntityType Name="Device">
           <Key>
-            <PropertyRef Name="pkContractID" />
+            <PropertyRef Name="pkDeviceID" />
           </Key>
-          <Property Name="pkContractID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="imenumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="statusname" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="oldpackage" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="newpackage" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="enCostType" Type="Int16" />
-          <Property Name="CellNumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="pkDeviceID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="fkContractID" Type="Int32" Nullable="false" />
+          <Property Name="fkSimCardID" Type="Int32" />
+          <Property Name="fkDeviceMakeID" Type="Int32" Nullable="false" />
+          <Property Name="fkDeviceModelID" Type="Int32" Nullable="false" />
           <Property Name="fkStatusID" Type="Int32" Nullable="false" />
-          <Property Name="fkPackageID" Type="Int32" Nullable="false" />
-          <Property Name="fkPackageSetupID" Type="Int32" />
-          <Property Name="AccountNumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ContractStartDate" Type="DateTime" Precision="3" />
-          <Property Name="ContractUpgradeDate" Type="DateTime" Precision="3" />
-          <Property Name="ContractEndDate" Type="DateTime" Precision="3" />
-          <Property Name="PaymentCancelDate" Type="DateTime" Precision="3" />
+          <Property Name="IMENumber" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="SerialNumber" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="ReceiveDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="InsuranceCost" Type="Decimal" Precision="18" Scale="2" />
+          <Property Name="InsuranceValue" Type="Decimal" Precision="18" Scale="2" />
           <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="Clients" Relationship="MobileManagerModel.FK_Client_Contract" FromRole="Contract" ToRole="Client" />
-          <NavigationProperty Name="Package" Relationship="MobileManagerModel.FK_Contract_Package" FromRole="Contract" ToRole="Package" />
-          <NavigationProperty Name="PackageSetup" Relationship="MobileManagerModel.FK_Contract_PackageSetup" FromRole="Contract" ToRole="PackageSetup" />
-          <NavigationProperty Name="Status" Relationship="MobileManagerModel.FK_Contract_Status" FromRole="Contract" ToRole="Status" />
-          <NavigationProperty Name="Devices" Relationship="MobileManagerModel.FK_Device_Contract" FromRole="Contract" ToRole="Device" />
-          <NavigationProperty Name="SimmCards" Relationship="MobileManagerModel.FK_SimmCard_Contract" FromRole="Contract" ToRole="SimmCard" />
+          <NavigationProperty Name="Contract" Relationship="MobileManagerModel.FK_Device_Contract" FromRole="Device" ToRole="Contract" />
+          <NavigationProperty Name="DeviceMake" Relationship="MobileManagerModel.FK_Device_DeviceMake" FromRole="Device" ToRole="DeviceMake" />
+          <NavigationProperty Name="DeviceModel" Relationship="MobileManagerModel.FK_Device_DeviceModel" FromRole="Device" ToRole="DeviceModel" />
+          <NavigationProperty Name="SimCard" Relationship="MobileManagerModel.FK_Device_SimCard" FromRole="Device" ToRole="SimCard" />
+          <NavigationProperty Name="Status" Relationship="MobileManagerModel.FK_Device_Status" FromRole="Device" ToRole="Status" />
         </EntityType>
-        <EntityType Name="PackageSetup">
+        <EntityType Name="SimCard">
           <Key>
-            <PropertyRef Name="pkPackageSetupID" />
+            <PropertyRef Name="pkSimCardID" />
           </Key>
-          <Property Name="pkPackageSetupID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="Cost" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
-          <Property Name="MBData" Type="Int32" Nullable="false" />
-          <Property Name="TalkTimeMinutes" Type="Int32" Nullable="false" />
-          <Property Name="SMSNumber" Type="Int32" Nullable="false" />
-          <Property Name="RandValue" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
-          <Property Name="SPULValue" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="pkSimCardID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="fkContractID" Type="Int32" />
+          <Property Name="fkStatusID" Type="Int32" />
+          <Property Name="CellNumber" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="CardNumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="PinNumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="PUKNumber" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ReceiveDate" Type="DateTime" Precision="3" />
+          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Precision="3" />
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="Contracts" Relationship="MobileManagerModel.FK_Contract_PackageSetup" FromRole="PackageSetup" ToRole="Contract" />
+          <NavigationProperty Name="Contract" Relationship="MobileManagerModel.FK_SimCard_Contract" FromRole="SimCard" ToRole="Contract" />
+          <NavigationProperty Name="Devices" Relationship="MobileManagerModel.FK_Device_SimCard" FromRole="SimCard" ToRole="Device" />
+          <NavigationProperty Name="Status" Relationship="MobileManagerModel.FK_SimCard_Status" FromRole="SimCard" ToRole="Status" />
         </EntityType>
-        <Association Name="FK_Client_Contract">
-          <End Type="MobileManagerModel.Contract" Role="Contract" Multiplicity="1" />
-          <End Type="MobileManagerModel.Client" Role="Client" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Contract">
-              <PropertyRef Name="pkContractID" />
-            </Principal>
-            <Dependent Role="Client">
-              <PropertyRef Name="fkContractID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Contract_Package">
-          <End Type="MobileManagerModel.Package" Role="Package" Multiplicity="1" />
-          <End Type="MobileManagerModel.Contract" Role="Contract" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Package">
-              <PropertyRef Name="pkPackageID" />
-            </Principal>
-            <Dependent Role="Contract">
-              <PropertyRef Name="fkPackageID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Contract_PackageSetup">
-          <End Type="MobileManagerModel.PackageSetup" Role="PackageSetup" Multiplicity="0..1" />
-          <End Type="MobileManagerModel.Contract" Role="Contract" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="PackageSetup">
-              <PropertyRef Name="pkPackageSetupID" />
-            </Principal>
-            <Dependent Role="Contract">
-              <PropertyRef Name="fkPackageSetupID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Contract_Status">
-          <End Type="MobileManagerModel.Status" Role="Status" Multiplicity="1" />
-          <End Type="MobileManagerModel.Contract" Role="Contract" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Status">
-              <PropertyRef Name="pkStatusID" />
-            </Principal>
-            <Dependent Role="Contract">
-              <PropertyRef Name="fkStatusID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_Device_Contract">
-          <End Type="MobileManagerModel.Contract" Role="Contract" Multiplicity="0..1" />
+          <End Type="MobileManagerModel.Contract" Role="Contract" Multiplicity="1" />
           <End Type="MobileManagerModel.Device" Role="Device" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Contract">
@@ -1954,238 +2095,75 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_SimmCard_Contract">
+        <Association Name="FK_SimCard_Contract">
           <End Type="MobileManagerModel.Contract" Role="Contract" Multiplicity="0..1" />
-          <End Type="MobileManagerModel.SimmCard" Role="SimmCard" Multiplicity="*" />
+          <End Type="MobileManagerModel.SimCard" Role="SimCard" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="Contract">
               <PropertyRef Name="pkContractID" />
             </Principal>
-            <Dependent Role="SimmCard">
+            <Dependent Role="SimCard">
               <PropertyRef Name="fkContractID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="BillingProcess">
-          <Key>
-            <PropertyRef Name="pkBillingProcessID" />
-          </Key>
-          <Property Name="pkBillingProcessID" Type="Int32" Nullable="false" />
-          <Property Name="ProcessDescription" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <NavigationProperty Name="BillingProcessHistories" Relationship="MobileManagerModel.FK_BillingProcessHistory_BillingProcess" FromRole="BillingProcess" ToRole="BillingProcessHistory" />
-          <NavigationProperty Name="DataValidationExceptions" Relationship="MobileManagerModel.FK_DataValidationException_BillingProcess1" FromRole="BillingProcess" ToRole="DataValidationException" />
-        </EntityType>
-        <EntityType Name="BillingProcessHistory">
-          <Key>
-            <PropertyRef Name="pkBillingProcessHistoryID" />
-          </Key>
-          <Property Name="pkBillingProcessHistoryID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="fkBillingProcessID" Type="Int32" Nullable="false" />
-          <Property Name="BillingPeriod" Type="String" Nullable="false" MaxLength="6" FixedLength="false" Unicode="false" />
-          <Property Name="ProcessStartDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="ProcessEndDate" Type="DateTime" Precision="3" />
-          <Property Name="ProcessCurrent" Type="Boolean" Nullable="false" />
-          <Property Name="ProcessResult" Type="Boolean" />
-          <Property Name="ProcessDuration" Type="Double" />
-          <Property Name="BillingComment" Type="Binary" MaxLength="255" FixedLength="false" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DateModified" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="BillingProcess" Relationship="MobileManagerModel.FK_BillingProcessHistory_BillingProcess" FromRole="BillingProcessHistory" ToRole="BillingProcess" />
-        </EntityType>
-        <Association Name="FK_BillingProcessHistory_BillingProcess">
-          <End Type="MobileManagerModel.BillingProcess" Role="BillingProcess" Multiplicity="1" />
-          <End Type="MobileManagerModel.BillingProcessHistory" Role="BillingProcessHistory" Multiplicity="*" />
+        <Association Name="FK_Device_DeviceMake">
+          <End Type="MobileManagerModel.DeviceMake" Role="DeviceMake" Multiplicity="1" />
+          <End Type="MobileManagerModel.Device" Role="Device" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="BillingProcess">
-              <PropertyRef Name="pkBillingProcessID" />
+            <Principal Role="DeviceMake">
+              <PropertyRef Name="pkDeviceMakeID" />
             </Principal>
-            <Dependent Role="BillingProcessHistory">
-              <PropertyRef Name="fkBillingProcessID" />
+            <Dependent Role="Device">
+              <PropertyRef Name="fkDeviceMakeID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="AuditLog">
-          <Key>
-            <PropertyRef Name="pkAuditLogID" />
-          </Key>
-          <Property Name="pkAuditLogID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="AuditGroup" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="AuditDescription" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="AuditComment" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="EntityID" Type="Int32" />
-          <Property Name="ChangedValue" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
-          <Property Name="AuditDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
-        </EntityType>
-        <EntityType Name="CompanyGroup">
-          <Key>
-            <PropertyRef Name="pkCompanyGroupID" />
-          </Key>
-          <Property Name="pkCompanyGroupID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="GroupName" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="Companies" Relationship="MobileManagerModel.FK_Company_CompanyGroup" FromRole="CompanyGroup" ToRole="Company" />
-        </EntityType>
-        <EntityType Name="Company">
-          <Key>
-            <PropertyRef Name="pkCompanyID" />
-          </Key>
-          <Property Name="pkCompanyID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="fkCompanyGroupID" Type="Int32" Nullable="false" />
-          <Property Name="CompanyName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="WBSNumber" Type="String" MaxLength="25" FixedLength="false" Unicode="false" />
-          <Property Name="CostCode" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="AdminFee" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
-          <Property Name="IPAddress" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="Clients" Relationship="MobileManagerModel.FK_Client_Company" FromRole="Company" ToRole="Client" />
-          <NavigationProperty Name="CompanyGroup" Relationship="MobileManagerModel.FK_Company_CompanyGroup" FromRole="Company" ToRole="CompanyGroup" />
-          <NavigationProperty Name="CompanyBillingLevels" Relationship="MobileManagerModel.FK_CompanyBillingLevel_Company" FromRole="Company" ToRole="CompanyBillingLevel" />
-          <NavigationProperty Name="UserInCompanies" Relationship="MobileManagerModel.FK_UserInCompany_UserInCompany" FromRole="Company" ToRole="UserInCompany" />
-        </EntityType>
-        <Association Name="FK_Client_Company">
-          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="1" />
-          <End Type="MobileManagerModel.Client" Role="Client" Multiplicity="*" />
+        <Association Name="FK_Device_DeviceModel">
+          <End Type="MobileManagerModel.DeviceModel" Role="DeviceModel" Multiplicity="1" />
+          <End Type="MobileManagerModel.Device" Role="Device" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Company">
-              <PropertyRef Name="pkCompanyID" />
+            <Principal Role="DeviceModel">
+              <PropertyRef Name="pkDeviceModelID" />
             </Principal>
-            <Dependent Role="Client">
-              <PropertyRef Name="fkCompanyID" />
+            <Dependent Role="Device">
+              <PropertyRef Name="fkDeviceModelID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Company_CompanyGroup">
-          <End Type="MobileManagerModel.CompanyGroup" Role="CompanyGroup" Multiplicity="1" />
-          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="*" />
+        <Association Name="FK_Device_SimCard">
+          <End Type="MobileManagerModel.SimCard" Role="SimCard" Multiplicity="0..1" />
+          <End Type="MobileManagerModel.Device" Role="Device" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="CompanyGroup">
-              <PropertyRef Name="pkCompanyGroupID" />
+            <Principal Role="SimCard">
+              <PropertyRef Name="pkSimCardID" />
             </Principal>
-            <Dependent Role="Company">
-              <PropertyRef Name="fkCompanyGroupID" />
+            <Dependent Role="Device">
+              <PropertyRef Name="fkSimCardID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_CompanyBillingLevel_Company">
-          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="1" />
-          <End Type="MobileManagerModel.CompanyBillingLevel" Role="CompanyBillingLevel" Multiplicity="*" />
+        <Association Name="FK_Device_Status">
+          <End Type="MobileManagerModel.Status" Role="Status" Multiplicity="1" />
+          <End Type="MobileManagerModel.Device" Role="Device" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Company">
-              <PropertyRef Name="pkCompanyID" />
+            <Principal Role="Status">
+              <PropertyRef Name="pkStatusID" />
             </Principal>
-            <Dependent Role="CompanyBillingLevel">
-              <PropertyRef Name="fkCompanyID" />
+            <Dependent Role="Device">
+              <PropertyRef Name="fkStatusID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_UserInCompany_UserInCompany">
-          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="1" />
-          <End Type="MobileManagerModel.UserInCompany" Role="UserInCompany" Multiplicity="*" />
+        <Association Name="FK_SimCard_Status">
+          <End Type="MobileManagerModel.Status" Role="Status" Multiplicity="0..1" />
+          <End Type="MobileManagerModel.SimCard" Role="SimCard" Multiplicity="*" />
           <ReferentialConstraint>
-            <Principal Role="Company">
-              <PropertyRef Name="pkCompanyID" />
+            <Principal Role="Status">
+              <PropertyRef Name="pkStatusID" />
             </Principal>
-            <Dependent Role="UserInCompany">
-              <PropertyRef Name="fkCompanyID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <EntityType Name="DataValidationException">
-          <Key>
-            <PropertyRef Name="pkDataValidationExceptionID" />
-          </Key>
-          <Property Name="pkDataValidationExceptionID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="BillingPeriod" Type="String" Nullable="false" MaxLength="6" FixedLength="false" Unicode="false" />
-          <Property Name="fkBillingProcessID" Type="Int32" Nullable="false" />
-          <Property Name="fkDataValidationPropertyID" Type="Int32" Nullable="false" />
-          <Property Name="enDataValidationEntity" Type="Int16" Nullable="false" />
-          <Property Name="DataValidationEntityID" Type="Int32" Nullable="false" />
-          <Property Name="Message" Type="String" MaxLength="255" FixedLength="false" Unicode="false" />
-          <Property Name="CanApplyRule" Type="Boolean" />
-          <Property Name="Result" Type="Boolean" />
-          <NavigationProperty Name="BillingProcess" Relationship="MobileManagerModel.FK_DataValidationException_BillingProcess1" FromRole="DataValidationException" ToRole="BillingProcess" />
-          <NavigationProperty Name="DataValidationProperty" Relationship="MobileManagerModel.FK_DataValidationException_DataValidationProperty" FromRole="DataValidationException" ToRole="DataValidationProperty" />
-        </EntityType>
-        <EntityType Name="DataValidationProperty">
-          <Key>
-            <PropertyRef Name="pkDataValidationPropertyID" />
-          </Key>
-          <Property Name="pkDataValidationPropertyID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="enDataValidationEntity" Type="Int16" Nullable="false" />
-          <Property Name="enDataValidationProperty" Type="Int16" Nullable="false" />
-          <Property Name="enDataType" Type="Int16" Nullable="false" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="DataValidationExceptions" Relationship="MobileManagerModel.FK_DataValidationException_DataValidationProperty" FromRole="DataValidationProperty" ToRole="DataValidationException" />
-          <NavigationProperty Name="DataValidationRules" Relationship="MobileManagerModel.FK_DataValidationRule_DataValidationProperty" FromRole="DataValidationProperty" ToRole="DataValidationRule" />
-        </EntityType>
-        <EntityType Name="DataValidationRule">
-          <Key>
-            <PropertyRef Name="pkDataValidationRuleID" />
-          </Key>
-          <Property Name="pkDataValidationRuleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="enValidationProcess" Type="Int16" Nullable="false" />
-          <Property Name="enDataValidationEntity" Type="Int16" Nullable="false" />
-          <Property Name="DataValidationEntityID" Type="Int32" Nullable="false" />
-          <Property Name="fkDataValidationPropertyID" Type="Int32" Nullable="false" />
-          <Property Name="enDataValidationOperator" Type="Int16" Nullable="false" />
-          <Property Name="DataValidationValue" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <NavigationProperty Name="DataValidationProperty" Relationship="MobileManagerModel.FK_DataValidationRule_DataValidationProperty" FromRole="DataValidationRule" ToRole="DataValidationProperty" />
-        </EntityType>
-        <EntityType Name="ImportRuleData">
-          <Key>
-            <PropertyRef Name="pkImportRuleDataID" />
-          </Key>
-          <Property Name="pkImportRuleDataID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="enDataImportColumn" Type="Int16" Nullable="false" />
-          <Property Name="enDataImportEntity" Type="Int16" Nullable="false" />
-          <Property Name="SearchEntities" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DateModified" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-        </EntityType>
-        <Association Name="FK_DataValidationException_BillingProcess1">
-          <End Type="MobileManagerModel.BillingProcess" Role="BillingProcess" Multiplicity="1" />
-          <End Type="MobileManagerModel.DataValidationException" Role="DataValidationException" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="BillingProcess">
-              <PropertyRef Name="pkBillingProcessID" />
-            </Principal>
-            <Dependent Role="DataValidationException">
-              <PropertyRef Name="fkBillingProcessID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_DataValidationException_DataValidationProperty">
-          <End Type="MobileManagerModel.DataValidationProperty" Role="DataValidationProperty" Multiplicity="1" />
-          <End Type="MobileManagerModel.DataValidationException" Role="DataValidationException" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="DataValidationProperty">
-              <PropertyRef Name="pkDataValidationPropertyID" />
-            </Principal>
-            <Dependent Role="DataValidationException">
-              <PropertyRef Name="fkDataValidationPropertyID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_DataValidationRule_DataValidationProperty">
-          <End Type="MobileManagerModel.DataValidationProperty" Role="DataValidationProperty" Multiplicity="1" />
-          <End Type="MobileManagerModel.DataValidationRule" Role="DataValidationRule" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="DataValidationProperty">
-              <PropertyRef Name="pkDataValidationPropertyID" />
-            </Principal>
-            <Dependent Role="DataValidationRule">
-              <PropertyRef Name="fkDataValidationPropertyID" />
+            <Dependent Role="SimCard">
+              <PropertyRef Name="fkStatusID" />
             </Dependent>
           </ReferentialConstraint>
         </Association>
@@ -2195,12 +2173,86 @@
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="MobileManagerModelStoreContainer" CdmEntityContainer="MobileManagerEntities">
+          <EntitySetMapping Name="AuditLogs">
+            <EntityTypeMapping TypeName="MobileManagerModel.AuditLog">
+              <MappingFragment StoreEntitySet="AuditLog">
+                <ScalarProperty Name="pkAuditLogID" ColumnName="pkAuditLogID" />
+                <ScalarProperty Name="AuditGroup" ColumnName="AuditGroup" />
+                <ScalarProperty Name="AuditDescription" ColumnName="AuditDescription" />
+                <ScalarProperty Name="AuditComment" ColumnName="AuditComment" />
+                <ScalarProperty Name="EntityID" ColumnName="EntityID" />
+                <ScalarProperty Name="ChangedValue" ColumnName="ChangedValue" />
+                <ScalarProperty Name="AuditDate" ColumnName="AuditDate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BillingLevels">
+            <EntityTypeMapping TypeName="MobileManagerModel.BillingLevel">
+              <MappingFragment StoreEntitySet="BillingLevel">
+                <ScalarProperty Name="pkBillingLevelID" ColumnName="pkBillingLevelID" />
+                <ScalarProperty Name="LevelDescription" ColumnName="LevelDescription" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BillingProcesses">
+            <EntityTypeMapping TypeName="MobileManagerModel.BillingProcess">
+              <MappingFragment StoreEntitySet="BillingProcess">
+                <ScalarProperty Name="pkBillingProcessID" ColumnName="pkBillingProcessID" />
+                <ScalarProperty Name="ProcessDescription" ColumnName="ProcessDescription" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="BillingProcessHistories">
+            <EntityTypeMapping TypeName="MobileManagerModel.BillingProcessHistory">
+              <MappingFragment StoreEntitySet="BillingProcessHistory">
+                <ScalarProperty Name="pkBillingProcessHistoryID" ColumnName="pkBillingProcessHistoryID" />
+                <ScalarProperty Name="fkBillingProcessID" ColumnName="fkBillingProcessID" />
+                <ScalarProperty Name="BillingPeriod" ColumnName="BillingPeriod" />
+                <ScalarProperty Name="ProcessStartDate" ColumnName="ProcessStartDate" />
+                <ScalarProperty Name="ProcessEndDate" ColumnName="ProcessEndDate" />
+                <ScalarProperty Name="ProcessCurrent" ColumnName="ProcessCurrent" />
+                <ScalarProperty Name="ProcessResult" ColumnName="ProcessResult" />
+                <ScalarProperty Name="ProcessDuration" ColumnName="ProcessDuration" />
+                <ScalarProperty Name="BillingComment" ColumnName="BillingComment" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="DateModified" ColumnName="DateModified" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="Cities">
             <EntityTypeMapping TypeName="MobileManagerModel.City">
               <MappingFragment StoreEntitySet="City">
                 <ScalarProperty Name="pkCityID" ColumnName="pkCityID" />
                 <ScalarProperty Name="fkProvinceID" ColumnName="fkProvinceID" />
                 <ScalarProperty Name="CityName" ColumnName="CityName" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="ClientBillings">
+            <EntityTypeMapping TypeName="MobileManagerModel.ClientBilling">
+              <MappingFragment StoreEntitySet="ClientBilling">
+                <ScalarProperty Name="pkClientBillingID" ColumnName="pkClientBillingID" />
+                <ScalarProperty Name="fkCompanyBillingLevelID" ColumnName="fkCompanyBillingLevelID" />
+                <ScalarProperty Name="IsBillable" ColumnName="IsBillable" />
+                <ScalarProperty Name="IsSplitBilling" ColumnName="IsSplitBilling" />
+                <ScalarProperty Name="WDPAllowance" ColumnName="WDPAllowance" />
+                <ScalarProperty Name="VoiceAllowance" ColumnName="VoiceAllowance" />
+                <ScalarProperty Name="SPLimit" ColumnName="SPLimit" />
+                <ScalarProperty Name="InternationalDailing" ColumnName="InternationalDailing" />
+                <ScalarProperty Name="InternationalRoaming" ColumnName="InternationalRoaming" />
+                <ScalarProperty Name="CountryVisiting" ColumnName="CountryVisiting" />
+                <ScalarProperty Name="RoamingFromDate" ColumnName="RoamingFromDate" />
+                <ScalarProperty Name="RoamingToDate" ColumnName="RoamingToDate" />
+                <ScalarProperty Name="StopBillingFromDate" ColumnName="StopBillingFromDate" />
+                <ScalarProperty Name="StopBillingToDate" ColumnName="StopBillingToDate" />
                 <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
                 <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
                 <ScalarProperty Name="IsActive" ColumnName="IsActive" />
@@ -2218,28 +2270,105 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="Devices">
-            <EntityTypeMapping TypeName="MobileManagerModel.Device">
-              <MappingFragment StoreEntitySet="Device">
-                <ScalarProperty Name="pkDeviceID" ColumnName="pkDeviceID" />
-                <ScalarProperty Name="fkContractID" ColumnName="fkContractID" />
-                <ScalarProperty Name="fkSimmCardID" ColumnName="fkSimmCardID" />
-                <ScalarProperty Name="tmpimeno" ColumnName="tmpimeno" />
-                <ScalarProperty Name="cellnumber" ColumnName="cellnumber" />
-                <ScalarProperty Name="make" ColumnName="make" />
-                <ScalarProperty Name="model" ColumnName="model" />
-                <ScalarProperty Name="status" ColumnName="status" />
-                <ScalarProperty Name="fkDeviceMakeID" ColumnName="fkDeviceMakeID" />
-                <ScalarProperty Name="fkDeviceModelID" ColumnName="fkDeviceModelID" />
-                <ScalarProperty Name="fkStatusID" ColumnName="fkStatusID" />
-                <ScalarProperty Name="IMENumber" ColumnName="IMENumber" />
-                <ScalarProperty Name="SerialNumber" ColumnName="SerialNumber" />
-                <ScalarProperty Name="ReceiveDate" ColumnName="ReceiveDate" />
-                <ScalarProperty Name="InsuranceCost" ColumnName="InsuranceCost" />
-                <ScalarProperty Name="InsuranceValue" ColumnName="InsuranceValue" />
+          <EntitySetMapping Name="Companies">
+            <EntityTypeMapping TypeName="MobileManagerModel.Company">
+              <MappingFragment StoreEntitySet="Company">
+                <ScalarProperty Name="pkCompanyID" ColumnName="pkCompanyID" />
+                <ScalarProperty Name="fkCompanyGroupID" ColumnName="fkCompanyGroupID" />
+                <ScalarProperty Name="CompanyName" ColumnName="CompanyName" />
+                <ScalarProperty Name="WBSNumber" ColumnName="WBSNumber" />
+                <ScalarProperty Name="CostCode" ColumnName="CostCode" />
+                <ScalarProperty Name="AdminFee" ColumnName="AdminFee" />
+                <ScalarProperty Name="IPAddress" ColumnName="IPAddress" />
                 <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
                 <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
                 <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CompanyBillingLevels">
+            <EntityTypeMapping TypeName="MobileManagerModel.CompanyBillingLevel">
+              <MappingFragment StoreEntitySet="CompanyBillingLevel">
+                <ScalarProperty Name="pkCompanyBillingLevelID" ColumnName="pkCompanyBillingLevelID" />
+                <ScalarProperty Name="fkCompanyID" ColumnName="fkCompanyID" />
+                <ScalarProperty Name="fkBillingLevelID" ColumnName="fkBillingLevelID" />
+                <ScalarProperty Name="Amount" ColumnName="Amount" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CompanyGroups">
+            <EntityTypeMapping TypeName="MobileManagerModel.CompanyGroup">
+              <MappingFragment StoreEntitySet="CompanyGroup">
+                <ScalarProperty Name="pkCompanyGroupID" ColumnName="pkCompanyGroupID" />
+                <ScalarProperty Name="GroupName" ColumnName="GroupName" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Contracts">
+            <EntityTypeMapping TypeName="MobileManagerModel.Contract">
+              <MappingFragment StoreEntitySet="Contract">
+                <ScalarProperty Name="pkContractID" ColumnName="pkContractID" />
+                <ScalarProperty Name="enCostType" ColumnName="enCostType" />
+                <ScalarProperty Name="CellNumber" ColumnName="CellNumber" />
+                <ScalarProperty Name="fkStatusID" ColumnName="fkStatusID" />
+                <ScalarProperty Name="fkPackageID" ColumnName="fkPackageID" />
+                <ScalarProperty Name="fkPackageSetupID" ColumnName="fkPackageSetupID" />
+                <ScalarProperty Name="AccountNumber" ColumnName="AccountNumber" />
+                <ScalarProperty Name="ContractStartDate" ColumnName="ContractStartDate" />
+                <ScalarProperty Name="ContractUpgradeDate" ColumnName="ContractUpgradeDate" />
+                <ScalarProperty Name="ContractEndDate" ColumnName="ContractEndDate" />
+                <ScalarProperty Name="PaymentCancelDate" ColumnName="PaymentCancelDate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DataValidationExceptions">
+            <EntityTypeMapping TypeName="MobileManagerModel.DataValidationException">
+              <MappingFragment StoreEntitySet="DataValidationException">
+                <ScalarProperty Name="pkDataValidationExceptionID" ColumnName="pkDataValidationExceptionID" />
+                <ScalarProperty Name="BillingPeriod" ColumnName="BillingPeriod" />
+                <ScalarProperty Name="fkBillingProcessID" ColumnName="fkBillingProcessID" />
+                <ScalarProperty Name="fkDataValidationPropertyID" ColumnName="fkDataValidationPropertyID" />
+                <ScalarProperty Name="enDataValidationEntity" ColumnName="enDataValidationEntity" />
+                <ScalarProperty Name="DataValidationEntityID" ColumnName="DataValidationEntityID" />
+                <ScalarProperty Name="Message" ColumnName="Message" />
+                <ScalarProperty Name="CanApplyRule" ColumnName="CanApplyRule" />
+                <ScalarProperty Name="Result" ColumnName="Result" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DataValidationProperties">
+            <EntityTypeMapping TypeName="MobileManagerModel.DataValidationProperty">
+              <MappingFragment StoreEntitySet="DataValidationProperty">
+                <ScalarProperty Name="pkDataValidationPropertyID" ColumnName="pkDataValidationPropertyID" />
+                <ScalarProperty Name="enDataValidationEntity" ColumnName="enDataValidationEntity" />
+                <ScalarProperty Name="enDataValidationProperty" ColumnName="enDataValidationProperty" />
+                <ScalarProperty Name="enDataType" ColumnName="enDataType" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DataValidationRules">
+            <EntityTypeMapping TypeName="MobileManagerModel.DataValidationRule">
+              <MappingFragment StoreEntitySet="DataValidationRule">
+                <ScalarProperty Name="pkDataValidationRuleID" ColumnName="pkDataValidationRuleID" />
+                <ScalarProperty Name="enValidationProcess" ColumnName="enValidationProcess" />
+                <ScalarProperty Name="enDataValidationEntity" ColumnName="enDataValidationEntity" />
+                <ScalarProperty Name="DataValidationEntityID" ColumnName="DataValidationEntityID" />
+                <ScalarProperty Name="fkDataValidationPropertyID" ColumnName="fkDataValidationPropertyID" />
+                <ScalarProperty Name="enDataValidationOperator" ColumnName="enDataValidationOperator" />
+                <ScalarProperty Name="DataValidationValue" ColumnName="DataValidationValue" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -2266,6 +2395,92 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="ImportRuleDatas">
+            <EntityTypeMapping TypeName="MobileManagerModel.ImportRuleData">
+              <MappingFragment StoreEntitySet="ImportRuleData">
+                <ScalarProperty Name="pkImportRuleDataID" ColumnName="pkImportRuleDataID" />
+                <ScalarProperty Name="enDataImportColumn" ColumnName="enDataImportColumn" />
+                <ScalarProperty Name="enDataImportEntity" ColumnName="enDataImportEntity" />
+                <ScalarProperty Name="SearchEntities" ColumnName="SearchEntities" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="DateModified" ColumnName="DateModified" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Invoices">
+            <EntityTypeMapping TypeName="MobileManagerModel.Invoice">
+              <MappingFragment StoreEntitySet="Invoice">
+                <ScalarProperty Name="pkInvoiceID" ColumnName="pkInvoiceID" />
+                <ScalarProperty Name="AccID" ColumnName="AccID" />
+                <ScalarProperty Name="CellNo" ColumnName="CellNo" />
+                <ScalarProperty Name="EmpNo" ColumnName="EmpNo" />
+                <ScalarProperty Name="Service" ColumnName="Service" />
+                <ScalarProperty Name="ImeNo" ColumnName="ImeNo" />
+                <ScalarProperty Name="fkClientID" ColumnName="fkClientID" />
+                <ScalarProperty Name="fkServiceID" ColumnName="fkServiceID" />
+                <ScalarProperty Name="InvoicePeriod" ColumnName="InvoicePeriod" />
+                <ScalarProperty Name="InvoiceNumber" ColumnName="InvoiceNumber" />
+                <ScalarProperty Name="InvoiceDate" ColumnName="InvoiceDate" />
+                <ScalarProperty Name="CompanyDue" ColumnName="CompanyDue" />
+                <ScalarProperty Name="PrivateDue" ColumnName="PrivateDue" />
+                <ScalarProperty Name="InvoiceTotal" ColumnName="InvoiceTotal" />
+                <ScalarProperty Name="IsPeriodClosed" ColumnName="IsPeriodClosed" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="InvoiceDetails">
+            <EntityTypeMapping TypeName="MobileManagerModel.InvoiceDetail">
+              <MappingFragment StoreEntitySet="InvoiceDetail">
+                <ScalarProperty Name="pkInvoiceItemID" ColumnName="pkInvoiceItemID" />
+                <ScalarProperty Name="fkInvoiceID" ColumnName="fkInvoiceID" />
+                <ScalarProperty Name="fkServiceProviderID" ColumnName="fkServiceProviderID" />
+                <ScalarProperty Name="ItemDescription" ColumnName="ItemDescription" />
+                <ScalarProperty Name="ReferenceNumber" ColumnName="ReferenceNumber" />
+                <ScalarProperty Name="ItemAmount" ColumnName="ItemAmount" />
+                <ScalarProperty Name="IsPrivate" ColumnName="IsPrivate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Packages">
+            <EntityTypeMapping TypeName="MobileManagerModel.Package">
+              <MappingFragment StoreEntitySet="Package">
+                <ScalarProperty Name="pkPackageID" ColumnName="pkPackageID" />
+                <ScalarProperty Name="fkServiceProviderID" ColumnName="fkServiceProviderID" />
+                <ScalarProperty Name="enPackageType" ColumnName="enPackageType" />
+                <ScalarProperty Name="PackageName" ColumnName="PackageName" />
+                <ScalarProperty Name="Cost" ColumnName="Cost" />
+                <ScalarProperty Name="MBData" ColumnName="MBData" />
+                <ScalarProperty Name="TalkTimeMinutes" ColumnName="TalkTimeMinutes" />
+                <ScalarProperty Name="SMSNumber" ColumnName="SMSNumber" />
+                <ScalarProperty Name="RandValue" ColumnName="RandValue" />
+                <ScalarProperty Name="SPULValue" ColumnName="SPULValue" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="PackageSetups">
+            <EntityTypeMapping TypeName="MobileManagerModel.PackageSetup">
+              <MappingFragment StoreEntitySet="PackageSetup">
+                <ScalarProperty Name="pkPackageSetupID" ColumnName="pkPackageSetupID" />
+                <ScalarProperty Name="Cost" ColumnName="Cost" />
+                <ScalarProperty Name="MBData" ColumnName="MBData" />
+                <ScalarProperty Name="TalkTimeMinutes" ColumnName="TalkTimeMinutes" />
+                <ScalarProperty Name="SMSNumber" ColumnName="SMSNumber" />
+                <ScalarProperty Name="RandValue" ColumnName="RandValue" />
+                <ScalarProperty Name="SPULValue" ColumnName="SPULValue" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="Provinces">
             <EntityTypeMapping TypeName="MobileManagerModel.Province">
               <MappingFragment StoreEntitySet="Province">
@@ -2277,29 +2492,32 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="ServiceProviders">
-            <EntityTypeMapping TypeName="MobileManagerModel.ServiceProvider">
-              <MappingFragment StoreEntitySet="ServiceProvider">
-                <ScalarProperty Name="pkServiceProviderID" ColumnName="pkServiceProviderID" />
-                <ScalarProperty Name="ServiceProviderName" ColumnName="ServiceProviderName" />
+          <EntitySetMapping Name="Roles">
+            <EntityTypeMapping TypeName="MobileManagerModel.Role">
+              <MappingFragment StoreEntitySet="Role">
+                <ScalarProperty Name="pkRoleID" ColumnName="pkRoleID" />
+                <ScalarProperty Name="RoleName" ColumnName="RoleName" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Services">
+            <EntityTypeMapping TypeName="MobileManagerModel.Service">
+              <MappingFragment StoreEntitySet="Service">
+                <ScalarProperty Name="pkServiceID" ColumnName="pkServiceID" />
+                <ScalarProperty Name="ServicePreFix" ColumnName="ServicePreFix" />
+                <ScalarProperty Name="ServiceDescription" ColumnName="ServiceDescription" />
                 <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
                 <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
                 <ScalarProperty Name="IsActive" ColumnName="IsActive" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="SimmCards">
-            <EntityTypeMapping TypeName="MobileManagerModel.SimmCard">
-              <MappingFragment StoreEntitySet="SimmCard">
-                <ScalarProperty Name="pkSimmCardID" ColumnName="pkSimmCardID" />
-                <ScalarProperty Name="statusname" ColumnName="statusname" />
-                <ScalarProperty Name="fkContractID" ColumnName="fkContractID" />
-                <ScalarProperty Name="fkStatusID" ColumnName="fkStatusID" />
-                <ScalarProperty Name="CellNumber" ColumnName="CellNumber" />
-                <ScalarProperty Name="CardNumber" ColumnName="CardNumber" />
-                <ScalarProperty Name="PinNumber" ColumnName="PinNumber" />
-                <ScalarProperty Name="PUKNumber" ColumnName="PUKNumber" />
-                <ScalarProperty Name="ReceiveDate" ColumnName="ReceiveDate" />
+          <EntitySetMapping Name="ServiceProviders">
+            <EntityTypeMapping TypeName="MobileManagerModel.ServiceProvider">
+              <MappingFragment StoreEntitySet="ServiceProvider">
+                <ScalarProperty Name="pkServiceProviderID" ColumnName="pkServiceProviderID" />
+                <ScalarProperty Name="ServiceProviderName" ColumnName="ServiceProviderName" />
                 <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
                 <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
                 <ScalarProperty Name="IsActive" ColumnName="IsActive" />
@@ -2331,91 +2549,32 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="Roles">
-            <EntityTypeMapping TypeName="MobileManagerModel.Role">
-              <MappingFragment StoreEntitySet="Role">
-                <ScalarProperty Name="Description" ColumnName="Description" />
-                <ScalarProperty Name="RoleName" ColumnName="RoleName" />
-                <ScalarProperty Name="pkRoleID" ColumnName="pkRoleID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="Users">
             <EntityTypeMapping TypeName="MobileManagerModel.User">
               <MappingFragment StoreEntitySet="User">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="LastActivityDate" ColumnName="LastActivityDate" />
-                <ScalarProperty Name="UserFullName" ColumnName="UserFullName" />
-                <ScalarProperty Name="UserName" ColumnName="UserName" />
                 <ScalarProperty Name="pkUserID" ColumnName="pkUserID" />
+                <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="UserFullName" ColumnName="UserFullName" />
+                <ScalarProperty Name="LastActivityDate" ColumnName="LastActivityDate" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="UserInCompanies">
             <EntityTypeMapping TypeName="MobileManagerModel.UserInCompany">
               <MappingFragment StoreEntitySet="UserInCompany">
-                <ScalarProperty Name="fkCompanyID" ColumnName="fkCompanyID" />
-                <ScalarProperty Name="fkUserID" ColumnName="fkUserID" />
                 <ScalarProperty Name="pkUserInCompanyID" ColumnName="pkUserInCompanyID" />
+                <ScalarProperty Name="fkUserID" ColumnName="fkUserID" />
+                <ScalarProperty Name="fkCompanyID" ColumnName="fkCompanyID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
           <EntitySetMapping Name="UserInRoles">
             <EntityTypeMapping TypeName="MobileManagerModel.UserInRole">
               <MappingFragment StoreEntitySet="UserInRole">
-                <ScalarProperty Name="fkRoleID" ColumnName="fkRoleID" />
-                <ScalarProperty Name="fkUserID" ColumnName="fkUserID" />
                 <ScalarProperty Name="pkUserInRoleID" ColumnName="pkUserInRoleID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="InvoiceDetails">
-            <EntityTypeMapping TypeName="MobileManagerModel.InvoiceDetail">
-              <MappingFragment StoreEntitySet="InvoiceDetail">
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="IsPrivate" ColumnName="IsPrivate" />
-                <ScalarProperty Name="ItemAmount" ColumnName="ItemAmount" />
-                <ScalarProperty Name="ReferenceNumber" ColumnName="ReferenceNumber" />
-                <ScalarProperty Name="ItemDescription" ColumnName="ItemDescription" />
-                <ScalarProperty Name="fkServiceProviderID" ColumnName="fkServiceProviderID" />
-                <ScalarProperty Name="fkInvoiceID" ColumnName="fkInvoiceID" />
-                <ScalarProperty Name="pkInvoiceItemID" ColumnName="pkInvoiceItemID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Services">
-            <EntityTypeMapping TypeName="MobileManagerModel.Service">
-              <MappingFragment StoreEntitySet="Service">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="ServiceDescription" ColumnName="ServiceDescription" />
-                <ScalarProperty Name="ServicePreFix" ColumnName="ServicePreFix" />
-                <ScalarProperty Name="pkServiceID" ColumnName="pkServiceID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Invoices">
-            <EntityTypeMapping TypeName="MobileManagerModel.Invoice">
-              <MappingFragment StoreEntitySet="Invoice">
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="IsPeriodClosed" ColumnName="IsPeriodClosed" />
-                <ScalarProperty Name="InvoiceTotal" ColumnName="InvoiceTotal" />
-                <ScalarProperty Name="PrivateDue" ColumnName="PrivateDue" />
-                <ScalarProperty Name="CompanyDue" ColumnName="CompanyDue" />
-                <ScalarProperty Name="InvoiceDate" ColumnName="InvoiceDate" />
-                <ScalarProperty Name="InvoiceNumber" ColumnName="InvoiceNumber" />
-                <ScalarProperty Name="InvoicePeriod" ColumnName="InvoicePeriod" />
-                <ScalarProperty Name="fkServiceID" ColumnName="fkServiceID" />
-                <ScalarProperty Name="fkClientID" ColumnName="fkClientID" />
-                <ScalarProperty Name="ImeNo" ColumnName="ImeNo" />
-                <ScalarProperty Name="Service" ColumnName="Service" />
-                <ScalarProperty Name="EmpNo" ColumnName="EmpNo" />
-                <ScalarProperty Name="CellNo" ColumnName="CellNo" />
-                <ScalarProperty Name="AccID" ColumnName="AccID" />
-                <ScalarProperty Name="pkInvoiceID" ColumnName="pkInvoiceID" />
+                <ScalarProperty Name="fkUserID" ColumnName="fkUserID" />
+                <ScalarProperty Name="fkRoleID" ColumnName="fkRoleID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -2441,53 +2600,6 @@
               </ComplexTypeMapping>
             </ResultMapping>
           </FunctionImportMapping>
-          <EntitySetMapping Name="BillingLevels">
-            <EntityTypeMapping TypeName="MobileManagerModel.BillingLevel">
-              <MappingFragment StoreEntitySet="BillingLevel">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="LevelDescription" ColumnName="LevelDescription" />
-                <ScalarProperty Name="pkBillingLevelID" ColumnName="pkBillingLevelID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="ClientBillings">
-            <EntityTypeMapping TypeName="MobileManagerModel.ClientBilling">
-              <MappingFragment StoreEntitySet="ClientBilling">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="StopBillingToDate" ColumnName="StopBillingToDate" />
-                <ScalarProperty Name="StopBillingFromDate" ColumnName="StopBillingFromDate" />
-                <ScalarProperty Name="RoamingToDate" ColumnName="RoamingToDate" />
-                <ScalarProperty Name="RoamingFromDate" ColumnName="RoamingFromDate" />
-                <ScalarProperty Name="CountryVisiting" ColumnName="CountryVisiting" />
-                <ScalarProperty Name="InternationalRoaming" ColumnName="InternationalRoaming" />
-                <ScalarProperty Name="InternationalDailing" ColumnName="InternationalDailing" />
-                <ScalarProperty Name="SPLimit" ColumnName="SPLimit" />
-                <ScalarProperty Name="VoiceAllowance" ColumnName="VoiceAllowance" />
-                <ScalarProperty Name="WDPAllowance" ColumnName="WDPAllowance" />
-                <ScalarProperty Name="IsSplitBilling" ColumnName="IsSplitBilling" />
-                <ScalarProperty Name="IsBillable" ColumnName="IsBillable" />
-                <ScalarProperty Name="fkCompanyBillingLevelID" ColumnName="fkCompanyBillingLevelID" />
-                <ScalarProperty Name="cellnumber" ColumnName="cellnumber" />
-                <ScalarProperty Name="pkClientBillingID" ColumnName="pkClientBillingID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="CompanyBillingLevels">
-            <EntityTypeMapping TypeName="MobileManagerModel.CompanyBillingLevel">
-              <MappingFragment StoreEntitySet="CompanyBillingLevel">
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="Amount" ColumnName="Amount" />
-                <ScalarProperty Name="fkBillingLevelID" ColumnName="fkBillingLevelID" />
-                <ScalarProperty Name="fkCompanyID" ColumnName="fkCompanyID" />
-                <ScalarProperty Name="pkCompanyBillingLevelID" ColumnName="pkCompanyBillingLevelID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="Clients">
             <EntityTypeMapping TypeName="MobileManagerModel.Client">
               <MappingFragment StoreEntitySet="Client">
@@ -2516,189 +2628,44 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="Packages">
-            <EntityTypeMapping TypeName="MobileManagerModel.Package">
-              <MappingFragment StoreEntitySet="Package">
+          <EntitySetMapping Name="Devices">
+            <EntityTypeMapping TypeName="MobileManagerModel.Device">
+              <MappingFragment StoreEntitySet="Device">
                 <ScalarProperty Name="IsActive" ColumnName="IsActive" />
                 <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
                 <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="SPULValue" ColumnName="SPULValue" />
-                <ScalarProperty Name="RandValue" ColumnName="RandValue" />
-                <ScalarProperty Name="SMSNumber" ColumnName="SMSNumber" />
-                <ScalarProperty Name="TalkTimeMinutes" ColumnName="TalkTimeMinutes" />
-                <ScalarProperty Name="MBData" ColumnName="MBData" />
-                <ScalarProperty Name="Cost" ColumnName="Cost" />
-                <ScalarProperty Name="PackageName" ColumnName="PackageName" />
-                <ScalarProperty Name="enPackageType" ColumnName="enPackageType" />
-                <ScalarProperty Name="fkServiceProviderID" ColumnName="fkServiceProviderID" />
-                <ScalarProperty Name="pkPackageID" ColumnName="pkPackageID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Contracts">
-            <EntityTypeMapping TypeName="MobileManagerModel.Contract">
-              <MappingFragment StoreEntitySet="Contract">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="PaymentCancelDate" ColumnName="PaymentCancelDate" />
-                <ScalarProperty Name="ContractEndDate" ColumnName="ContractEndDate" />
-                <ScalarProperty Name="ContractUpgradeDate" ColumnName="ContractUpgradeDate" />
-                <ScalarProperty Name="ContractStartDate" ColumnName="ContractStartDate" />
-                <ScalarProperty Name="AccountNumber" ColumnName="AccountNumber" />
-                <ScalarProperty Name="fkPackageSetupID" ColumnName="fkPackageSetupID" />
-                <ScalarProperty Name="fkPackageID" ColumnName="fkPackageID" />
+                <ScalarProperty Name="InsuranceValue" ColumnName="InsuranceValue" />
+                <ScalarProperty Name="InsuranceCost" ColumnName="InsuranceCost" />
+                <ScalarProperty Name="ReceiveDate" ColumnName="ReceiveDate" />
+                <ScalarProperty Name="SerialNumber" ColumnName="SerialNumber" />
+                <ScalarProperty Name="IMENumber" ColumnName="IMENumber" />
                 <ScalarProperty Name="fkStatusID" ColumnName="fkStatusID" />
+                <ScalarProperty Name="fkDeviceModelID" ColumnName="fkDeviceModelID" />
+                <ScalarProperty Name="fkDeviceMakeID" ColumnName="fkDeviceMakeID" />
+                <ScalarProperty Name="fkSimCardID" ColumnName="fkSimCardID" />
+                <ScalarProperty Name="fkContractID" ColumnName="fkContractID" />
+                <ScalarProperty Name="pkDeviceID" ColumnName="pkDeviceID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="SimCards">
+            <EntityTypeMapping TypeName="MobileManagerModel.SimCard">
+              <MappingFragment StoreEntitySet="SimCard">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="ReceiveDate" ColumnName="ReceiveDate" />
+                <ScalarProperty Name="PUKNumber" ColumnName="PUKNumber" />
+                <ScalarProperty Name="PinNumber" ColumnName="PinNumber" />
+                <ScalarProperty Name="CardNumber" ColumnName="CardNumber" />
                 <ScalarProperty Name="CellNumber" ColumnName="CellNumber" />
-                <ScalarProperty Name="enCostType" ColumnName="enCostType" />
-                <ScalarProperty Name="newpackage" ColumnName="newpackage" />
-                <ScalarProperty Name="oldpackage" ColumnName="oldpackage" />
-                <ScalarProperty Name="statusname" ColumnName="statusname" />
-                <ScalarProperty Name="imenumber" ColumnName="imenumber" />
-                <ScalarProperty Name="pkContractID" ColumnName="pkContractID" />
+                <ScalarProperty Name="fkStatusID" ColumnName="fkStatusID" />
+                <ScalarProperty Name="fkContractID" ColumnName="fkContractID" />
+                <ScalarProperty Name="pkSimCardID" ColumnName="pkSimCardID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="PackageSetups">
-            <EntityTypeMapping TypeName="MobileManagerModel.PackageSetup">
-              <MappingFragment StoreEntitySet="PackageSetup">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="SPULValue" ColumnName="SPULValue" />
-                <ScalarProperty Name="RandValue" ColumnName="RandValue" />
-                <ScalarProperty Name="SMSNumber" ColumnName="SMSNumber" />
-                <ScalarProperty Name="TalkTimeMinutes" ColumnName="TalkTimeMinutes" />
-                <ScalarProperty Name="MBData" ColumnName="MBData" />
-                <ScalarProperty Name="Cost" ColumnName="Cost" />
-                <ScalarProperty Name="pkPackageSetupID" ColumnName="pkPackageSetupID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="BillingProcesses">
-            <EntityTypeMapping TypeName="MobileManagerModel.BillingProcess">
-              <MappingFragment StoreEntitySet="BillingProcess">
-                <ScalarProperty Name="ProcessDescription" ColumnName="ProcessDescription" />
-                <ScalarProperty Name="pkBillingProcessID" ColumnName="pkBillingProcessID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="BillingProcessHistories">
-            <EntityTypeMapping TypeName="MobileManagerModel.BillingProcessHistory">
-              <MappingFragment StoreEntitySet="BillingProcessHistory">
-                <ScalarProperty Name="DateModified" ColumnName="DateModified" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="BillingComment" ColumnName="BillingComment" />
-                <ScalarProperty Name="ProcessDuration" ColumnName="ProcessDuration" />
-                <ScalarProperty Name="ProcessResult" ColumnName="ProcessResult" />
-                <ScalarProperty Name="ProcessCurrent" ColumnName="ProcessCurrent" />
-                <ScalarProperty Name="ProcessEndDate" ColumnName="ProcessEndDate" />
-                <ScalarProperty Name="ProcessStartDate" ColumnName="ProcessStartDate" />
-                <ScalarProperty Name="BillingPeriod" ColumnName="BillingPeriod" />
-                <ScalarProperty Name="fkBillingProcessID" ColumnName="fkBillingProcessID" />
-                <ScalarProperty Name="pkBillingProcessHistoryID" ColumnName="pkBillingProcessHistoryID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="AuditLogs">
-            <EntityTypeMapping TypeName="MobileManagerModel.AuditLog">
-              <MappingFragment StoreEntitySet="AuditLog">
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="AuditDate" ColumnName="AuditDate" />
-                <ScalarProperty Name="ChangedValue" ColumnName="ChangedValue" />
-                <ScalarProperty Name="EntityID" ColumnName="EntityID" />
-                <ScalarProperty Name="AuditComment" ColumnName="AuditComment" />
-                <ScalarProperty Name="AuditDescription" ColumnName="AuditDescription" />
-                <ScalarProperty Name="AuditGroup" ColumnName="AuditGroup" />
-                <ScalarProperty Name="pkAuditLogID" ColumnName="pkAuditLogID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="CompanyGroups">
-            <EntityTypeMapping TypeName="MobileManagerModel.CompanyGroup">
-              <MappingFragment StoreEntitySet="CompanyGroup">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="GroupName" ColumnName="GroupName" />
-                <ScalarProperty Name="pkCompanyGroupID" ColumnName="pkCompanyGroupID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="Companies">
-            <EntityTypeMapping TypeName="MobileManagerModel.Company">
-              <MappingFragment StoreEntitySet="Company">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="IPAddress" ColumnName="IPAddress" />
-                <ScalarProperty Name="AdminFee" ColumnName="AdminFee" />
-                <ScalarProperty Name="CostCode" ColumnName="CostCode" />
-                <ScalarProperty Name="WBSNumber" ColumnName="WBSNumber" />
-                <ScalarProperty Name="CompanyName" ColumnName="CompanyName" />
-                <ScalarProperty Name="fkCompanyGroupID" ColumnName="fkCompanyGroupID" />
-                <ScalarProperty Name="pkCompanyID" ColumnName="pkCompanyID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="DataValidationExceptions">
-            <EntityTypeMapping TypeName="MobileManagerModel.DataValidationException">
-              <MappingFragment StoreEntitySet="DataValidationException">
-                <ScalarProperty Name="Result" ColumnName="Result" />
-                <ScalarProperty Name="CanApplyRule" ColumnName="CanApplyRule" />
-                <ScalarProperty Name="Message" ColumnName="Message" />
-                <ScalarProperty Name="DataValidationEntityID" ColumnName="DataValidationEntityID" />
-                <ScalarProperty Name="enDataValidationEntity" ColumnName="enDataValidationEntity" />
-                <ScalarProperty Name="fkDataValidationPropertyID" ColumnName="fkDataValidationPropertyID" />
-                <ScalarProperty Name="fkBillingProcessID" ColumnName="fkBillingProcessID" />
-                <ScalarProperty Name="BillingPeriod" ColumnName="BillingPeriod" />
-                <ScalarProperty Name="pkDataValidationExceptionID" ColumnName="pkDataValidationExceptionID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="DataValidationProperties">
-            <EntityTypeMapping TypeName="MobileManagerModel.DataValidationProperty">
-              <MappingFragment StoreEntitySet="DataValidationProperty">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="enDataType" ColumnName="enDataType" />
-                <ScalarProperty Name="enDataValidationProperty" ColumnName="enDataValidationProperty" />
-                <ScalarProperty Name="enDataValidationEntity" ColumnName="enDataValidationEntity" />
-                <ScalarProperty Name="pkDataValidationPropertyID" ColumnName="pkDataValidationPropertyID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="DataValidationRules">
-            <EntityTypeMapping TypeName="MobileManagerModel.DataValidationRule">
-              <MappingFragment StoreEntitySet="DataValidationRule">
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="DataValidationValue" ColumnName="DataValidationValue" />
-                <ScalarProperty Name="enDataValidationOperator" ColumnName="enDataValidationOperator" />
-                <ScalarProperty Name="fkDataValidationPropertyID" ColumnName="fkDataValidationPropertyID" />
-                <ScalarProperty Name="DataValidationEntityID" ColumnName="DataValidationEntityID" />
-                <ScalarProperty Name="enDataValidationEntity" ColumnName="enDataValidationEntity" />
-                <ScalarProperty Name="enValidationProcess" ColumnName="enValidationProcess" />
-                <ScalarProperty Name="pkDataValidationRuleID" ColumnName="pkDataValidationRuleID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="ImportRuleDatas">
-            <EntityTypeMapping TypeName="MobileManagerModel.ImportRuleData">
-              <MappingFragment StoreEntitySet="ImportRuleData">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="DateModified" ColumnName="DateModified" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="SearchEntities" ColumnName="SearchEntities" />
-                <ScalarProperty Name="enDataImportEntity" ColumnName="enDataImportEntity" />
-                <ScalarProperty Name="enDataImportColumn" ColumnName="enDataImportColumn" />
-                <ScalarProperty Name="pkImportRuleDataID" ColumnName="pkImportRuleDataID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          </EntityContainerMapping>
+        </EntityContainerMapping>
       </Mapping>
     </edmx:Mappings>
   </edmx:Runtime>

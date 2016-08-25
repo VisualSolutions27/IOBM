@@ -7,9 +7,9 @@ namespace Gijima.IOBM.MobileManager.Common.Events
     public class ActionCompletedEvent : PubSubEvent<ActionCompleted> {}
     public class ReadInvoicesEvent : PubSubEvent<int> {}
     public class ReadDevicesEvent : PubSubEvent<int> {}
-    public class ReadSimmCardsEvent : PubSubEvent<int> {}
-    public class LinkDeviceSimmCardEvent : PubSubEvent<int> {}
-    public class LinkSimmCardDeviceEvent : PubSubEvent<int> {}
+    public class ReadSimCardsEvent : PubSubEvent<int> {}
+    public class LinkDeviceSimCardEvent : PubSubEvent<int> {}
+    public class LinkSimCardDeviceEvent : PubSubEvent<int> {}
     public class SearchResultEvent : PubSubEvent<int> {}
     public class SetActivityLogProcessEvent : PubSubEvent<object> {}
     public class ShowInvoiceReportEvent : PubSubEvent<object> {}

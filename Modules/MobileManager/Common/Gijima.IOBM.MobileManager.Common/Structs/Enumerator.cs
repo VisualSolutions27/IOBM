@@ -21,7 +21,7 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     /// </summary>
     public enum ActionCompleted
     {
-        ReadContractSimmCards
+        ReadContractSimCards
     }
 
     /// <summary>
@@ -33,10 +33,10 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         All = 0,
         Contract = 1,
         Device = 2,
-        Simm = 3,
+        Sim = 3,
         ContractDevice = 4,
-        ContractSimm = 5,
-        DeviceSimm = 6
+        ContractSim = 5,
+        DeviceSim = 6
     }
 
     /// <summary>
@@ -98,7 +98,7 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         Contract,
         ClientBilling,
         Device,
-        SimmCard,
+        SimCard,
         PackageSetup
     }
 
@@ -182,8 +182,8 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         Package = 4,
         [Description("Device Data")]
         Device = 5,
-        [Description("Simmcard Data")]
-        SimmCard = 6,
+        [Description("Simcard Data")]
+        SimCard = 6,
         [Description("Status Data")]
         Status = 7
     }
@@ -260,11 +260,11 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         RandValue = 31,
         [Description("Package SPUL Value")]
         SPULValue = 32,
-        [Description("Simm Card Number")]
+        [Description("Sim Card Number")]
         CardNumber = 33,
-        [Description("Simm Card PUK Number")]
+        [Description("Sim Card PUK Number")]
         PUKNumber = 34,
-        [Description("Simm Card Cell Number")]
+        [Description("Sim Card Cell Number")]
         CellNumber = 35,
     }
 

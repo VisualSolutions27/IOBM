@@ -141,9 +141,9 @@
                     <RadioButton x:Name="RadioButtonInsuranceNo" Content="No" TabIndex="71" GroupName="Insurance" 
                         IsChecked="{Binding DeviceInsuranceNo, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" BorderBrush="{Binding ValidInsurance}"/>
                 </StackPanel>
-                <TextBlock Grid.Row="2" Grid.Column="3" Text="Simm crd:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-                <ComboBox x:Name="ComboBoxSimmCards" Grid.Row="2" Grid.Column="4" ToolTip="Select the simm card linked to the device." TabIndex="66"
-                    ItemsSource="{Binding SimmCardCollection}" DisplayMemberPath="CellNumber" SelectedItem="{Binding SelectedSimmCard}">
+                <TextBlock Grid.Row="2" Grid.Column="3" Text="Sim crd:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <ComboBox x:Name="ComboBoxSimCards" Grid.Row="2" Grid.Column="4" ToolTip="Select the sim card linked to the device." TabIndex="66"
+                    ItemsSource="{Binding SimCardCollection}" DisplayMemberPath="CellNumber" SelectedItem="{Binding SelectedSimCard}">
                 </ComboBox>
                 <TextBlock Grid.Row="8" Grid.Column="0" Text="Insr value:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
                 <TextBox x:Name="TextBoxInsuranceValue" Grid.Row="8" Grid.Column="1" TabIndex="72" ToolTip="Enter the insurance value." Style="{StaticResource UXTextBoxStyle}"
@@ -160,13 +160,14 @@
                 </StackPanel>
                 <DataGrid x:Name="DataGridInstruments" Grid.Row="10" Grid.ColumnSpan="5" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserSortColumns="True"
                     IsReadOnly="True" TabIndex="75" Style="{StaticResource DataGridStyle}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}" 
-                    ItemsSource="{Binding DeviceCollection}" SelectedItem="{Binding SelectedDevice}">
+                    ItemsSource="{Binding DeviceCollection}" SelectedItem="{Binding SelectedDevice, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" 
+                    SelectedIndex="{Binding SelectedDeviceIndex, UpdateSourceTrigger=PropertyChanged}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Status" Binding="{Binding Status1.StatusDescription}" Width="Auto" />
-                        <DataGridTextColumn Header="State" Binding="{Binding IsAcitve, Converter={StaticResource UIDataConvertionHelper}, ConverterParameter='State'}" Width="Auto" />
+                        <DataGridTextColumn Header="Status" Binding="{Binding Status.StatusDescription}" Width="Auto" />
+                        <DataGridTextColumn Header="State" Binding="{Binding IsActive, Converter={StaticResource UIDataConvertionHelper}, ConverterParameter='State'}" Width="Auto" />
                         <DataGridTextColumn Header="Make" Binding="{Binding DeviceMake.MakeDescription}" Width="Auto" />
                         <DataGridTextColumn Header="Model" Binding="{Binding DeviceModel.ModelDescription}" Width="Auto" />
-                        <DataGridTextColumn Header="Cell Number" Binding="{Binding SimmCard.CellNumber}" Width="Auto" />
+                        <DataGridTextColumn Header="Cell Number" Binding="{Binding SimCard.CellNumber}" Width="Auto" />
                         <DataGridTextColumn Header="IME Number" Binding="{Binding IMENumber}" Width="Auto" />
                         <DataGridTextColumn Header="Serial Number" Binding="{Binding SerialNumber}" Width="Auto" />
                         <DataGridTextColumn Header="Insr Value" Binding="{Binding InsuranceValue}" Width="Auto" />

@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Gijima.IOBM.MobileManager.Model.Models
 {
-    public class SimmCardModel
+    public class SimCardModel
     {
         #region Properties and Attributes
 
@@ -24,7 +24,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// Constructure
         /// </summary>
         /// <param name="eventAggreagator"></param>
-        public SimmCardModel(IEventAggregator eventAggreagator)
+        public SimCardModel(IEventAggregator eventAggreagator)
         {
             _eventAggregator = eventAggreagator;
             _activityLogger = new AuditLogModel(_eventAggregator);
@@ -32,25 +32,25 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         }
 
         /// <summary>
-        /// Create a new simm card entity in the database
+        /// Create a new Sim card entity in the database
         /// </summary>
-        /// <param name="simmCard">The simm card entity to add.</param>
+        /// <param name="simCard">The Sim card entity to add.</param>
         /// <returns>True if successfull</returns>
-        public bool CreateSimmCard(SimmCard simmCard)
+        public bool CreateSimCard(SimCard simCard)
         {
             try
             {
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    if (!db.SimmCards.Any(p => p.PUKNumber == simmCard.PUKNumber))
+                    if (!db.SimCards.Any(p => p.PUKNumber == simCard.PUKNumber))
                     {
-                        db.SimmCards.Add(simmCard);
+                        db.SimCards.Add(simCard);
                         db.SaveChanges();
                         return true;
                     }
                     else
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0}, {1} simm card already exist.", simmCard.CellNumber, simmCard.PUKNumber));
+                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0}, {1} sim card already exist.", simCard.CellNumber, simCard.PUKNumber));
                         return false;
                     }
                 }
@@ -63,25 +63,25 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         }
 
         /// <summary>
-        /// Read all or active only simm cards from the database
+        /// Read all or active only Sim cards from the database
         /// </summary>
         /// <param name="activeOnly">Flag to load all or active only entities.</param>
         /// <param name="excludeDefault">Flag to include or exclude the default entity.</param>
-        /// <returns>Collection of SimmCard</returns>
-        public ObservableCollection<SimmCard> ReadSimmCard(bool activeOnly, bool excludeDefault = false)
+        /// <returns>Collection of SimCard</returns>
+        public ObservableCollection<SimCard> ReadSimCard(bool activeOnly, bool excludeDefault = false)
         {
             try
             {
-                IEnumerable<SimmCard> simmCards = null;
+                IEnumerable<SimCard> simCards = null;
 
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    simmCards = ((DbQuery<SimmCard>)(from simmCard in db.SimmCards
-                                                     where activeOnly ? simmCard.IsActive : true &&
-                                                           excludeDefault ? simmCard.pkSimmCardID > 0 : true
-                                                     select simmCard)).ToList();
+                    simCards = ((DbQuery<SimCard>)(from simCard in db.SimCards
+                                                   where activeOnly ? simCard.IsActive : true &&
+                                                         excludeDefault ? simCard.pkSimCardID > 0 : true
+                                                   select simCard)).ToList();
 
-                    return new ObservableCollection<SimmCard>(simmCards);
+                    return new ObservableCollection<SimCard>(simCards);
                 }
             }
             catch (Exception ex)
@@ -92,30 +92,30 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         }
 
         /// <summary>
-        /// Read all or active only simm cards linked to the specified contract from the database
+        /// Read all or active only Sim cards linked to the specified contract from the database
         /// </summary>
-        /// <param name="contractID">The contract primary key linked to the simmCards.</param>
+        /// <param name="contractID">The contract primary key linked to the SimCards.</param>
         /// <param name="activeOnly">Flag to load all or active only entities.</param>
-        /// <returns>Collection of SimmCard</returns>
-        public ObservableCollection<SimmCard> ReadSimmCardsForContract(int contractID, bool activeOnly = false)
+        /// <returns>Collection of SimCard</returns>
+        public ObservableCollection<SimCard> ReadSimCardsForContract(int contractID, bool activeOnly = false)
         {
             try
             {
-                IEnumerable<SimmCard> simmCards = null;
+                IEnumerable<SimCard> simCards = null;
 
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    simmCards = ((DbQuery<SimmCard>)(from simmCard in db.SimmCards
-                                                     where simmCard.fkContractID == contractID
-                                                     select simmCard)).Include("Devices")
+                    simCards = ((DbQuery<SimCard>)(from simCard in db.SimCards
+                                                   where simCard.fkContractID == contractID
+                                                   select simCard)).Include("Devices")
                                                                       .Include("Devices.DeviceMake")
                                                                       .Include("Devices.DeviceModel")
                                                                       .Include("Status").ToList();
 
                     if (activeOnly)
-                        simmCards = simmCards.Where(p => p.IsActive);
+                        simCards = simCards.Where(p => p.IsActive);
 
-                    return new ObservableCollection<SimmCard>(simmCards);
+                    return new ObservableCollection<SimCard>(simCards);
                 }
             }
             catch (Exception ex)
@@ -126,37 +126,37 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         }
 
         /// <summary>
-        /// Update an existing simm card entity in the database
+        /// Update an existing Sim card entity in the database
         /// </summary>
-        /// <param name="simmCard">The simm card entity to update.</param>
+        /// <param name="simCard">The Sim card entity to update.</param>
         /// <returns>True if successfull</returns>
-        public bool UpdateSimmCard(SimmCard simmCard)
+        public bool UpdateSimCard(SimCard simCard)
         {
             try
             {
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    SimmCard existingSimmCard = db.SimmCards.Where(p => p.pkSimmCardID == simmCard.pkSimmCardID).FirstOrDefault();
+                    SimCard existingSimCard = db.SimCards.Where(p => p.pkSimCardID == simCard.pkSimCardID).FirstOrDefault();
 
-                    // Check to see if the simm card already exist for another entity 
-                    if (existingSimmCard != null && existingSimmCard.pkSimmCardID != simmCard.pkSimmCardID && 
-                        (existingSimmCard.PUKNumber == simmCard.PUKNumber || existingSimmCard.CardNumber == simmCard.CardNumber ||
-                         existingSimmCard.CellNumber == simmCard.CellNumber))
+                    // Check to see if the sim card already exist for another entity 
+                    if (existingSimCard != null && existingSimCard.pkSimCardID != simCard.pkSimCardID && 
+                        (existingSimCard.PUKNumber == simCard.PUKNumber || existingSimCard.CardNumber == simCard.CardNumber ||
+                         existingSimCard.CellNumber == simCard.CellNumber))
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0}, {1} simm card already exist.", simmCard.CellNumber, simmCard.PUKNumber));
+                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0}, {1} sim card already exist.", simCard.CellNumber, simCard.PUKNumber));
                         return false;
                     }
                     else
                     {
                         // Prevent primary key confilcts when using attach property
-                        if (existingSimmCard != null)
-                            db.Entry(existingSimmCard).State = System.Data.Entity.EntityState.Detached;
+                        if (existingSimCard != null)
+                            db.Entry(existingSimCard).State = System.Data.Entity.EntityState.Detached;
 
-                        db.SimmCards.Attach(simmCard);
-                        db.Entry(simmCard).State = System.Data.Entity.EntityState.Modified;
+                        db.SimCards.Attach(simCard);
+                        db.Entry(simCard).State = System.Data.Entity.EntityState.Modified;
                         db.SaveChanges();
 
-                        _activityLogger.CreateDataChangeAudits<SimmCard>(_dataActivityHelper.GetDataChangeActivities<SimmCard>(existingSimmCard, simmCard, simmCard.fkContractID.Value, db));
+                        _activityLogger.CreateDataChangeAudits<SimCard>(_dataActivityHelper.GetDataChangeActivities<SimCard>(existingSimCard, simCard, simCard.fkContractID.Value, db));
                         return true;
                     }
                 }

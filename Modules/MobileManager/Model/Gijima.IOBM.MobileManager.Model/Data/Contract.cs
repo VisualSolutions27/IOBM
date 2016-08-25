@@ -19,14 +19,10 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         {
             this.Clients = new HashSet<Client>();
             this.Devices = new HashSet<Device>();
-            this.SimmCards = new HashSet<SimmCard>();
+            this.SimCards = new HashSet<SimCard>();
         }
     
         public int pkContractID { get; set; }
-        public string imenumber { get; set; }
-        public string statusname { get; set; }
-        public string oldpackage { get; set; }
-        public string newpackage { get; set; }
         public Nullable<short> enCostType { get; set; }
         public string CellNumber { get; set; }
         public int fkStatusID { get; set; }
@@ -41,14 +37,14 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public System.DateTime ModifiedDate { get; set; }
         public bool IsActive { get; set; }
     
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Client> Clients { get; set; }
         public virtual Package Package { get; set; }
         public virtual PackageSetup PackageSetup { get; set; }
         public virtual Status Status { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Client> Clients { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Device> Devices { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<SimmCard> SimmCards { get; set; }
+        public virtual ICollection<SimCard> SimCards { get; set; }
     }
 }

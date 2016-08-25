@@ -15,15 +15,10 @@ namespace Gijima.IOBM.MobileManager.Model.Data
     public partial class Device
     {
         public int pkDeviceID { get; set; }
-        public Nullable<int> fkContractID { get; set; }
-        public Nullable<int> fkSimmCardID { get; set; }
-        public string tmpimeno { get; set; }
-        public string cellnumber { get; set; }
-        public string make { get; set; }
-        public string model { get; set; }
-        public string status { get; set; }
-        public Nullable<int> fkDeviceMakeID { get; set; }
-        public Nullable<int> fkDeviceModelID { get; set; }
+        public int fkContractID { get; set; }
+        public Nullable<int> fkSimCardID { get; set; }
+        public int fkDeviceMakeID { get; set; }
+        public int fkDeviceModelID { get; set; }
         public int fkStatusID { get; set; }
         public string IMENumber { get; set; }
         public string SerialNumber { get; set; }
@@ -34,10 +29,10 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public System.DateTime ModifiedDate { get; set; }
         public bool IsActive { get; set; }
     
+        public virtual Contract Contract { get; set; }
         public virtual DeviceMake DeviceMake { get; set; }
         public virtual DeviceModel DeviceModel { get; set; }
-        public virtual SimmCard SimmCard { get; set; }
-        public virtual Status Status1 { get; set; }
-        public virtual Contract Contract { get; set; }
+        public virtual SimCard SimCard { get; set; }
+        public virtual Status Status { get; set; }
     }
 }

@@ -17,8 +17,8 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public DeviceMake()
         {
-            this.Devices = new HashSet<Device>();
             this.DeviceModels = new HashSet<DeviceModel>();
+            this.Devices = new HashSet<Device>();
         }
     
         public int pkDeviceMakeID { get; set; }
@@ -28,8 +28,8 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public bool IsActive { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<Device> Devices { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<DeviceModel> DeviceModels { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Device> Devices { get; set; }
     }
 }

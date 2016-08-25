@@ -34,8 +34,8 @@ namespace Gijima.IOBM.MobileManager.Common.Helpers
                         return StatusLink.Contract.ToString();
                     case StatusLink.Device:
                         return StatusLink.Device.ToString();
-                    case StatusLink.Simm:
-                        return StatusLink.Simm.ToString();
+                    case StatusLink.Sim:
+                        return StatusLink.Sim.ToString();
                     default:
                         return "All";
                 }

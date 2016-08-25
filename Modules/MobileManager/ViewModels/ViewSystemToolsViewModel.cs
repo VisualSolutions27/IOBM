@@ -51,6 +51,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             TabCollection = new ObservableCollection<TabItem>();
             if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()))
             {
+                TabCollection.Add(new TabItem() { Header = "Data Update" });
                 TabCollection.Add(new TabItem() { Header = "Data Import" });
                 TabCollection.Add(new TabItem() { Header = "Data Validation" });
             }
@@ -73,8 +74,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 switch (tabItem.Header.ToString())
                 {
-                    case "Data Import":
-                        SelectedTab.Content = new ViewDataImport();
+                    case "Data Update":
+                        SelectedTab.Content = new ViewDataUpdate();
                         break;
                     case "Data Validation":
                         //SelectedTab.Content = new ViewBillingCF();
