@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Gijima.IOBM.MobileManager.Model.Models
 {
-    public class ImportRuleDataModel
+    public class UpdateRuleDataModel
     {
         #region Properties and Attributes
 
@@ -22,7 +22,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// Constructure
         /// </summary>
         /// <param name="eventAggreagator"></param>
-        public ImportRuleDataModel(IEventAggregator eventAggreagator)
+        public UpdateRuleDataModel(IEventAggregator eventAggreagator)
         {
             _eventAggregator = eventAggreagator;
         }
@@ -30,26 +30,26 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// <summary>
         /// Create a new import rule data entity in the database
         /// </summary>
-        /// <param name="importRuleData">The import rule data entity to add.</param>
+        /// <param name="updateRuleData">The import rule data entity to add.</param>
         /// <returns>True if successfull</returns>
-        public bool CreateImportRule(ImportRuleData importRuleData)
+        public bool CreateUpdateRule(UpdateRuleData updateRuleData)
         {
             try
             {
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    if (!db.ImportRuleDatas.Any(p => p.enDataImportColumn == importRuleData.enDataImportColumn &&
-                                                     p.enDataImportEntity == importRuleData.enDataImportEntity))
+                    if (!db.UpdateRuleDatas.Any(p => p.enDataUpdateColumn == updateRuleData.enDataUpdateColumn &&
+                                                     p.enDataUpdateEntity == updateRuleData.enDataUpdateEntity))
                     {
-                        db.ImportRuleDatas.Add(importRuleData);
+                        db.UpdateRuleDatas.Add(updateRuleData);
                         db.SaveChanges();
                         return true;
                     }
                     else
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The data import rule source {0} and destination {1} already exist.", 
-                                                                                       ((DataImportColumn)importRuleData.enDataImportColumn).ToString(),
-                                                                                       ((DataImportEntity)importRuleData.enDataImportEntity).ToString()));
+                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The data update rule source {0} and destination {1} already exist.", 
+                                                                                       ((DataUpdateColumn)updateRuleData.enDataUpdateColumn).ToString(),
+                                                                                       ((DataUpdateEntity)updateRuleData.enDataUpdateEntity).ToString()));
                         return false;
                     }
                 }
@@ -65,20 +65,20 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// Read all or active only data import rule data from the database
         /// </summary>
         /// <param name="activeOnly">Flag to load all or active only entities.</param>
-        /// <returns>Collection of ImportRuleData</returns>
-        public ObservableCollection<ImportRuleData> ReadImportRuleData(bool activeOnly)
+        /// <returns>Collection of UpdateRuleData</returns>
+        public ObservableCollection<UpdateRuleData> ReadUpdateRuleData(bool activeOnly)
         {
             try
             {
-                IEnumerable<ImportRuleData> importRuleData = null;
+                IEnumerable<UpdateRuleData> updateRuleData = null;
 
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    importRuleData = ((DbQuery<ImportRuleData>)(from ruleData in db.ImportRuleDatas
+                    updateRuleData = ((DbQuery<UpdateRuleData>)(from ruleData in db.UpdateRuleDatas
                                                                 where activeOnly ? ruleData.IsActive : true
                                                                 select ruleData)).ToList();
 
-                    return new ObservableCollection<ImportRuleData>(importRuleData);
+                    return new ObservableCollection<UpdateRuleData>(updateRuleData);
                 }
             }
             catch (Exception ex)

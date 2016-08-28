@@ -25,6 +25,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private DevicesModel _model = null;
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
+        private DataActivityLog _activityLogInfo = null;
         private int _selectedContractID = 0;
 
         #region Commands
@@ -460,7 +461,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             if (DeviceCollection != null && DeviceCollection.Count > 0)
             {
-                if (sender > 0 && DeviceCollection.Any(p => p.fkSimCardID.Value == sender))
+                if (sender > 0 && DeviceCollection.Any(p => p.fkSimCardID != null && p.fkSimCardID.Value == sender))
                     SelectedDevice = DeviceCollection.Where(p => p.fkSimCardID.Value == sender).FirstOrDefault();
                 //else
                 //    ExecuteCancel();
@@ -514,6 +515,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
             // Subscribe to this event to link the selected Simcard to its device
             _eventAggregator.GetEvent<LinkSimCardDeviceEvent>().Subscribe(LinkSimCardToDevice_Event, true);
+
+            // Initialise the data activity log info entity
+            _activityLogInfo = new DataActivityLog();
+            _activityLogInfo.ActivityProcess = ActivityProcess.Administration.Value();
 
             // Load the view data
             await ReadDeviceMakesAsync();
@@ -731,6 +736,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
             if (result)
                 ReadContractDevicesAsync_Event(_selectedContractID);
+
+            // Publish the event to read the administartion activity logs
+            _activityLogInfo.EntityID = _selectedContractID;
+            _eventAggregator.GetEvent<SetActivityLogProcessEvent>().Publish(_activityLogInfo);
         }
 
         /// <summary>

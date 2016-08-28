@@ -400,7 +400,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             DataImportDescription = string.Format("Importing - {0} of {1}", 0, 0);
             DataImportProgress = DataImportCount = DataImportsPassed = DataImportsFailed = 0;
             WorkSheetInfo defaultInfo = new WorkSheetInfo();
-            defaultInfo.SheetName = EnumHelper.GetDescriptionFromEnum(DataImportColumn.None);
+            defaultInfo.SheetName = EnumHelper.GetDescriptionFromEnum(DataUpdateColumn.None);
             DataSheetCollection = new ObservableCollection<WorkSheetInfo>();
             DataSheetCollection.Add(defaultInfo);
             //ValidationErrorCollection = null;

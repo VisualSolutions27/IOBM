@@ -148,19 +148,28 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                         _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0}, {1} device already exist.", device.DeviceMake.MakeDescription, device.DeviceModel.ModelDescription));
                         return false;
                     }
-                    else
+                    else if (existingDevice != null)
                     {
-                        // Prevent primary key confilcts when using attach property
-                        if (existingDevice != null)
-                            db.Entry(existingDevice).State = System.Data.Entity.EntityState.Detached;
-
-                        db.Devices.Attach(device);
-                        db.Entry(device).State = System.Data.Entity.EntityState.Modified;
-                        db.SaveChanges();
-
+                        // Log the data values that changed
                         _activityLogger.CreateDataChangeAudits<Device>(_dataActivityHelper.GetDataChangeActivities<Device>(existingDevice, device, device.fkContractID, db));
-                        return true;
+
+                        // Save the new values
+                        existingDevice.fkDeviceMakeID = device.fkDeviceMakeID;
+                        existingDevice.fkDeviceModelID = device.fkDeviceModelID;
+                        existingDevice.fkSimCardID = device.fkSimCardID;
+                        existingDevice.fkStatusID = device.fkStatusID;
+                        existingDevice.IMENumber = device.IMENumber;
+                        existingDevice.SerialNumber = device.SerialNumber;
+                        existingDevice.ReceiveDate = device.ReceiveDate;
+                        existingDevice.InsuranceCost = device.InsuranceCost;
+                        existingDevice.InsuranceValue = device.InsuranceValue;
+                        existingDevice.ModifiedBy = device.ModifiedBy;
+                        existingDevice.ModifiedDate = device.ModifiedDate;
+                        existingDevice.IsActive = device.IsActive;
+                        db.SaveChanges();
                     }
+
+                    return true;
                 }
             }
             catch (Exception ex)

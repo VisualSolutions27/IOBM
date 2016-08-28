@@ -160,8 +160,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             _eventAggregator.GetEvent<SetActivityLogProcessEvent>().Subscribe(SetActivityLogProcess_Event, true);
 
             // Load all the activity logs for the client
+            DataActivityLog activityLogInfo = new DataActivityLog();
+            activityLogInfo.ActivityProcess = ActivityProcess.Administration.Value();
+            activityLogInfo.EntityID = MobileManagerEnvironment.SelectedContractID;
+            ReadActivityLogFilters(activityLogInfo);
             SelectedActivityLogFilter = AdminActivityFilter.None.ToString();
-            await ReadAuditLogsAsync(MobileManagerEnvironment.SelectedContractID);
         }
 
         /// <summary>

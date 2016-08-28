@@ -146,19 +146,25 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                         _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0}, {1} sim card already exist.", simCard.CellNumber, simCard.PUKNumber));
                         return false;
                     }
-                    else
+                    else if(existingSimCard != null)
                     {
-                        // Prevent primary key confilcts when using attach property
-                        if (existingSimCard != null)
-                            db.Entry(existingSimCard).State = System.Data.Entity.EntityState.Detached;
-
-                        db.SimCards.Attach(simCard);
-                        db.Entry(simCard).State = System.Data.Entity.EntityState.Modified;
-                        db.SaveChanges();
-
+                        // Log the data values that changed
                         _activityLogger.CreateDataChangeAudits<SimCard>(_dataActivityHelper.GetDataChangeActivities<SimCard>(existingSimCard, simCard, simCard.fkContractID.Value, db));
-                        return true;
+
+                        // Save the new values
+                        existingSimCard.fkStatusID = simCard.fkStatusID;
+                        existingSimCard.CardNumber = simCard.CardNumber;
+                        existingSimCard.CellNumber = simCard.CellNumber;
+                        existingSimCard.PinNumber = simCard.PinNumber;
+                        existingSimCard.PUKNumber = simCard.PUKNumber;
+                        existingSimCard.ReceiveDate = simCard.ReceiveDate;
+                        existingSimCard.IsActive = simCard.IsActive;
+                        existingSimCard.ModifiedBy = simCard.ModifiedBy;
+                        existingSimCard.ModifiedDate = simCard.ModifiedDate;
+                        db.SaveChanges();         
                     }
+
+                    return true;
                 }
             }
             catch (Exception ex)

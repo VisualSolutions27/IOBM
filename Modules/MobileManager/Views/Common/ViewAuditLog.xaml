@@ -74,6 +74,7 @@
                     IsReadOnly="True" TabIndex="2" Style="{StaticResource DataGridStyle}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}" 
                     ItemsSource="{Binding AuditLogCollection}" SelectedItem="{Binding SelectedAuditLog}">
                     <DataGrid.Columns>
+                        <DataGridTextColumn Header="Activity Group" Binding="{Binding AuditGroup}" Width="Auto" />
                         <DataGridTextColumn Header="Activity Description" Binding="{Binding AuditDescription}" Width="*" />
                         <DataGridTextColumn Header="Activity Comment" Binding="{Binding AuditComment}" Width="Auto" />
                         <DataGridTextColumn Header="Modified By" Binding="{Binding ModifiedBy}" Width="Auto" />

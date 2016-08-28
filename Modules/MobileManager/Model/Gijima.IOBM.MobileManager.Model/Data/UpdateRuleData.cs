@@ -12,11 +12,12 @@ namespace Gijima.IOBM.MobileManager.Model.Data
     using System;
     using System.Collections.Generic;
     
-    public partial class ImportRuleData
+    public partial class UpdateRuleData
     {
-        public int pkImportRuleDataID { get; set; }
-        public short enDataImportColumn { get; set; }
-        public short enDataImportEntity { get; set; }
+        public int pkUpdateRuleDataID { get; set; }
+        public short enDataUpdateColumn { get; set; }
+        public short enDataUpdateEntity { get; set; }
+        public short enDataBaseEntity { get; set; }
         public string SearchEntities { get; set; }
         public string ModifiedBy { get; set; }
         public System.DateTime DateModified { get; set; }

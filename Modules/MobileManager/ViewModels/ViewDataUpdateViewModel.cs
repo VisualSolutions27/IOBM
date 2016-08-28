@@ -26,10 +26,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
     {
         #region Properties & Attributes
 
-        private ImportRuleDataModel _model = null;
+        private UpdateRuleDataModel _model = null;
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
-        private IEnumerable<ImportRuleData> _importRules = null;
+        private IEnumerable<UpdateRuleData> _importRules = null;
+        private UpdateRuleData _importRule = null;
         private MSOfficeHelper _officeHelper = null;
 
         #region Commands
@@ -502,7 +503,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private async void InitialiseDataUpdateView()
         {
-            _model = new ImportRuleDataModel(_eventAggregator);
+            _model = new UpdateRuleDataModel(_eventAggregator);
             InitialiseViewControls();
 
             // Initialise the view commands
@@ -535,17 +536,17 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             // Add the default items
             DataSheetCollection = new ObservableCollection<WorkSheetInfo>();
             WorkSheetInfo defaultInfo = new WorkSheetInfo();
-            defaultInfo.SheetName = EnumHelper.GetDescriptionFromEnum(DataImportColumn.None);
+            defaultInfo.SheetName = EnumHelper.GetDescriptionFromEnum(DataUpdateColumn.None);
             DataSheetCollection.Add(defaultInfo);
             SearchColumnCollection = new ObservableCollection<string>();
-            SearchColumnCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportColumn.None));
+            SearchColumnCollection.Add(EnumHelper.GetDescriptionFromEnum(DataUpdateColumn.None));
             SourceColumnCollection = new ObservableCollection<string>();
-            SourceColumnCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportColumn.None));
+            SourceColumnCollection.Add(EnumHelper.GetDescriptionFromEnum(DataUpdateColumn.None));
             DestinationEntityCollection = new ObservableCollection<string>();
-            DestinationEntityCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportColumn.None));
+            DestinationEntityCollection.Add(EnumHelper.GetDescriptionFromEnum(DataUpdateColumn.None));
             SearchEntityCollection = new ObservableCollection<string>();
-            SearchEntityCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportColumn.None));
-            SelectedDestinationEntity = EnumHelper.GetDescriptionFromEnum(DataImportColumn.None);
+            SearchEntityCollection.Add(EnumHelper.GetDescriptionFromEnum(DataUpdateColumn.None));
+            SelectedDestinationEntity = EnumHelper.GetDescriptionFromEnum(DataUpdateColumn.None);
         }
 
         /// <summary>
@@ -555,7 +556,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             try
             {
-                _importRules = await Task.Run(() => _model.ReadImportRuleData(true));
+                _importRules = await Task.Run(() => _model.ReadUpdateRuleData(true));
             }
             catch (Exception ex)
             {
@@ -627,22 +628,22 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     DestinationEntityCollection.Clear();
 
                     // Convert enum description back to the enum
-                    int destinationColumnID = EnumHelper.GetEnumFromDescription<DataImportColumn>(SelectedDestinationColumn).Value();
+                    int destinationColumnID = EnumHelper.GetEnumFromDescription<DataUpdateColumn>(SelectedDestinationColumn).Value();
 
                     // Filter the update destination data based on the update source
-                    IEnumerable<ImportRuleData> destinations = _importRules.Where(p => p.enDataImportColumn == destinationColumnID).ToList();
+                    IEnumerable<UpdateRuleData> destinations = _importRules.Where(p => p.enDataUpdateColumn == destinationColumnID).ToList();
 
                     // Add the default enum description
-                    DestinationEntityCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportEntity.None));
+                    DestinationEntityCollection.Add(EnumHelper.GetDescriptionFromEnum(DataUpdateEntity.None));
 
                     // Add all the update destination enum decriptions to the collection
-                    foreach (ImportRuleData rule in destinations)
+                    foreach (UpdateRuleData rule in destinations)
                     {
-                        DestinationEntityCollection.Add(EnumHelper.GetDescriptionFromEnum((DataImportEntity)rule.enDataImportEntity));
+                        DestinationEntityCollection.Add(EnumHelper.GetDescriptionFromEnum((DataUpdateEntity)rule.enDataUpdateEntity));
                     }
 
                     // Set the default value;
-                    SelectedDestinationEntity = EnumHelper.GetDescriptionFromEnum(DataImportEntity.None);
+                    SelectedDestinationEntity = EnumHelper.GetDescriptionFromEnum(DataUpdateEntity.None);
                 }
             }
             catch (Exception ex)
@@ -658,22 +659,24 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             try
             {
-                if (_importRules != null)
+                if (_importRules != null && SelectedDestinationColumn != null && SelectedDestinationEntity != null)
                 {
                     SearchEntityCollection.Clear();
 
                     // Convert enum description back to the enum
-                    int destinationEntityID = EnumHelper.GetEnumFromDescription<DataImportEntity>(SelectedDestinationEntity).Value();
+                    int destinationColumnID = EnumHelper.GetEnumFromDescription<DataUpdateColumn>(SelectedDestinationColumn).Value();
+                    int destinationEntityID = EnumHelper.GetEnumFromDescription<DataUpdateEntity>(SelectedDestinationEntity).Value();
 
                     // Filter the update destination data based on the update source
-                    ImportRuleData destinationEntity = _importRules.Where(p => p.enDataImportEntity == destinationEntityID).FirstOrDefault();
+                    _importRule = _importRules.Where(p => p.enDataUpdateColumn == destinationColumnID && 
+                                                          p.enDataUpdateEntity == destinationEntityID).FirstOrDefault();
 
                     // Add the default enum description
-                    SearchEntityCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportEntity.None));
+                    SearchEntityCollection.Add(EnumHelper.GetDescriptionFromEnum(DataUpdateEntity.None));
 
-                    if (destinationEntity != null)
+                    if (_importRule != null)
                     {
-                        string[] searchEntities = destinationEntity.SearchEntities.Split(';');
+                        string[] searchEntities = _importRule.SearchEntities.Split(';');
 
                         // Add all the update destination enum decriptions to the collection
                         foreach (string searchEntity in searchEntities)
@@ -683,7 +686,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     }
 
                     // Set the default value;
-                    SelectedSearchEntity = EnumHelper.GetDescriptionFromEnum(DataImportEntity.None);
+                    SelectedSearchEntity = EnumHelper.GetDescriptionFromEnum(DataUpdateEntity.None);
                     ValidSearchEntities = SearchEntityCollection.Count > 0 ? true : false;
                 }
             }
@@ -741,9 +744,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             if (SelectedDataSheet != null && SelectedDataSheet.ColumnNames != null)
             {
                 SearchColumnCollection = new ObservableCollection<string>();
-                SearchColumnCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportColumn.None));
+                SearchColumnCollection.Add(EnumHelper.GetDescriptionFromEnum(DataUpdateColumn.None));
                 SourceColumnCollection = new ObservableCollection<string>();
-                SourceColumnCollection.Add(EnumHelper.GetDescriptionFromEnum(DataImportColumn.None));
+                SourceColumnCollection.Add(EnumHelper.GetDescriptionFromEnum(DataUpdateColumn.None));
 
                 foreach (string columnName in SelectedDataSheet.ColumnNames)
                 {
@@ -751,8 +754,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     SourceColumnCollection.Add(columnName);
                 }
 
-                SelectedSearchColumn = EnumHelper.GetDescriptionFromEnum(DataImportColumn.None);
-                SelectedSourceColumn = EnumHelper.GetDescriptionFromEnum(DataImportColumn.None);
+                SelectedSearchColumn = EnumHelper.GetDescriptionFromEnum(DataUpdateColumn.None);
+                SelectedSourceColumn = EnumHelper.GetDescriptionFromEnum(DataUpdateColumn.None);
             }
         }
 
@@ -763,7 +766,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             DestinationColumnCollection = new ObservableCollection<string>();
 
-            foreach (DataImportColumn source in Enum.GetValues(typeof(DataImportColumn)))
+            foreach (DataUpdateColumn source in Enum.GetValues(typeof(DataUpdateColumn)))
             {               
                 DestinationColumnCollection.Add(EnumHelper.GetDescriptionFromEnum(source));
             }
@@ -831,11 +834,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             bool result = false;
 
             result = SelectedDataSheet != null && SelectedDataSheet.SheetName != "-- Please Select --" &&
-                     !string.IsNullOrEmpty(SelectedSearchColumn) && SelectedSearchColumn != EnumHelper.GetDescriptionFromEnum(DataImportColumn.None) &&
-                     !string.IsNullOrEmpty(SelectedSourceColumn) && SelectedSourceColumn != EnumHelper.GetDescriptionFromEnum(DataImportColumn.None) &&
-                     !string.IsNullOrEmpty(SelectedDestinationColumn) && SelectedDestinationColumn != EnumHelper.GetDescriptionFromEnum(DataImportColumn.None) &&
-                     !string.IsNullOrEmpty(SelectedDestinationEntity) && SelectedDestinationEntity != EnumHelper.GetDescriptionFromEnum(DataImportEntity.None) &&
-                     !string.IsNullOrEmpty(SelectedSearchEntity) && SelectedSearchEntity != EnumHelper.GetDescriptionFromEnum(DataImportEntity.None);
+                     !string.IsNullOrEmpty(SelectedSearchColumn) && SelectedSearchColumn != EnumHelper.GetDescriptionFromEnum(DataUpdateColumn.None) &&
+                     !string.IsNullOrEmpty(SelectedSourceColumn) && SelectedSourceColumn != EnumHelper.GetDescriptionFromEnum(DataUpdateColumn.None) &&
+                     !string.IsNullOrEmpty(SelectedDestinationColumn) && SelectedDestinationColumn != EnumHelper.GetDescriptionFromEnum(DataUpdateColumn.None) &&
+                     !string.IsNullOrEmpty(SelectedDestinationEntity) && SelectedDestinationEntity != EnumHelper.GetDescriptionFromEnum(DataUpdateEntity.None) &&
+                     !string.IsNullOrEmpty(SelectedSearchEntity) && SelectedSearchEntity != EnumHelper.GetDescriptionFromEnum(DataUpdateEntity.None);
 
             if (result && DestinationCompanyLinked)
                 result = SelectedDestinationCompany != null && SelectedDestinationCompany.pkCompanyGroupID > 0;
@@ -861,8 +864,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 int rowIdx = 1;
 
                 // Convert enum description back to the enum
-                string destinationColumn = EnumHelper.GetEnumFromDescription<DataImportColumn>(SelectedDestinationColumn).ToString();
-                int destinationEntityID = EnumHelper.GetEnumFromDescription<DataImportEntity>(SelectedDestinationEntity).Value();
+                string destinationColumn = EnumHelper.GetEnumFromDescription<DataUpdateColumn>(SelectedDestinationColumn).ToString();
+                int destinationEntityID = EnumHelper.GetEnumFromDescription<DataUpdateEntity>(SelectedDestinationEntity).Value();
                 SearchEntity searchEntity = ((SearchEntity)Enum.Parse(typeof(SearchEntity), SelectedSearchEntity));
                 SelectedDestinationCompany = DestinationCompanyLinked && SelectedDestinationCompany.pkCompanyGroupID > 0 ? SelectedDestinationCompany : null;
 
@@ -874,16 +877,22 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     rowIdx = ImportedDataCollection.Rows.IndexOf(row);
 
                     // Update the related entity data
-                    switch ((DataImportEntity)destinationEntityID)
+                    switch ((DataBaseEntity)_importRule.enDataBaseEntity)
                     {
-                        case DataImportEntity.Client:
-                            result = await Task.Run(() => new ClientModel(_eventAggregator).UpdateClient(searchEntity, 
-                                                                                                         searchCriteria, 
-                                                                                                         destinationColumn, 
+                        case DataBaseEntity.Client:
+                            result = await Task.Run(() => new ClientModel(_eventAggregator).UpdateClient(searchEntity,
+                                                                                                         searchCriteria,
+                                                                                                         destinationColumn,
                                                                                                          updateValue,
-                                                                                                         SelectedDestinationCompany, 
-                                                                                                         out errorMessage));
-                            break;
+                                                                                                         SelectedDestinationCompany,
+                                                                                                         out errorMessage)); break;
+                        case DataBaseEntity.PackageSetup:
+                            result = await Task.Run(() => new PackageSetupModel(_eventAggregator).UpdatePackageSetup(searchEntity,
+                                                                                                                     searchCriteria,
+                                                                                                                     destinationColumn,
+                                                                                                                     updateValue,
+                                                                                                                     SelectedDestinationCompany,
+                                                                                                                     out errorMessage)); break;
                     }
 
                     if (result)

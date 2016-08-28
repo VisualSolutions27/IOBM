@@ -257,18 +257,6 @@
           <Property Name="ModfiedDate" Type="datetime" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
         </EntityType>
-        <EntityType Name="ImportRuleData">
-          <Key>
-            <PropertyRef Name="pkImportRuleDataID" />
-          </Key>
-          <Property Name="pkImportRuleDataID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="enDataImportColumn" Type="smallint" Nullable="false" />
-          <Property Name="enDataImportEntity" Type="smallint" Nullable="false" />
-          <Property Name="SearchEntities" Type="varchar" MaxLength="250" />
-          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
-          <Property Name="DateModified" Type="datetime" Nullable="false" />
-          <Property Name="IsActive" Type="bit" Nullable="false" />
-        </EntityType>
         <EntityType Name="Invoice">
           <Key>
             <PropertyRef Name="pkInvoiceID" />
@@ -414,6 +402,19 @@
           <Property Name="PostalCode" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="UpdateRuleData">
+          <Key>
+            <PropertyRef Name="pkUpdateRuleDataID" />
+          </Key>
+          <Property Name="pkUpdateRuleDataID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="enDataUpdateColumn" Type="smallint" Nullable="false" />
+          <Property Name="enDataUpdateEntity" Type="smallint" Nullable="false" />
+          <Property Name="enDataBaseEntity" Type="smallint" Nullable="false" />
+          <Property Name="SearchEntities" Type="varchar" MaxLength="250" />
+          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="DateModified" Type="datetime" Nullable="false" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="User">
@@ -884,7 +885,6 @@
           <EntitySet Name="Device" EntityType="Self.Device" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DeviceMake" EntityType="Self.DeviceMake" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DeviceModel" EntityType="Self.DeviceModel" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="ImportRuleData" EntityType="Self.ImportRuleData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Invoice" EntityType="Self.Invoice" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="InvoiceDetail" EntityType="Self.InvoiceDetail" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Package" EntityType="Self.Package" Schema="dbo" store:Type="Tables" />
@@ -896,6 +896,7 @@
           <EntitySet Name="SimCard" EntityType="Self.SimCard" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Status" EntityType="Self.Status" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Suburb" EntityType="Self.Suburb" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="UpdateRuleData" EntityType="Self.UpdateRuleData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="User" EntityType="Self.User" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UserInCompany" EntityType="Self.UserInCompany" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UserInRole" EntityType="Self.UserInRole" Schema="dbo" store:Type="Tables" />
@@ -1281,18 +1282,6 @@
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
           <NavigationProperty Name="DeviceMake" Relationship="Self.FK_DeviceModel_DeviceMake" FromRole="DeviceModel" ToRole="DeviceMake" />
           <NavigationProperty Name="Devices" Relationship="MobileManagerModel.FK_Device_DeviceModel" FromRole="DeviceModel" ToRole="Device" />
-        </EntityType>
-        <EntityType Name="ImportRuleData">
-          <Key>
-            <PropertyRef Name="pkImportRuleDataID" />
-          </Key>
-          <Property Name="pkImportRuleDataID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="enDataImportColumn" Type="Int16" Nullable="false" />
-          <Property Name="enDataImportEntity" Type="Int16" Nullable="false" />
-          <Property Name="SearchEntities" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedBy" Type="String" MaxLength="50" FixedLength="false" Unicode="false" Nullable="false" />
-          <Property Name="DateModified" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
         </EntityType>
         <EntityType Name="Invoice">
           <Key>
@@ -1756,7 +1745,6 @@
           <EntitySet Name="DataValidationRules" EntityType="Self.DataValidationRule" />
           <EntitySet Name="DeviceMakes" EntityType="Self.DeviceMake" />
           <EntitySet Name="DeviceModels" EntityType="Self.DeviceModel" />
-          <EntitySet Name="ImportRuleDatas" EntityType="Self.ImportRuleData" />
           <EntitySet Name="Invoices" EntityType="Self.Invoice" />
           <EntitySet Name="InvoiceDetails" EntityType="Self.InvoiceDetail" />
           <EntitySet Name="Packages" EntityType="Self.Package" />
@@ -1916,6 +1904,7 @@
             <End Role="Status" EntitySet="Status" />
             <End Role="SimCard" EntitySet="SimCards" />
           </AssociationSet>
+          <EntitySet Name="UpdateRuleDatas" EntityType="MobileManagerModel.UpdateRuleData" />
           </EntityContainer>
         <ComplexType Name="sp_report_Invoice_Result">
           <Property Type="String" Name="ClientName" Nullable="false" MaxLength="100" />
@@ -2167,6 +2156,19 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="UpdateRuleData">
+          <Key>
+            <PropertyRef Name="pkUpdateRuleDataID" />
+          </Key>
+          <Property Name="pkUpdateRuleDataID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="enDataUpdateColumn" Type="Int16" Nullable="false" />
+          <Property Name="enDataUpdateEntity" Type="Int16" Nullable="false" />
+          <Property Name="enDataBaseEntity" Type="Int16" Nullable="false" />
+          <Property Name="SearchEntities" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DateModified" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+        </EntityType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -2391,19 +2393,6 @@
                 <ScalarProperty Name="ModelDescription" ColumnName="ModelDescription" />
                 <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
                 <ScalarProperty Name="ModfiedDate" ColumnName="ModfiedDate" />
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="ImportRuleDatas">
-            <EntityTypeMapping TypeName="MobileManagerModel.ImportRuleData">
-              <MappingFragment StoreEntitySet="ImportRuleData">
-                <ScalarProperty Name="pkImportRuleDataID" ColumnName="pkImportRuleDataID" />
-                <ScalarProperty Name="enDataImportColumn" ColumnName="enDataImportColumn" />
-                <ScalarProperty Name="enDataImportEntity" ColumnName="enDataImportEntity" />
-                <ScalarProperty Name="SearchEntities" ColumnName="SearchEntities" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="DateModified" ColumnName="DateModified" />
                 <ScalarProperty Name="IsActive" ColumnName="IsActive" />
               </MappingFragment>
             </EntityTypeMapping>
@@ -2662,6 +2651,20 @@
                 <ScalarProperty Name="fkStatusID" ColumnName="fkStatusID" />
                 <ScalarProperty Name="fkContractID" ColumnName="fkContractID" />
                 <ScalarProperty Name="pkSimCardID" ColumnName="pkSimCardID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UpdateRuleDatas">
+            <EntityTypeMapping TypeName="MobileManagerModel.UpdateRuleData">
+              <MappingFragment StoreEntitySet="UpdateRuleData">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="DateModified" ColumnName="DateModified" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="SearchEntities" ColumnName="SearchEntities" />
+                <ScalarProperty Name="enDataBaseEntity" ColumnName="enDataBaseEntity" />
+                <ScalarProperty Name="enDataUpdateEntity" ColumnName="enDataUpdateEntity" />
+                <ScalarProperty Name="enDataUpdateColumn" ColumnName="enDataUpdateColumn" />
+                <ScalarProperty Name="pkUpdateRuleDataID" ColumnName="pkUpdateRuleDataID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

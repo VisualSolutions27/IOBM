@@ -25,6 +25,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private SimCardModel _model = null;
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
+        private DataActivityLog _activityLogInfo = null;
         private int _selectedContractID = 0;
 
         #region Commands
@@ -294,6 +295,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             // Subscribe to this event to link the selected device to a Simcard
             _eventAggregator.GetEvent<LinkDeviceSimCardEvent>().Subscribe(LinkDeviceToSimCard, true);
 
+            // Initialise the data activity log info entity
+            _activityLogInfo = new DataActivityLog();
+            _activityLogInfo.ActivityProcess = ActivityProcess.Administration.Value();
+
             // Load the view data
             await ReadStatusesAsync();
         }
@@ -465,6 +470,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             bool result = false;
             SelectedSimCard.fkContractID = selectedSimCardID = _selectedContractID;
             SelectedSimCard.fkStatusID = SelectedStatus.pkStatusID;
+            SelectedSimCard.Status = SelectedStatus;
             SelectedSimCard.CellNumber = SelectedCellNumber.Trim();
             SelectedSimCard.CardNumber = SelectedCardNumber.ToUpper().Trim();
             SelectedSimCard.PinNumber = SelectedPinNumber.ToUpper().Trim();
@@ -480,6 +486,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
             if (result)
                 ReadContractSimCardsAsync(_selectedContractID);
+
+            // Publish the event to read the administartion activity logs
+            _activityLogInfo.EntityID = _selectedContractID;
+            _eventAggregator.GetEvent<SetActivityLogProcessEvent>().Publish(_activityLogInfo);
         }
 
         /// <summary>

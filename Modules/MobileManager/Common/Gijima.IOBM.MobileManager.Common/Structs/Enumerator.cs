@@ -40,6 +40,79 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     }
 
     /// <summary>
+    /// The <see cref="SearchEntity"/> enumeration lists of entities
+    /// the user can search on.
+    /// </summary>
+    public enum SearchEntity
+    {
+        ClientID,
+        EmployeeNumber,
+        PrimaryCellNumber,
+        IDNumber,
+        Email,
+        CompanyName,
+        PackageName,
+        AccountNumber,
+        Other
+    }
+
+
+    /// <summary>
+    /// The <see cref="BillingProcess"/> enumeration a list of 
+    /// billing processes.
+    /// </summary>
+    public enum BillingExecutionState
+    {
+        Started = 1,
+        DataValidation = 2,
+        DataImport = 3
+    }
+
+    /// <summary>
+    /// The <see cref="DataBaseEntity"/> enumeration a list of 
+    /// data update column options.
+    /// </summary>
+    public enum DataBaseEntity
+    {
+        [Description("-- Please Select --")]
+        None = 0,
+        [Description("Clients")]
+        Client = 1,
+        [Description("Client Billing")]
+        ClientBilling = 2,
+        [Description("Client Locations")]
+        ClientLocation = 3,
+        [Description("Companies")]
+        Company = 4,
+        [Description("Company Billing Levels")]
+        CompanyBillingLevel = 5,
+        [Description("Contracts")]
+        Contract = 6,
+        [Description("Devices")]
+        Device = 7,
+        [Description("Device Makes")]
+        DeviceMake = 8,
+        [Description("Device Models")]
+        DeviceModel = 9,
+        [Description("Packages")]
+        Package = 10,
+        [Description("Client Package Setup")]
+        PackageSetup = 11,
+        [Description("Provinces")]
+        Province = 12,
+        [Description("Service Providers")]
+        ServiceProvider = 13,
+        [Description("Sim Cards")]
+        SimCard = 14,
+        [Description("Suburbs")]
+        Suburb = 15,
+        [Description("Cities")]
+        City = 16,
+    }
+
+    #region Types
+
+    /// <summary>
     /// The <see cref="PackageType"/> enumeration lists of package types.
     /// </summary>
     public enum PackageType
@@ -59,22 +132,9 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         AMORTIZED = 2
     }
 
-    /// <summary>
-    /// The <see cref="SearchEntity"/> enumeration lists of entities
-    /// the user can search on.
-    /// </summary>
-    public enum SearchEntity
-    {
-        ClientID,
-        EmployeeNumber,
-        PrimaryCellNumber,
-        IDNumber,
-        Email,
-        CompanyName,
-        PackageName,
-        AccountNumber,
-        Other
-    }
+    #endregion
+
+    #region Data Activity
 
     /// <summary>
     /// The <see cref="ActivityProcess"/> enumeration a list of administartion
@@ -131,16 +191,7 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         None,
     }
 
-    /// <summary>
-    /// The <see cref="BillingProcess"/> enumeration a list of 
-    /// billing processes.
-    /// </summary>
-    public enum BillingExecutionState
-    {
-        Started = 1,
-        DataValidation = 2,
-        DataImport = 3
-    }
+    #endregion
 
     #region Data Validation
 
@@ -270,13 +321,13 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
 
     #endregion
 
-    #region Data Validation
+    #region Data Update
 
     /// <summary>
-    /// The <see cref="DataImportColumn"/> enumeration a list of 
-    /// data import column options.
+    /// The <see cref="DataUpdateColumn"/> enumeration a list of 
+    /// data update column options.
     /// </summary>
-    public enum DataImportColumn
+    public enum DataUpdateColumn
     {
         [Description("-- Please Select --")]
         None = 0,
@@ -325,10 +376,10 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     }
 
     /// <summary>
-    /// The <see cref="DataImportEntity"/> enumeration a list of 
+    /// The <see cref="DataUpdateEntity"/> enumeration a list of 
     /// data import entities options.
     /// </summary>
-    public enum DataImportEntity
+    public enum DataUpdateEntity
     {
         [Description("-- Please Select --")]
         None = 0,
@@ -383,11 +434,11 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         {
             return Convert.ToInt16(type);
         }
-        public static short Value(this DataImportColumn type)
+        public static short Value(this DataUpdateColumn type)
         {
             return Convert.ToInt16(type);
         }
-        public static short Value(this DataImportEntity type)
+        public static short Value(this DataUpdateEntity type)
         {
             return Convert.ToInt16(type);
         }

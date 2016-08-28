@@ -1,10 +1,7 @@
-﻿using Gijima.DataImport.MSOffice;
-using Gijima.IOBM.Infrastructure.Events;
+﻿using Gijima.IOBM.Infrastructure.Events;
 using Gijima.IOBM.Infrastructure.Helpers;
-using Gijima.IOBM.MobileManager.Common.Events;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
-using Gijima.IOBM.Security;
 using Prism.Events;
 using System;
 using System.Collections.Generic;
@@ -13,7 +10,6 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace Gijima.IOBM.MobileManager.Model.Models
 {
@@ -271,8 +267,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     {
                         clientToUpdate = db.Clients.Where(p => p.pkClientID == existingClient.pkClientID).FirstOrDefault();
 
-                         // Get the client table properties (Fields)
-                         PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(Client));
+                        // Get the client table properties (Fields)
+                        PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(Client));
 
                         foreach (PropertyDescriptor property in properties)
                         {

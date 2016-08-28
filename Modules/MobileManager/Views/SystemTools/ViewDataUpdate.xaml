@@ -60,7 +60,7 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Data file:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
                 <TextBox x:Name="TextBoxUpdateFile" Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" IsTabStop="False" IsReadOnly="True" Style="{StaticResource UXTextBoxStyle}" 
-                    Text="{Binding SelectedUpdateFile, UpdateSourceTrigger=PropertyChanged}" Margin="0,0">
+                    Text="{Binding SelectedImportFile, UpdateSourceTrigger=PropertyChanged}" Margin="0,0">
                 </TextBox>
                 <TextBlock Grid.Row="0" Grid.Column="4" Text="Data sheets:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
                 <Border Grid.Row="0" Grid.Column="5" BorderThickness="1" BorderBrush="{Binding ValidDataSheet}">
@@ -117,8 +117,7 @@
                 <Border Grid.Row="0" Grid.Column="1" Grid.ColumnSpan="2" BorderThickness="1" BorderBrush="{Binding ValidDestinationColumn}">
                     <ComboBox x:Name="ComboBoxDataSource" ToolTip="Select the destination column to update to." TabIndex="5" IsSynchronizedWithCurrentItem="True"
                         IsEnabled="{Binding ValidDataUpdate}" ItemsSource="{Binding DestinationColumnCollection}" 
-                        SelectedItem="{Binding SelectedDestinationColumn, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Height="22" >
-                    </ComboBox>
+                        SelectedItem="{Binding SelectedDestinationColumn, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" />
                 </Border>
                 <TextBlock Grid.Row="0" Grid.Column="4" Text="Destination entity:" Style="{StaticResource UXLabelTextStyle}" ></TextBlock>
                 <Border Grid.Row="0" Grid.Column="5" BorderThickness="1" BorderBrush="{Binding ValidDestinationEntity}">

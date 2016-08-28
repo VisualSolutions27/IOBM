@@ -9,7 +9,7 @@
              xmlns:prism="http://prismlibrary.com/"
              prism:ViewModelLocator.AutoWireViewModel="True"             
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1280">
+             d:DesignHeight="680" d:DesignWidth="1000">
 
     <UserControl.Resources>
         <mm:UIDataConvertionHelper x:Key="UIDataConvertionHelper"/>
@@ -18,12 +18,12 @@
     <Grid x:Name="LayoutControl">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="365" />
+            <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Border Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Style="{StaticResource UXHeaderStyle}">
             <Grid>
@@ -43,10 +43,10 @@
                     <Button x:Name="ButtonCellularAdd" ToolTip="Add new cellular data." TabIndex="42" Margin="0,0,2,0"
                         Style="{StaticResource UXHeaderImageButtonStyle}" Command="{Binding AddCommand}">
                         <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/508.png" Margin="2,2,2,2"/>
-                    </Button>                    
-                    <Button x:Name="ButtonCellularDelete" ToolTip="Set the selected user as in-active." TabIndex="43" Margin="0,0,2,0"
+                    </Button>
+                    <Button x:Name="ButtonCellularDelete" ToolTip="{Binding DeleteButtonToolTip, UpdateSourceTrigger=PropertyChanged}" TabIndex="43" Margin="0,0,2,0"
                         Style="{StaticResource UXHeaderImageButtonStyle}" Command="{Binding DeleteCommand}">
-                        <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/278.png" Margin="2,2,2,2"/>
+                        <Image Source="{Binding DeleteButtonImage, UpdateSourceTrigger=PropertyChanged}" Margin="2,2,2,2"/>
                     </Button>
                     <Button x:Name="ButtonCellularSave" ToolTip="Save the cellular data." TabIndex="44" Margin="0"
                         Style="{StaticResource UXHeaderImageButtonStyle}" Command="{Binding SaveCommand}">
@@ -55,28 +55,28 @@
                 </StackPanel>
             </Grid>
         </Border>
-        <GroupBox Grid.Row="1" Grid.Column="0" Header="Client Detail" Margin="5,0,5,0" Style="{StaticResource UXGroupBoxStyle}" >
+        <GroupBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Header="Client Detail" Margin="5,0,5,0" Style="{StaticResource UXGroupBoxStyle}" >
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="65" />
-                    <ColumnDefinition Width="110" />
+                    <ColumnDefinition Width="200" />
                     <ColumnDefinition Width="10" />
                     <ColumnDefinition Width="65" />
                     <ColumnDefinition Width="*" />
@@ -110,14 +110,16 @@
                     Text="{Binding SelectedClient.EmployeeNumber}">
                 </TextBox>
                 <TextBlock Grid.Row="2" Grid.Column="3" Text="Site:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-                <Border Grid.Row="2" Grid.Column="4" Grid.ColumnSpan="4" BorderThickness="1" BorderBrush="Silver">
+                <Border Grid.Row="2" Grid.Column="4" Grid.ColumnSpan="4" BorderThickness="1"  BorderBrush="{Binding ValidLocation}">
                     <Grid>
                         <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="53*" />
+                            <ColumnDefinition Width="33*"/>
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <ComboBox x:Name="ComboBoxLocation" Grid.Column="0" ToolTip="Select the client's site location." TabIndex="4" IsSynchronizedWithCurrentItem="True" Height="20"
-                            ItemsSource="{Binding ClientLocationCollection}" DisplayMemberPath="LocationDescription" SelectedItem="{Binding SelectedClientLocation}">
+                            ItemsSource="{Binding ClientLocationCollection}" DisplayMemberPath="LocationDescription" 
+                            SelectedItem="{Binding SelectedClientLocation, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Grid.ColumnSpan="2">
                         </ComboBox>
                         <Button x:Name="ButtonUserSiteCrud" Grid.Column="2" Margin="2,0,0,0" ToolTip="Add, edit or delete user site data." TabIndex="5" Height="20"
                             Style="{StaticResource UXImageButtonStyle}" Command="{Binding ClientUserSiteCommand}">
@@ -160,7 +162,7 @@
                 <TextBox x:Name="TextBoxClientState" Grid.Row="12" Grid.Column="7" IsTabStop="False" ToolTip="Enter the value of the admin fee." Style="{StaticResource UXTextBoxStyle}" IsReadOnly="True"
                     Text="{Binding SelectedClientState, UpdateSourceTrigger=PropertyChanged, Converter={StaticResource UIDataConvertionHelper}, ConverterParameter='State'}"
                     Foreground="{Binding ClientStateColour, UpdateSourceTrigger=PropertyChanged}">
-                </TextBox>                
+                </TextBox>
                 <GroupBox Grid.Row="14" Grid.Column="0" Grid.ColumnSpan="8" Header="RICA Address" Style="{StaticResource UXGroupBoxStyle}" Margin="0">
                     <Grid>
                         <Grid.RowDefinitions>
@@ -218,97 +220,27 @@
                 </GroupBox>
             </Grid>
         </GroupBox>
-        <GroupBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Header="Billing Detail" Margin="5,0,5,0" Style="{StaticResource UXGroupBoxStyle}" >
+        <GroupBox Grid.Row="2" Grid.Column="0" Header="Contract Detail" Margin="5,0,5,5" Style="{StaticResource UXGroupBoxStyle}" >
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="95" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="10" />
-                    <ColumnDefinition Width="95" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="20" />
-                    <ColumnDefinition Width="90" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="10" />
-                    <ColumnDefinition Width="75" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="Split billing:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-                <StackPanel Grid.Column="1" Orientation="Horizontal">
-                    <RadioButton x:Name="RadioButtonSplitBillYes" Content="Yes" Margin="0,0,5,0" TabIndex="40" IsChecked="{Binding SplitBilling, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" BorderBrush="{Binding ValidSplitBilling}" />
-                    <RadioButton x:Name="RadioButtonSplitBillNo" Content="No" TabIndex="41" IsChecked="{Binding NoSplitBilling, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" BorderBrush="{Binding ValidSplitBilling}" />
-                </StackPanel>
-                <TextBlock Grid.Row="0" Grid.Column="6" Text="International:" Margin="0,0,5,0" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-                <StackPanel Grid.Row="0" Grid.Column="7" Grid.ColumnSpan="3" Orientation="Horizontal" IsEnabled="{Binding SplitBilling}" >
-                    <CheckBox x:Name="CheckBoxIntDialing" Content="Dailing" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,5,0" TabIndex="46" IsChecked="{Binding SelectedIntDailing, UpdateSourceTrigger=PropertyChanged}" />
-                    <CheckBox x:Name="CheckBoxIntRoaming" Content="Roaming" HorizontalAlignment="Left" VerticalAlignment="Center" TabIndex="47" IsChecked="{Binding SelectedIntRoaming, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"/>
-                </StackPanel>
-                <TextBlock Grid.Row="2" Grid.Column="0" Text="Billing level:" Style="{StaticResource UXLabelTextStyle}" ></TextBlock>
-                <ComboBox x:Name="ComboBoxCompanyLevel"  Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" ToolTip="Select the company billing level." TabIndex="42" IsSynchronizedWithCurrentItem="True"
-                    IsEnabled="{Binding SplitBilling}" ItemsSource="{Binding BillingLevelCollection}" DisplayMemberPath="BillingLevel" SelectedItem="{Binding SelectedBillingLevel, UpdateSourceTrigger=PropertyChanged}">
-                </ComboBox>
-                <TextBlock Grid.Row="2" Grid.Column="6" Text="Country visiting:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-                <TextBox x:Name="TextBoxCountryVisiting" Grid.Row="2" Grid.Column="7" Grid.ColumnSpan="4" TabIndex="48" ToolTip="Select the country for roaming." Style="{StaticResource UXTextBoxStyle}"
-                    Text="{Binding SelectedRoamingCountry, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" BorderBrush="{Binding ValidRoamingCountry}" IsEnabled="{Binding SelectedIntRoaming}">
-                </TextBox>
-                <TextBlock Grid.Row="4" Grid.Column="0" Text="WDP allowance:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-                <TextBox x:Name="TextBoxWDPAllowance" Grid.Row="4" Grid.Column="1" TabIndex="43" ToolTip="Enter the WDP allowance value." Style="{StaticResource UXTextBoxStyle}"
-                    IsEnabled="{Binding SplitBilling}" Text="{Binding SelectedClientBilling.WDPAllowance, UpdateSourceTrigger=PropertyChanged}">
-                </TextBox>
-                <TextBlock Grid.Row="4" Grid.Column="3" Text="Voice allowance:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-                <TextBox x:Name="TextBoxVoiceAllowance" Grid.Row="4" Grid.Column="4" TabIndex="44" ToolTip="Enter the voice allowance value." Style="{StaticResource UXTextBoxStyle}"
-                    IsEnabled="{Binding SplitBilling}" Text="{Binding SelectedVoiceAllowance, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" BorderBrush="{Binding ValidVoiceAllowance}">
-                </TextBox>
-                <TextBlock Grid.Row="4" Grid.Column="6" Text="Roaming from:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-                <DatePicker x:Name="DatePickerRoamingFrom" Grid.Row="4" Grid.Column="7" TabIndex="49" ToolTip="Select the date to start roaming from."
-                    SelectedDate="{Binding SelectedRoamingFromDate, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" BorderBrush="{Binding ValidRoamingFromDate}" IsEnabled="{Binding SelectedIntRoaming}"/>
-                <TextBlock Grid.Row="4" Grid.Column="9" Text="Roaming to:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-                <DatePicker x:Name="DatePickerRoamingTo" Grid.Row="4" Grid.Column="10" TabIndex="50" ToolTip="Select the date to stop roaming."
-                    SelectedDate="{Binding SelectedRoamingToDate, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" BorderBrush="{Binding ValidRoamingToDate}" IsEnabled="{Binding SelectedIntRoaming}"/>
-                <TextBlock Grid.Row="6" Grid.Column="0" Text="Provider limit:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-                <TextBox x:Name="TextBoxSPAllowance" Grid.Row="6" Grid.Column="1" TabIndex="45" ToolTip="Enter the service provider limit." Style="{StaticResource UXTextBoxStyle}"
-                    IsEnabled="{Binding SplitBilling}" Text="{Binding SelectedClientBilling.SPLimit, UpdateSourceTrigger=PropertyChanged}">
-                </TextBox>
-                <TextBlock Grid.Row="6" Grid.Column="6" Text="Pause from:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-                <DatePicker x:Name="DatePickerStopBillingFrom" Grid.Row="6" Grid.Column="7" TabIndex="51" ToolTip="Select the date to pause billing from."
-                    SelectedDate="{Binding SelectedClientBilling.StopBillingFromDate, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding SplitBilling}"/>
-                <TextBlock Grid.Row="6" Grid.Column="9" Text="Pause to:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-                <DatePicker x:Name="DatePickerStopBillingTo" Grid.Row="6" Grid.Column="10" TabIndex="52" ToolTip="Select the date to pause billing to."
-                    SelectedDate="{Binding SelectedClientBilling.StopBillingToDate, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding SplitBilling}"/>
-            </Grid>
-        </GroupBox>
-        <GroupBox Grid.Row="1" Grid.Column="1" Header="Contract Detail" VerticalAlignment="Top" Margin="5,0,5,0" Style="{StaticResource UXGroupBoxStyle}" >
-            <Grid>
-                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="28" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="5" />
+                    <RowDefinition Height="*" />
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -335,7 +267,6 @@
                         </Button>
                     </Grid>
                 </Border>
-                <Border Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Height="1" BorderBrush="Silver" BorderThickness="1"/>
                 <TextBlock Grid.Row="2" Grid.Column="0" Text="Package:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
                 <Border Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" BorderThickness="1" BorderBrush="{Binding ValidPackage}">
                     <Grid>
@@ -386,7 +317,7 @@
                 <TextBlock Grid.Row="12" Grid.Column="3" Text="SPUL val:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
                 <TextBox x:Name="TextBoxPackageSPUL" Grid.Row="12" Grid.Column="4" TabIndex="27" ToolTip="Enter the rand value included in the package." Style="{StaticResource UXTextBoxStyle}"
                     Text="{Binding SelectedContract.PackageSetup.RandValue}">
-                </TextBox>                
+                </TextBox>
                 <TextBlock Grid.Row="14" Grid.Column="0" Text="Talk Time:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
                 <TextBox x:Name="TextBoxTalkTime" Grid.Row="14" Grid.Column="1" TabIndex="28" ToolTip="Enter the talk time included in the package." Style="{StaticResource UXTextBoxStyle}"
                     Text="{Binding SelectedContract.PackageSetup.TalkTimeMinutes}">
@@ -411,6 +342,76 @@
                 <DatePicker x:Name="DatePickerPaymentCancel" Grid.Row="18" Grid.Column="4" TabIndex="33" ToolTip="Select the payment cancellation date."
                     SelectedDate="{Binding SelectedContract.PaymentCancelDate}">
                 </DatePicker>
+            </Grid>
+        </GroupBox>
+        <GroupBox Grid.Row="2" Grid.Column="1" Header="Billing Detail" Margin="5,0,5,5" Style="{StaticResource UXGroupBoxStyle}" >
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="95" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="95" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Split billing:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <RadioButton x:Name="RadioButtonSplitBillYes" Content="Yes" Margin="0,0,5,0" TabIndex="40" IsChecked="{Binding SplitBilling, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" BorderBrush="{Binding ValidSplitBilling}" />
+                    <RadioButton x:Name="RadioButtonSplitBillNo" Content="No" TabIndex="41" IsChecked="{Binding NoSplitBilling, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" BorderBrush="{Binding ValidSplitBilling}" />
+                </StackPanel>
+                <TextBlock Grid.Row="2" Grid.Column="0" Text="Billing level:" Style="{StaticResource UXLabelTextStyle}" ></TextBlock>
+                <ComboBox x:Name="ComboBoxCompanyLevel"  Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="4" ToolTip="Select the company billing level." TabIndex="42" IsSynchronizedWithCurrentItem="True" 
+                    IsEnabled="{Binding SplitBilling}" ItemsSource="{Binding BillingLevelCollection}" DisplayMemberPath="BillingLevel" SelectedItem="{Binding SelectedBillingLevel, UpdateSourceTrigger=PropertyChanged}">
+                </ComboBox>
+                <TextBlock Grid.Row="4" Grid.Column="0" Text="WDP allowance:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <TextBox x:Name="TextBoxWDPAllowance" Grid.Row="4" Grid.Column="1" TabIndex="43" ToolTip="Enter the WDP allowance value." Style="{StaticResource UXTextBoxStyle}"
+                    IsEnabled="{Binding SplitBilling}" Text="{Binding SelectedClientBilling.WDPAllowance, UpdateSourceTrigger=PropertyChanged}">
+                </TextBox>
+                <TextBlock Grid.Row="4" Grid.Column="3" Text="Voice allowance:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <TextBox x:Name="TextBoxVoiceAllowance" Grid.Row="4" Grid.Column="4" TabIndex="44" ToolTip="Enter the voice allowance value." Style="{StaticResource UXTextBoxStyle}"
+                    IsEnabled="{Binding SplitBilling}" Text="{Binding SelectedVoiceAllowance, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged, StringFormat=N2}" BorderBrush="{Binding ValidVoiceAllowance}">
+                </TextBox>
+                <TextBlock Grid.Row="6" Grid.Column="0" Text="Provider limit:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <TextBox x:Name="TextBoxSPAllowance" Grid.Row="6" Grid.Column="1" TabIndex="45" ToolTip="Enter the service provider limit." Style="{StaticResource UXTextBoxStyle}"
+                    IsEnabled="{Binding SplitBilling}" Text="{Binding SelectedClientBilling.SPLimit, UpdateSourceTrigger=PropertyChanged}">
+                </TextBox>
+                <TextBlock Grid.Row="8" Grid.Column="0" Text="International:" Margin="0,0,5,0" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <StackPanel Grid.Row="8" Grid.Column="1" Orientation="Horizontal" IsEnabled="{Binding SplitBilling}" >
+                    <CheckBox x:Name="CheckBoxIntDialing" Content="Dailing" HorizontalAlignment="Left" VerticalAlignment="Center" Margin="0,0,5,0" TabIndex="46" IsChecked="{Binding SelectedIntDailing, UpdateSourceTrigger=PropertyChanged}" />
+                    <CheckBox x:Name="CheckBoxIntRoaming" Content="Roaming" HorizontalAlignment="Left" VerticalAlignment="Center" TabIndex="47" IsChecked="{Binding SelectedIntRoaming, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}"/>
+                </StackPanel>
+                <TextBlock Grid.Row="10" Grid.Column="0" Text="Country visiting:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <TextBox x:Name="TextBoxCountryVisiting" Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="4" TabIndex="48" ToolTip="Select the country for roaming." Style="{StaticResource UXTextBoxStyle}"
+                    Text="{Binding SelectedRoamingCountry, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" BorderBrush="{Binding ValidRoamingCountry}" IsEnabled="{Binding SelectedIntRoaming}">
+                </TextBox>
+                <TextBlock Grid.Row="12" Grid.Column="0" Text="Roaming from:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <DatePicker x:Name="DatePickerRoamingFrom" Grid.Row="12" Grid.Column="1" TabIndex="49" ToolTip="Select the date to start roaming from."
+                    SelectedDate="{Binding SelectedRoamingFromDate, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" BorderBrush="{Binding ValidRoamingFromDate}" IsEnabled="{Binding SelectedIntRoaming}"/>
+                <TextBlock Grid.Row="12" Grid.Column="3" Text="Roaming to:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <DatePicker x:Name="DatePickerRoamingTo" Grid.Row="12" Grid.Column="4" TabIndex="50" ToolTip="Select the date to stop roaming."
+                    SelectedDate="{Binding SelectedRoamingToDate, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" BorderBrush="{Binding ValidRoamingToDate}" IsEnabled="{Binding SelectedIntRoaming}"/>
+                <TextBlock Grid.Row="14" Grid.Column="0" Text="Pause from:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <DatePicker x:Name="DatePickerStopBillingFrom" Grid.Row="14" Grid.Column="1" TabIndex="51" ToolTip="Select the date to pause billing from."
+                    SelectedDate="{Binding SelectedClientBilling.StopBillingFromDate, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding SplitBilling}"/>
+                <TextBlock Grid.Row="14" Grid.Column="3" Text="Pause to:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <DatePicker x:Name="DatePickerStopBillingTo" Grid.Row="14" Grid.Column="4" TabIndex="52" ToolTip="Select the date to pause billing to."
+                    SelectedDate="{Binding SelectedClientBilling.StopBillingToDate, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding SplitBilling}"/>
             </Grid>
         </GroupBox>
     </Grid>
