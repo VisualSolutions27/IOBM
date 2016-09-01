@@ -30,9 +30,10 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// Create a new invoice entity in the database
         /// </summary>
         /// <param name="invoice">The invoice entity to add.</param>
+        /// <param name="invoiceItems">The invoice items for the specified invoice.</param>
         /// <param name="servicePrefix">The selected service to create a invoice for.</param>
         /// <returns>True if successfull</returns>
-        public bool CreateInvoice(Invoice invoice, string servicePrefix)
+        public bool CreateInvoice(Invoice invoice, IEnumerable<InvoiceDetail> invoiceItems, string servicePrefix)
         {
             try
             {
@@ -52,7 +53,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                         db.SaveChanges();
 
                         // Create the invoice detail
-                        CreateInvoiceItems(invoice.pkInvoiceID, invoice.InvoiceDetails, db);
+                        CreateInvoiceItems(invoice.pkInvoiceID, invoiceItems, db);
 
                         return true;
                     }
@@ -83,6 +84,9 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             {
                 foreach (InvoiceDetail item in invoiceItems)
                 {
+                    //invoiceItem = new InvoiceDetail();
+                    item.Invoice = null;
+                    item.ServiceProvider = null;
                     item.fkInvoiceID = invoiceID;
                     db.InvoiceDetails.Add(item);
                     db.SaveChanges();
@@ -117,7 +121,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                                    select invoice)).Include("Client")
                                                                    .Include("Client.Company")
                                                                    .Include("Service1")
-                                                                   .OrderByDescending(p => p.InvoicePeriod).ToList();
+                                                                   .OrderByDescending(p => p.InvoicePeriod)
+                                                                   .ThenByDescending(p => p.InvoiceNumber).ToList();
 
                     if (accPeriodFilter != "None")
                         invoices = invoices.Where(p => p.InvoicePeriod == accPeriodFilter);
@@ -214,8 +219,9 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// Update an existing invoice entity in the database
         /// </summary>
         /// <param name="invoice">The invoice entity to update.</param>
+        /// <param name="invoiceItems">The invoice items for the specified invoice.</param>
         /// <returns>True if successfull</returns>
-        public bool UpdateInvoice(Invoice invoice)
+        public bool UpdateInvoice(Invoice invoice, IEnumerable<InvoiceDetail> invoiceItems)
         {
             try
             {
@@ -235,7 +241,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                         db.SaveChanges();
 
                         // Update the invoice detail
-                        UpdateInvoiceItems(invoice.pkInvoiceID, invoice.InvoiceDetails, db);
+                        UpdateInvoiceItems(invoice.pkInvoiceID, invoiceItems, db);
 
                         return true;
                     }

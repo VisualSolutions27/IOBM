@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -24,9 +25,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
     {
         #region Properties & Attributes
 
+        private bool _isNewInvoice = false;
+        private bool _isNewInvoiceItem = false;
         private InvoiceModel _model = null;
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
+        private DateTime _validBillingDate = DateTime.ParseExact(string.Format("01/{0}/{1}", MobileManagerEnvironment.BillingPeriod.Substring(5, 2)
+                                                                                           , MobileManagerEnvironment.BillingPeriod.Substring(0, 4))
+                                                                                           , "dd/MM/yyyy", CultureInfo.InvariantCulture);
 
         #region Commands
 
@@ -44,6 +50,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         #region Properties
 
         /// <summary>
+        /// The selected client primary key
+        /// </summary>
+        private int SelectedClientID
+        {
+            get { return _selectedClientID; }
+            set { SetProperty(ref _selectedClientID, value); }
+        }
+        private int _selectedClientID = 0;
+
+        /// <summary>
         /// Holds the selected (current) invoice entity
         /// </summary>
         public Invoice SelectedInvoice
@@ -51,31 +67,45 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             get { return _selectedInvoice; }
             set
             {
-                if (value != null)
+                if (_isNewInvoice || (value != null && value.pkInvoiceID > 0))
                 {
+                    if (_isNewInvoice)
+                        InitialiseInvoiceControls();
+
+                    SetProperty(ref _selectedInvoice, value);
+                    _isNewInvoice = false;
+
                     // Invoice required fields
-                    SelectedInvoiceNumber = value.InvoiceNumber != null ? value.InvoiceNumber : string.Empty;
-                    SelectedInvoiceDate = value.InvoiceDate != null ? value.InvoiceDate.Value : DateTime.MinValue;
-                    SelectedPrivateDue = value.PrivateDue != null ? value.PrivateDue.Value : 0;
-                    SelectedCompanyDue = value.CompanyDue != null ? value.CompanyDue.Value : 0;
-                    SelectedService = ServiceCollection != null && value.Service1 != null ? ServiceCollection.Where(p => p.pkServiceID == value.fkServiceID).FirstOrDefault() :
+                    SelectedInvoiceNumber = value != null && value.InvoiceNumber != null ? value.InvoiceNumber : string.Empty;
+                    SelectedInvoiceDate = value != null && value.InvoiceDate != null && value.InvoiceDate.Value.Date >= _validBillingDate.Date ? value.InvoiceDate.Value : _validBillingDate;
+                    SelectedPrivateDue = value != null && value.PrivateDue != null ? value.PrivateDue.Value : 0;
+                    SelectedCompanyDue = value != null && value.CompanyDue != null ? value.CompanyDue.Value : 0;
+                    SelectedService = value != null && ServiceCollection != null && value.Service1 != null ? ServiceCollection.Where(p => p.pkServiceID == value.fkServiceID).FirstOrDefault() :
                                       ServiceCollection != null ? ServiceCollection.Where(p => p.pkServiceID == 0).FirstOrDefault() : null;
 
                     // Publish the event to execute the ShowInvoiceReport method on the Accounts View
                     InvoiceReportEventArgs eventArgs = new InvoiceReportEventArgs();
-                    eventArgs.InvoiceID = value.pkInvoiceID;
+                    eventArgs.InvoiceID = value != null ? value.pkInvoiceID : 0;
                     eventArgs.ServiceDescription = SelectedService != null ? SelectedService.ServiceDescription : string.Empty;
                     _eventAggregator.GetEvent<ShowInvoiceReportEvent>().Publish(eventArgs);
+
+                    // Read all the invoice items linked 
+                    // to the selected invoice
+                    ReadClientInvoiceItemsAsync();
                 }
-
-                SetProperty(ref _selectedInvoice, value);
-
-                // Read all the invoice items linked 
-                // to the selected invoice
-                ReadClientInvoiceItemsAsync();
             }
         }
-        private Invoice _selectedInvoice = new Invoice();
+        private Invoice _selectedInvoice;
+
+        /// <summary>
+        /// The selected invoice item index
+        /// </summary>
+        public int SelectedInvoiceItemIndex
+        {
+            get { return _selectedInvoiceItemIndex; }
+            set { SetProperty(ref _selectedInvoiceItemIndex, value); }
+        }
+        private int _selectedInvoiceItemIndex;
 
         /// <summary>
         /// Holds the selected invoice item entity
@@ -85,6 +115,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             get { return _selectedInvoiceItem; }
             set
             {
+                _isNewInvoiceItem = false;
+                SetProperty(ref _selectedInvoiceItem, value);
+
                 // Invoice item required fields
                 if (value != null && value.fkServiceProviderID > 0)
                 {
@@ -96,11 +129,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     SelectedItemReference = value.ReferenceNumber != null ? value.ReferenceNumber : string.Empty;
                     SelectedItemAmount = value.ItemAmount.ToString();
                 }
-
-                SetProperty(ref _selectedInvoiceItem, value);
             }
         }
-        private InvoiceDetail _selectedInvoiceItem = null;
+        private InvoiceDetail _selectedInvoiceItem;
 
         /// <summary>
         /// The selected invoice number
@@ -372,7 +403,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             get { return _selectedItemAmount; }
             set { SetProperty(ref _selectedItemAmount, value); }
         }
-        private string _selectedItemAmount = "0.00";
+        private string _selectedItemAmount = "0";
 
         #endregion
 
@@ -462,7 +493,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 switch (columnName)
                 {
                     case "SelectedInvoiceDate":
-                        ValidInvoiceDate = SelectedInvoiceDate.Date == DateTime.MinValue.Date ? Brushes.Red : Brushes.Silver; break;
+                        ValidInvoiceDate = SelectedInvoiceDate.Date < _validBillingDate.Date ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedService":
                         ValidService = SelectedService != null && SelectedService.pkServiceID > 0 && SelectedService.ServicePreFix == "EQP" ? Brushes.Silver : Brushes.Red; break;
                     case "SelectedSupplier":
@@ -519,12 +550,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private async void InitialiseInvoiceView()
         {
             _model = new InvoiceModel(_eventAggregator);
-            InitialiseInvoiceControls();
 
             // Initialise the view commands
             CancelInvoiceCommand = new DelegateCommand(ExecuteCancel, CanExecuteCancel).ObservesProperty(() => SelectedInvoiceDate)
                                                                                        .ObservesProperty(() => SelectedService);
-            AddInvoiceCommand = new DelegateCommand(ExecuteAdd, CanExecuteAdd).ObservesProperty(() => SelectedInvoice);
+            AddInvoiceCommand = new DelegateCommand(ExecuteAdd, CanExecuteAdd).ObservesProperty(() => SelectedClientID);
             SaveInvoiceCommand = new DelegateCommand(ExecuteSave, CanExecuteSave).ObservesProperty(() => SelectedInvoiceDate)
                                                                                  .ObservesProperty(() => SelectedService)
                                                                                  .ObservesProperty(() => InvoiceItemsCollection);
@@ -551,12 +581,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void InitialiseInvoiceControls()
         {
-            SelectedInvoice = new Invoice();
-            SelectedService = new Service();
-            SelectedInvoiceDate = System.DateTime.MinValue;
+            SelectedInvoiceNumber = string.Empty;
+            SelectedInvoiceDate = DateTime.Now.Date < _validBillingDate.Date ? _validBillingDate : DateTime.Now;
             SelectedService = ServiceCollection != null ? ServiceCollection.Where(p => p.pkServiceID == 0).FirstOrDefault() : null;
             SelectedServiceGroup = SelectedPeriodGroup = false;
+            SelectedPrivateDue = SelectedCompanyDue = 0;
             InvoiceItemsCollection = null;
+            _isNewInvoice = false;
             InitialiseInvoiceItemsControls();
         }
 
@@ -565,11 +596,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void InitialiseInvoiceItemsControls()
         {
-            SelectedInvoiceItem = null;
+            SelectedInvoiceItemIndex = -1;
             SelectedSupplier = SupplierCollection != null ? SupplierCollection.Where(p => p.pkServiceProviderID == 0).FirstOrDefault() : null;
             SelectedItemDescription = SelectedItemReference = string.Empty;
-            SelectedItemAmount = "0.00";
+            SelectedItemAmount = "0";
             SelectedPrivateBilling = false;
+            _isNewInvoiceItem = true;
         }
 
         /// <summary>
@@ -588,6 +620,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 if (SelectedServiceGroup && SelectedServiceFilter != null && SelectedServiceFilter.pkServiceID > 0)
                     serviceFilter = SelectedServiceFilter.pkServiceID;
 
+                SelectedClientID = MobileManagerEnvironment.SelectedClientID;
                 InvoiceCollection = await Task.Run(() => _model.ReadInvoicesForClient(MobileManagerEnvironment.SelectedClientID, accPeriodFilter, serviceFilter));
             }
             catch (Exception ex)
@@ -707,8 +740,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private bool CanExecuteAdd()
         {
             // Validate if the logged-in user can administrate the company the client is linked to
-            return SelectedInvoice != null && SelectedInvoice.pkInvoiceID > 0 &&
-                   (MobileManagerEnvironment.ClientCompanyID == 0 || _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false);
+            return SelectedClientID > 0 && _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false;
         }
 
         /// <summary>
@@ -716,8 +748,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void ExecuteAdd()
         {
-            InitialiseInvoiceControls();
-            SelectedInvoiceDate = DateTime.Now;
+            _isNewInvoice = true;
+            SelectedInvoice = new Invoice();
         }
 
         /// <summary>
@@ -729,13 +761,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             bool result = false;
 
             // Validate if the logged-in user can administrate the company the client is linked to
-            result = SelectedInvoice != null && SelectedInvoice.pkInvoiceID > 0 &&
-                     (MobileManagerEnvironment.ClientCompanyID == 0 || _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false);
+            result = SelectedClientID > 0 && _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false;
 
             if (result)
                 result= SelectedInvoiceDate.Date > DateTime.MinValue.Date && InvoiceItemsCollection != null &&
                         InvoiceItemsCollection.Count > 0 && SelectedService != null && SelectedService.pkServiceID > 0 && SelectedService.ServicePreFix == "EQP" &&
-                        (SelectedInvoice.pkInvoiceID > 0 ? SelectedInvoice.IsPeriodClosed != null && !SelectedInvoice.IsPeriodClosed.Value : true);
+                        (SelectedInvoice != null && SelectedInvoice.pkInvoiceID > 0 ? SelectedInvoice.IsPeriodClosed != null && !SelectedInvoice.IsPeriodClosed.Value : true);
 
             return result;
         }
@@ -754,15 +785,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedInvoice.CompanyDue = _selectedCompanyDue;
             SelectedInvoice.InvoiceDate = SelectedInvoiceDate;
             SelectedInvoice.InvoicePeriod = string.Format("{0}/{1}", SelectedInvoiceDate.Year.ToString(), SelectedInvoiceDate.Month.ToString().PadLeft(2, '0'));
-            SelectedInvoice.ModifiedBy = SecurityHelper.LoggedInDomainName;
+            SelectedInvoice.ModifiedBy = SecurityHelper.LoggedInUserFullName;
             SelectedInvoice.ModifiedDate = DateTime.Now;
-            SelectedInvoice.InvoiceDetails = InvoiceItemsCollection;
 
             if (SelectedInvoice.pkInvoiceID == 0)
-                result = await Task.Run(() => _model.CreateInvoice(SelectedInvoice, SelectedService.ServicePreFix));
+                result = await Task.Run(() => _model.CreateInvoice(SelectedInvoice, InvoiceItemsCollection, SelectedService.ServicePreFix));
             else
-                result = await Task.Run(() => _model.UpdateInvoice(SelectedInvoice));
-
+                result = await Task.Run(() => _model.UpdateInvoice(SelectedInvoice, InvoiceItemsCollection));
+            
             if (result)
             {
                 await ReadClientInvoicesAsync();
@@ -796,8 +826,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             bool result = false;
 
             // Validate if the logged-in user can administrate the company the client is linked to
-            result = SelectedInvoice != null && SelectedInvoice.pkInvoiceID > 0 &&
-                     (MobileManagerEnvironment.ClientCompanyID == 0 || _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false);
+            result = SelectedClientID > 0 && _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false;
 
             if (result)
                 result = SelectedInvoice != null && SelectedInvoiceItem != null &&
@@ -829,13 +858,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             bool result = false;
 
             // Validate if the logged-in user can administrate the company the client is linked to
-            result = SelectedInvoice != null && SelectedInvoice.pkInvoiceID > 0 && 
-                     (MobileManagerEnvironment.ClientCompanyID == 0 || _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false);
+            result = SelectedClientID > 0 && _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false;
 
             if (result)
                 result = SelectedSupplier != null && SelectedSupplier.pkServiceProviderID > 0 && !string.IsNullOrEmpty(SelectedItemDescription) &&
                          !string.IsNullOrEmpty(SelectedItemReference) && (!string.IsNullOrWhiteSpace(SelectedItemAmount) && Convert.ToDecimal(SelectedItemAmount) > 0) &&
-                         (SelectedInvoice.pkInvoiceID > 0 ? SelectedInvoice.IsPeriodClosed != null && !SelectedInvoice.IsPeriodClosed.Value : true);
+                         (SelectedInvoice !=null && SelectedInvoice.pkInvoiceID > 0 ? SelectedInvoice.IsPeriodClosed != null && !SelectedInvoice.IsPeriodClosed.Value : true);
 
             return result;
         }
@@ -845,6 +873,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void ExecuteItemAdd()
         {
+            int invoiceItemID = 0;
+
             if (SelectedInvoiceItem == null)
                 SelectedInvoiceItem = new InvoiceDetail();
 
@@ -854,20 +884,27 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             if (SelectedInvoiceItem.ServiceProvider == null)
                 SelectedInvoiceItem.ServiceProvider = new ServiceProvider();
 
+            // When an existing item was changed first remove it before adding
+            if (!_isNewInvoiceItem && SelectedInvoiceItem != null)
+            {
+                invoiceItemID = SelectedInvoiceItem.pkInvoiceItemID;
+                InvoiceItemsCollection.Remove(SelectedInvoiceItem);
+                SelectedInvoiceItem = new InvoiceDetail();
+                SelectedInvoiceItem.pkInvoiceItemID = invoiceItemID;
+            }          
+
             SelectedInvoiceItem.fkInvoiceID = 0;
             SelectedInvoiceItem.fkServiceProviderID = SelectedSupplier.pkServiceProviderID;
             SelectedInvoiceItem.IsPrivate = SelectedPrivateBilling;
             SelectedInvoiceItem.ItemDescription = SelectedItemDescription.ToUpper();
             SelectedInvoiceItem.ReferenceNumber = SelectedItemReference.ToUpper();
             SelectedInvoiceItem.ItemAmount = Convert.ToDecimal(SelectedItemAmount);
-            SelectedInvoiceItem.ModifiedBy = SecurityHelper.LoggedInDomainName;
+            SelectedInvoiceItem.ModifiedBy = SecurityHelper.LoggedInUserFullName;
             SelectedInvoiceItem.ModifiedDate = DateTime.Now;
             SelectedInvoiceItem.ServiceProvider = SelectedSupplier;
 
-            if (SelectedInvoiceItem.pkInvoiceItemID == 0)
-                InvoiceItemsCollection.Add(SelectedInvoiceItem);
-            else
-                InvoiceItemsCollection = new ObservableCollection<InvoiceDetail>(InvoiceItemsCollection);
+            InvoiceItemsCollection.Add(SelectedInvoiceItem);
+            InvoiceItemsCollection = new ObservableCollection<InvoiceDetail>(InvoiceItemsCollection);
 
             // Calculate the private and company due amounts
             SelectedPrivateDue = InvoiceItemsCollection.Where(p => p.IsPrivate).ToList().Sum(p => p.ItemAmount);

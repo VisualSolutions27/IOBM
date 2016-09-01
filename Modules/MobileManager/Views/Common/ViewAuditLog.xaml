@@ -36,11 +36,15 @@
                     ItemsSource="{Binding ActivityLogFilterCollection}" SelectedItem="{Binding SelectedActivityLogFilter}">
                 </ComboBox>
                 <StackPanel Grid.Column="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,1,10,0">
-                    <Button x:Name="ButtonInstrumentCancel" ToolTip="Cancel the current operation." TabIndex="4" Margin="0,0,2,0" 
+                    <Button x:Name="ButtonCancel" ToolTip="Cancel the current operation." TabIndex="4" Margin="0,0,2,0" 
                         Style="{StaticResource UXHeaderImageButtonStyle}" Command="{Binding CancelCommand}">
                         <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/stop_32.ico" Margin="2"/>
                     </Button>
-                    <Button x:Name="ButtonInstrumentSave" ToolTip="Save the activity comment." TabIndex="5" Margin="0"
+                    <Button x:Name="ButtonAdd" ToolTip="Add a manual activity action." TabIndex="5" Margin="0,0,2,0"
+                        Style="{StaticResource UXHeaderImageButtonStyle}" Command="{Binding AddCommand}">
+                        <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/508.png" Margin="2,2,2,2"/>
+                    </Button>                    
+                    <Button x:Name="ButtonSave" ToolTip="Save the activity comment." TabIndex="6" Margin="0"
                         Style="{StaticResource UXHeaderImageButtonStyle}" Command="{Binding SaveCommand}" >
                         <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/save_32.ico" Margin="2"/>
                     </Button>

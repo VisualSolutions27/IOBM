@@ -1,5 +1,6 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
 using Gijima.IOBM.Infrastructure.Helpers;
+using Gijima.IOBM.MobileManager.Common.Helpers;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
 using Prism.Events;
@@ -10,6 +11,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
+using System.Transactions;
 
 namespace Gijima.IOBM.MobileManager.Model.Models
 {
@@ -50,8 +52,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         {
             try
             {
-                //using (TransactionScope tc = TransactionHelper.CreateTransactionScope())
-                //{
+                using (TransactionScope tc = TransactionHelper.CreateTransactionScope())
+                {
                     using (var db = MobileManagerEntities.GetContext())
                     {
                         if (!db.Clients.Any(p => p.ClientName.ToUpper() == client.ClientName && p.PrimaryCellNumber == client.PrimaryCellNumber))
@@ -61,8 +63,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                             db.Clients.Add(client);
                             db.SaveChanges();
 
-                            //// Commit changes
-                            //tc.Complete();
+                            // Commit changes
+                            tc.Complete();
 
                             return true;
                         }
@@ -72,7 +74,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                             return false;
                         }
                     }
-                //}
+                }
             }
             catch (Exception ex)
             {
@@ -167,8 +169,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             {
                 bool result = false;
 
-                //using (TransactionScope tc = TransactionHelper.CreateTransactionScope())
-                //{
+                using (TransactionScope tc = TransactionHelper.CreateTransactionScope())
+                {
                     using (var db = MobileManagerEntities.GetContext())
                     {
                         Client existingClient = ReadClient(client.pkClientID);
@@ -204,15 +206,15 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                             _activityLogger.CreateDataChangeAudits<PackageSetup>(_dataActivityHelper.GetDataChangeActivities<PackageSetup>(existingClient.Contract.PackageSetup, client.Contract.PackageSetup, client.fkContractID, db));
                             _activityLogger.CreateDataChangeAudits<ClientBilling>(_dataActivityHelper.GetDataChangeActivities<ClientBilling>(existingClient.ClientBilling, client.ClientBilling, client.fkContractID, db));
 
-                            //// Commit changes
-                            //tc.Complete();
+                            // Commit changes
+                            tc.Complete();
 
                             result = true;
                         }
                     }
 
                     return result;
-                //}
+                }
             }
             catch (Exception ex)
             {
@@ -240,86 +242,87 @@ namespace Gijima.IOBM.MobileManager.Model.Models
 
             try
             {
-                //using (TransactionScope tc = TransactionHelper.CreateTransactionScope())
-                //{
-                using (var db = MobileManagerEntities.GetContext())
+                using (TransactionScope tc = TransactionHelper.CreateTransactionScope())
                 {
-                    switch (searchEntity)
+                    using (var db = MobileManagerEntities.GetContext())
                     {
-                        case SearchEntity.ClientID:
-                            existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.ClientID).FirstOrDefault();
-                            break;
-                        case SearchEntity.PrimaryCellNumber:
-                            existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.PrimaryCellNumber).FirstOrDefault();
-                            break;
-                        case SearchEntity.EmployeeNumber:
-                            if (companyGroup == null)
-                                existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.EmployeeNumber).FirstOrDefault();
-                            else
-                                existingClient = new SearchEngineModel(_eventAggregator).SearchForClientByCompanyGroup(searchCriteria, SearchEntity.EmployeeNumber, companyGroup).FirstOrDefault();
-                            break;
-                        case SearchEntity.IDNumber:
-                            existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.IDNumber).FirstOrDefault();
-                            break;
-                    }
-
-                    if (existingClient != null)
-                    {
-                        clientToUpdate = db.Clients.Where(p => p.pkClientID == existingClient.pkClientID).FirstOrDefault();
-
-                        // Get the client table properties (Fields)
-                        PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(Client));
-
-                        foreach (PropertyDescriptor property in properties)
+                        switch (searchEntity)
                         {
-                            // Find the data column (property) to update
-                            if (property.Name == updateColumn)
-                            {
-                                // Update the property value based on the data type
-                                if (property.PropertyType == typeof(DateTime))
-                                {
-                                    property.SetValue(clientToUpdate, Convert.ToDateTime(updateValue));
-                                }
-                                else if (property.PropertyType == typeof(int))
-                                {
-                                    property.SetValue(clientToUpdate, Convert.ToInt32(updateValue));
-                                }
-                                else if (property.PropertyType == typeof(decimal))
-                                {
-                                    property.SetValue(clientToUpdate, Convert.ToDecimal(updateValue));
-                                }
-                                else if (property.PropertyType == typeof(bool))
-                                {
-                                    property.SetValue(clientToUpdate, Convert.ToBoolean(updateValue));
-                                }
-                                else if (property.PropertyType == typeof(string))
-                                {
-                                    property.SetValue(clientToUpdate, updateValue);
-                                }
+                            case SearchEntity.ClientID:
+                                existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.ClientID).FirstOrDefault();
+                                break;
+                            case SearchEntity.PrimaryCellNumber:
+                                existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.PrimaryCellNumber).FirstOrDefault();
+                                break;
+                            case SearchEntity.EmployeeNumber:
+                                if (companyGroup == null)
+                                    existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.EmployeeNumber).FirstOrDefault();
                                 else
+                                    existingClient = new SearchEngineModel(_eventAggregator).SearchForClientByCompanyGroup(searchCriteria, SearchEntity.EmployeeNumber, companyGroup).FirstOrDefault();
+                                break;
+                            case SearchEntity.IDNumber:
+                                existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.IDNumber).FirstOrDefault();
+                                break;
+                        }
+
+                        if (existingClient != null)
+                        {
+                            clientToUpdate = db.Clients.Where(p => p.pkClientID == existingClient.pkClientID).FirstOrDefault();
+
+                            // Get the client table properties (Fields)
+                            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(Client));
+
+                            foreach (PropertyDescriptor property in properties)
+                            {
+                                // Find the data column (property) to update
+                                if (property.Name == updateColumn)
                                 {
-                                    errorMessage = string.Format("Data type {0) not found for {1}.", property.PropertyType, updateColumn);
-                                    return false;
+                                    // Update the property value based on the data type
+                                    if (property.PropertyType == typeof(DateTime))
+                                    {
+                                        property.SetValue(clientToUpdate, Convert.ToDateTime(updateValue));
+                                    }
+                                    else if (property.PropertyType == typeof(int))
+                                    {
+                                        property.SetValue(clientToUpdate, Convert.ToInt32(updateValue));
+                                    }
+                                    else if (property.PropertyType == typeof(decimal))
+                                    {
+                                        property.SetValue(clientToUpdate, Convert.ToDecimal(updateValue));
+                                    }
+                                    else if (property.PropertyType == typeof(bool))
+                                    {
+                                        property.SetValue(clientToUpdate, Convert.ToBoolean(updateValue));
+                                    }
+                                    else if (property.PropertyType == typeof(string))
+                                    {
+                                        property.SetValue(clientToUpdate, updateValue);
+                                    }
+                                    else
+                                    {
+                                        errorMessage = string.Format("Data type {0) not found for {1}.", property.PropertyType, updateColumn);
+                                        return false;
+                                    }
+
+                                    // Add the data activity log
+                                    result = _activityLogger.CreateDataChangeAudits<Client>(_dataActivityHelper.GetDataChangeActivities<Client>(existingClient, clientToUpdate, clientToUpdate.pkClientID, db));
+
+                                    db.SaveChanges();
+
+                                    // Commit changes
+                                    tc.Complete();
                                 }
-
-                                db.SaveChanges();
-
-                                result = _activityLogger.CreateDataChangeAudits<Client>(_dataActivityHelper.GetDataChangeActivities<Client>(existingClient, clientToUpdate, clientToUpdate.pkClientID, db));
-
-                                //// Commit changes
-                                //tc.Complete();
                             }
                         }
+                        else
+                        {
+                            errorMessage = string.Format("Client not found for {0} {1}.", searchEntity.ToString(), searchCriteria);
+                            return false;
+                        }
                     }
-                    else
-                    {
-                        errorMessage = string.Format("Client not found for {0} {1}.", searchEntity.ToString(), searchCriteria);
-                        return false;
-                    }
-                }
 
-                return result;
-                //}
+                    return result;
+                }
             }
             catch (Exception ex)
             {

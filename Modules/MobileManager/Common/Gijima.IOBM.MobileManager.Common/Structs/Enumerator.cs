@@ -159,7 +159,8 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         ClientBilling,
         Device,
         SimCard,
-        PackageSetup
+        PackageSetup,
+        Manual
     }
 
     /// <summary>

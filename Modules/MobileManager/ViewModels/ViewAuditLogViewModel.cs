@@ -22,16 +22,26 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private AuditLogModel _model = null;
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
-        private int _entityID = 0;
 
         #region Commands
 
         public DelegateCommand CancelCommand { get; set; }
+        public DelegateCommand AddCommand { get; set; }
         public DelegateCommand SaveCommand { get; set; }
 
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Holds the entity ID linked to the action
+        /// </summary>
+        public int EntityID
+        {
+            get { return _entityID; }
+            set { SetProperty(ref _entityID, value); }
+        }
+        private int _entityID = 0;
 
         /// <summary>
         /// Holds the selected activity log
@@ -57,8 +67,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set
             {
                 SetProperty(ref _selectedActivityLogFilter, value);
-                if (_entityID > 0)
-                    Task.Run(() => ReadAuditLogsAsync(_entityID));
+                if (EntityID > 0)
+                    Task.Run(() => ReadAuditLogsAsync(EntityID));
             }
         }
         private string _selectedActivityLogFilter = null;
@@ -146,7 +156,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Initialise all the view dependencies
         /// </summary>
-        private async void InitialiseAuditLogView()
+        private void InitialiseAuditLogView()
         {
             _model = new AuditLogModel(_eventAggregator);
             _securityHelper = new SecurityHelper(_eventAggregator);
@@ -154,6 +164,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
             // Initialise the view commands
             CancelCommand = new DelegateCommand(ExecuteCancel, CanExecuteCancel).ObservesProperty(() => SelectedAuditLog);
+            AddCommand = new DelegateCommand(ExecuteAdd, CanExecuteAdd).ObservesProperty(() => EntityID);
             SaveCommand = new DelegateCommand(ExecuteSave, CanExecuteSave).ObservesProperty(() => SelectedAuditLog);
 
             // Subscribe to this event to read to activity logs from the database for the specified process
@@ -202,7 +213,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private async void ReadActivityLogFilters(DataActivityLog dataActivityLog)
         {
             ActivityLogFilterCollection = new ObservableCollection<string>();
-            _entityID = dataActivityLog.EntityID;
+            EntityID = dataActivityLog.EntityID;
 
             switch ((ActivityProcess)dataActivityLog.ActivityProcess)
             {
@@ -238,7 +249,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         #region Command Execution
 
         /// <summary>
-        /// Validate if the save functionality can be executed
+        /// Validate if the cancel functionality can be executed
         /// </summary>
         /// <returns>True if can execute</returns>
         private bool CanExecuteCancel()
@@ -252,6 +263,31 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private void ExecuteCancel()
         {
             InitialiseViewControls();
+        }
+
+        /// <summary>
+        /// Validate if the add functionality can be executed
+        /// </summary>
+        /// <returns>True if can execute</returns>
+        private bool CanExecuteAdd()
+        {
+            return EntityID > 0;
+        }
+
+        /// <summary>
+        /// Execute when the add command button is clicked 
+        /// </summary>
+        private void ExecuteAdd()
+        {
+            SelectedActivityLogFilter = AdminActivityFilter.Manual.ToString();
+            ShowComment = Visibility.Visible;
+            SelectedComment = string.Empty;
+            SelectedAuditLog = new AuditLog();
+            SelectedAuditLog.AuditGroup = AdminActivityFilter.Manual.ToString().ToUpper();
+            SelectedAuditLog.AuditDescription = string.Format("Manual activity created by {0} on {1}.", SecurityHelper.LoggedInUserFullName, DateTime.Now.ToString());
+            SelectedAuditLog.EntityID = EntityID;
+            SelectedAuditLog.ChangedValue = string.Empty;
+            SelectedAuditLog.AuditDate = DateTime.Now;
         }
 
         /// <summary>
@@ -283,7 +319,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 SelectedAuditLog.ModifiedBy = SecurityHelper.LoggedInUserFullName;
                 SelectedAuditLog.ModifiedDate = DateTime.Now;
 
-                result = await Task.Run(() => _model.UpdateAuditLog(SelectedAuditLog));
+                if(SelectedAuditLog.pkAuditLogID == 0)
+                    result = await Task.Run(() => _model.CreateAuditLog(SelectedAuditLog));
+                else
+                    result = await Task.Run(() => _model.UpdateAuditLog(SelectedAuditLog));
 
                 if (result)
                 {

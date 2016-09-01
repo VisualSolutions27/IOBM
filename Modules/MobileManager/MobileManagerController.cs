@@ -12,6 +12,9 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Security.Principal;
 using System.Threading.Tasks;
+using Gijima.IOBM.MobileManager.Model.Models;
+using System.Collections.Generic;
+using Gijima.IOBM.MobileManager.Model.Data;
 
 namespace Gijima.IOBM.MobileManager
 {

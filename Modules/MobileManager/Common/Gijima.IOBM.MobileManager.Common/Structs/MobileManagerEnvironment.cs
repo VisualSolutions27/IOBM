@@ -19,6 +19,16 @@
         /// </summary>
         public static int ClientCompanyID { get; set; }
 
+        /// <summary>
+        /// The current billing period.
+        /// </summary>
+        public static string BillingPeriod { get; set; }
+
+        /// <summary>
+        /// Indicate if the billing period is open.
+        /// </summary>
+        public static bool IsBillingPeriodOpen { get; set; }
+
         #endregion
 
         #region Methods

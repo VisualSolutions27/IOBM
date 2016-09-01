@@ -29,6 +29,29 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         }
 
         /// <summary>
+        /// Create a audit log entry for the specified entity
+        /// </summary>
+        /// <param name="auditLog">The activity entry to log.</param>
+        /// <returns>True if successfull</returns>
+        public bool CreateAuditLog(AuditLog auditLog)
+        {
+            try
+            {
+                using (var db = MobileManagerEntities.GetContext())
+                {
+                    db.AuditLogs.Add(auditLog);
+                    db.SaveChanges();
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Create log entries for all the changes made to a specified entity after 
         /// the changes been saved to the database
         /// </summary>

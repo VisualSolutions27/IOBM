@@ -73,6 +73,7 @@
         <AssociationConnector Association="MobileManagerModel.FK_Device_Status" />
         <AssociationConnector Association="MobileManagerModel.FK_SimCard_Status" />
         <EntityTypeShape EntityType="MobileManagerModel.UpdateRuleData" Width="1.5" PointX="9.5" PointY="0.75" IsExpanded="false" />
+        <EntityTypeShape EntityType="MobileManagerModel.AppSetting" Width="1.5" PointX="5.5" PointY="10.75" />
       </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

@@ -6,6 +6,7 @@ using Microsoft.Reporting.WinForms;
 using Prism.Events;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
@@ -39,6 +40,8 @@ namespace Gijima.IOBM.MobileManager.Views
             {
                 ReportViewer.Reset();
 
+                string reportPath = ConfigurationManager.AppSettings["ReportPath"].ToString();
+
                 // Read the invoice data for the selected invoice
                 List<sp_report_Invoice_Result> invoiceData = await Task.Run(() => new InvoiceModel(null).ReadInvoiceData(invoiceID));
                 ReportDataSource reportData = new ReportDataSource("dsInvoice", invoiceData);
@@ -54,7 +57,7 @@ namespace Gijima.IOBM.MobileManager.Views
                     ReportViewer.ProcessingMode = ProcessingMode.Local;
                     ReportViewer.LocalReport.SetBasePermissionsForSandboxAppDomain(security);
                     ReportViewer.LocalReport.DataSources.Add(reportData);
-                    ReportViewer.LocalReport.ReportPath = @".\Reports\Invoice.rdlc";
+                    ReportViewer.LocalReport.ReportPath = string.Format("{0}{1}", reportPath, "Invoice.rdlc");
                     ReportViewer.LocalReport.SetParameters(reportParameters);
                     ReportViewer.RefreshReport();
                     ReportViewer.Show();

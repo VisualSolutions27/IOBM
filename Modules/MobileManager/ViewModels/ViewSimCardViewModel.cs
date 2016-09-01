@@ -426,8 +426,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             bool result = false;
 
             // Validate if the logged-in user can administrate the company the client is linked to
-            result = SelectedSimCard != null && SelectedSimCard.pkSimCardID > 0 && 
-                     (MobileManagerEnvironment.ClientCompanyID == 0 || _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false);
+            result = _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false;
 
             if (result)
                 result = !string.IsNullOrEmpty(SelectedCellNumber);

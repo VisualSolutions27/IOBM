@@ -1,12 +1,18 @@
-﻿using Gijima.IOBM.MobileManager.Common.Events;
+﻿using Gijima.IOBM.Infrastructure.Events;
+using Gijima.IOBM.Infrastructure.Structs;
+using Gijima.IOBM.MobileManager.Common.Events;
 using Gijima.IOBM.MobileManager.Common.Structs;
+using Gijima.IOBM.MobileManager.Model.Data;
+using Gijima.IOBM.MobileManager.Model.Models;
 using Gijima.IOBM.MobileManager.Security;
 using Gijima.IOBM.MobileManager.Views;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using Prism.Regions;
+using System;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace Gijima.IOBM.MobileManager.ViewModels
@@ -20,6 +26,26 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private int _selectedTabIndex = 0;
 
         #region Properties
+
+        /// <summary>
+        /// The current billing period
+        /// </summary>
+        public string BillingPeriod
+        {
+            get { return _billingPeriod; }
+            set { SetProperty(ref _billingPeriod, value); }
+        }
+        private string _billingPeriod = null;
+
+        /// <summary>
+        /// Indicate if the billing period is open or closed
+        /// </summary>
+        public string BillingPeriodOpen
+        {
+            get { return _billingPeriodOpen; }
+            set { SetProperty(ref _billingPeriodOpen, value); }
+        }
+        private string _billingPeriodOpen;
 
         /// <summary>
         /// The selected tab item
@@ -272,6 +298,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             _eventAggregator = eventAggreagator;
             _securityHelper = new SecurityHelper(eventAggreagator);
             InitialiseMobileManagerView();
+            ReadAppSettingsAsync();
         }
 
         /// <summary>
@@ -346,6 +373,31 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             //}
 
             _selectedTabIndex = tabItem.TabIndex;
+        }
+
+        /// <summary>
+        /// Read the app settings from the database
+        /// </summary>
+        private async void ReadAppSettingsAsync()
+        {
+            try
+            {
+                AppSetting appSetting = null;
+
+                await Task.Run(() => appSetting = new AppSettingModel(_eventAggregator).ReadAppSettings());
+
+                if (appSetting != null)
+                {
+                    BillingPeriod = appSetting.BillingPeriod;
+                    BillingPeriodOpen = appSetting.IsBillingPeriodOpen ? "(Open)" : "(Closed)";
+                    MobileManagerEnvironment.BillingPeriod = appSetting.BillingPeriod;
+                    MobileManagerEnvironment.IsBillingPeriodOpen = appSetting.IsBillingPeriodOpen;
+                }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+            }
         }
 
         #endregion

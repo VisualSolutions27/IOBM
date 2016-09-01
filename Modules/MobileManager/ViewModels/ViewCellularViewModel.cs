@@ -76,7 +76,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     SelectedCellNumber = value.PrimaryCellNumber;
                     SelectedClientName = value.ClientName;
                     SelectedClientIDNumber = value.IDNumber;
-                    SelectedClientAdminFee = value.AdminFee > 0 ? value.AdminFee.ToString() : SelectedCompany != null ? SelectedCompany.AdminFee.ToString() : "0.00";
+                    SelectedClientAdminFee = value.AdminFee > 0 ? value.AdminFee.ToString() : SelectedCompany != null ? SelectedCompany.AdminFee.ToString() : "0";
                     SelectedClientAddressLine = value.AddressLine1;
                     SelectedClientWBSNumber = !string.IsNullOrWhiteSpace(value.WBSNumber) ? value.WBSNumber : SelectedCompany != null ? SelectedCompany.WBSNumber : null;
                     SelectedClientCostCode = !string.IsNullOrWhiteSpace(value.CostCode) ? value.CostCode : SelectedCompany != null ? SelectedCompany.CostCode : null;
@@ -444,7 +444,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 if (value == true)
                 {
                     SelectedClientBilling = new ClientBilling();
-                    SelectedVoiceAllowance = "0.00";
+                    SelectedVoiceAllowance = "0";
                     SelectedIntRoaming = false;
                 }
 
@@ -923,7 +923,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedCellNumber = SelectedClientName = SelectedClientIDNumber = SelectedClientAddressLine = SelectedContractAccNumber = string.Empty;
             SelectedClientWBSNumber = SelectedClientCostCode = SelectedClientIPAddress = string.Empty;
             SelectedContractStartDate = SelectedContractEndDate = DateTime.MinValue;
-            SelectedClientAdminFee = "0.00";
+            SelectedClientAdminFee = "0";
             SelectedClientState = true;
             SelectedCostType = SelectedPackageType = "NONE";
             DeleteButtonImage = "278.png";
@@ -954,6 +954,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             try
             {
                 SelectedClient = await Task.Run(() => _model.ReadClient(clientID));
+
+                // Publish the event to read the administartion activity logs
+                if (SelectedClient.fkContractID > 0)
+                {
+                    _activityLogInfo.EntityID = SelectedClient.fkContractID;
+                    _eventAggregator.GetEvent<SetActivityLogProcessEvent>().Publish(_activityLogInfo);
+                }
             }
             catch (Exception ex)
             {
@@ -1004,7 +1011,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 {
                     SplitBilling = false;
                     NoSplitBilling = true;
-                    SelectedVoiceAllowance = "0.00";
+                    SelectedVoiceAllowance = "0";
                     SelectedIntRoaming = false;
                     SelectedRoamingCountry = string.Empty;
                     SelectedRoamingFromDate = DateTime.MinValue.Date;

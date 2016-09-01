@@ -34,11 +34,16 @@
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="5" />
+                            <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock x:Name="TextBlockApplicationName" Grid.Column="0" Text="Application Name" Style="{StaticResource ClientHeaderTextStyle}" VerticalAlignment="Bottom" Margin="0,0,0,2" FontStyle="Italic" Visibility="Visible" />
-                        <Views:ViewBasicSearch Grid.Column="2"/>
+                        <TextBlock Grid.Column="0" Text="Billing Period - " Style="{StaticResource ClientHeaderTextStyle}" VerticalAlignment="Bottom" Margin="0,0,0,2" FontStyle="Italic" Visibility="Visible" />
+                        <TextBlock x:Name="TextBoxBillingPeriod" Grid.Column="1" Text="{Binding BillingPeriod, UpdateSourceTrigger=PropertyChanged}" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="TextBoxBillingPeriodOpen" Grid.Column="3" Text="{Binding BillingPeriodOpen, UpdateSourceTrigger=PropertyChanged}" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                        <Views:ViewBasicSearch Grid.Column="5"/>
                     </Grid>
                 </Border>
             </Grid>

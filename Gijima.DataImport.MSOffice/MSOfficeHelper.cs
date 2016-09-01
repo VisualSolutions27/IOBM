@@ -306,7 +306,8 @@ namespace Gijima.DataImport.MSOffice
                 using (OleDbConnection dbConnection = new OleDbConnection())
                 {
                     DataTable dt = new DataTable();
-                    dbConnection.ConnectionString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + workBook + ";" + "Extended Properties='Excel 12.0 Xml;HDR=YES;'";
+                    dbConnection.ConnectionString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + workBook + "; Extended Properties =\"Excel 12.0;HDR=YES;IMEX=1\"";
+
 
                     using (OleDbCommand dbCommand = new OleDbCommand())
                     {
@@ -322,9 +323,9 @@ namespace Gijima.DataImport.MSOffice
                     }
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                throw new Exception(e.InnerException.Message);
+                throw new Exception(ex.InnerException.Message);
             }
         }
     }

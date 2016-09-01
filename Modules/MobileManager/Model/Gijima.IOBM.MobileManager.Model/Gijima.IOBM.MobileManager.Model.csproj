@@ -42,6 +42,10 @@
       <HintPath>..\..\..\..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\..\..\..\packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Prism">
       <HintPath>..\..\..\..\Assemblies\Prism\Prism.dll</HintPath>
     </Reference>
@@ -60,6 +64,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\AppSetting.cs">
+      <DependentUpon>MobileManagerEntities.tt</DependentUpon>
+    </Compile>
     <Compile Include="Data\AuditLog.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
@@ -181,6 +188,7 @@
     <Compile Include="Data\UserInRole.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="Models\AppSettingModel.cs" />
     <Compile Include="Models\AuditLogModel.cs" />
     <Compile Include="Models\BillingLevelModel.cs" />
     <Compile Include="Models\BillingProcessModel.cs" />
