@@ -49,8 +49,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             get { return _selectedDevice; }
             set
             {
+                SetProperty(ref _selectedDevice, value);
+                
                 // Prevent circullar action
-                if (value != null)
+                if (value != null && value.pkDeviceID > 0)
                 {
                     // Device required fields
                     SelectedDeviceMake = DeviceMakeCollection != null ? value.fkDeviceMakeID > 0 ? 
@@ -68,8 +70,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     // Insurance required fields
                     if (value.InsuranceCost != null && value.InsuranceValue != null)
                         SetDeviceInsurance(value.InsuranceCost.Value, value.InsuranceValue.Value);
-
-                    SetProperty(ref _selectedDevice, value);
 
                     // Link the device to its Simcard
                     //LinkDeviceToSimCard();
@@ -675,8 +675,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private bool CanExecuteAdd()
         {
             // Validate if the logged-in user can administrate the company the client is linked to
-            return SelectedDevice != null && SelectedDevice.pkDeviceID > 0 && 
-                   (MobileManagerEnvironment.ClientCompanyID == 0 || _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false);
+            return MobileManagerEnvironment.ClientCompanyID > 0 && _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false;
         }
 
         /// <summary>
@@ -696,7 +695,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             bool result = false;
 
             // Validate if the logged-in user can administrate the company the client is linked to
-            result = MobileManagerEnvironment.ClientCompanyID == 0 || _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false;
+            result = MobileManagerEnvironment.ClientCompanyID > 0 && _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false;
 
             if (result && SelectedDeviceMake != null && SelectedDeviceModel != null)
                 result = SelectedDeviceMake.pkDeviceMakeID > 0 && SelectedDeviceModel.pkDeviceModelID > 0 && !string.IsNullOrEmpty(SelectedIMENumber) &&
@@ -714,6 +713,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private void ExecuteSave()
         {
             bool result = false;
+
+            if (SelectedDevice == null)
+                SelectedDevice = new Device();
+
             SelectedDevice.fkContractID = _selectedContractID;
             SelectedDevice.fkDeviceMakeID = SelectedDeviceMake.pkDeviceMakeID;
             SelectedDevice.fkDeviceModelID = SelectedDeviceModel.pkDeviceModelID;
@@ -726,7 +729,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedDevice.ModifiedBy = SecurityHelper.LoggedInDomainName;
             SelectedDevice.ModifiedDate = DateTime.Now;
             SelectedDevice.IsActive = DeviceState;
-            if (SelectedSimCard != null)
+            if (SelectedSimCard != null && SelectedSimCard.pkSimCardID > 0)
                 SelectedDevice.fkSimCardID = SelectedSimCard.pkSimCardID;
 
             if (SelectedDevice.pkDeviceID == 0)

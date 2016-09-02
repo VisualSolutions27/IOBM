@@ -92,11 +92,11 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                         packageSetupCurrent = db.PackageSetups.Where(p => p.pkPackageSetupID == clientContract.fkPackageSetupID).FirstOrDefault();
                 }
 
-                using (TransactionScope tc = TransactionHelper.CreateTransactionScope())
+                if (packageSetupCurrent != null)
                 {
-                    using (var db = MobileManagerEntities.GetContext())
+                    using (TransactionScope tc = TransactionHelper.CreateTransactionScope())
                     {
-                        if (packageSetupCurrent != null)
+                        using (var db = MobileManagerEntities.GetContext())
                         {
                             PackageSetup packageSetupToUpdate = db.PackageSetups.Where(p => p.pkPackageSetupID == clientContract.fkPackageSetupID).FirstOrDefault();
 
@@ -129,19 +129,19 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                     db.SaveChanges();
                                 }
                             }
+                        }
 
-                            // Commit changes
-                            tc.Complete();
-                        }
-                        else
-                        {
-                            errorMessage = string.Format("Client package not found for {0} {1}.", searchEntity.ToString(), searchCriteria);
-                            return false;
-                        }
+                        // Commit changes
+                        tc.Complete();
                     }
-
-                    return result;
                 }
+                else
+                {
+                    errorMessage = string.Format("Client package not found for {0} {1}.", searchEntity.ToString(), searchCriteria);
+                    return false;
+                }
+
+                return result;
             }
             catch (Exception ex)
             {

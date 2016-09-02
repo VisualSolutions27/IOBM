@@ -424,9 +424,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                         _officeHelper = new MSOfficeHelper();
 
                     // Import the worksheet data
-                    sheetData = _officeHelper.ReadExcelIntoDataTable(SelectedDataSheet.WorkBookName, SelectedDataSheet.SheetName);
-                    string formula = "AmountEx + vatamt";
-                    int total = 0;
+                    sheetData = _officeHelper.ReadSheetDataIntoDataTable(SelectedDataSheet.WorkBookName, SelectedDataSheet.SheetName);
+                    //string formula = "AmountEx + vatamt";
+                    //int total = 0;
 
                     // This is to fake the progress bar for importing
                     for (int i = 1; i <= SelectedDataSheet.RowCount; i++)
@@ -436,8 +436,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                             DataImportProgress = i;
                             DataImportsPassed = i;
                             DataImportDescription = string.Format("Importing - {0} of {1}", DataImportProgress, SelectedDataSheet.RowCount);
-
-
                         });
                     }
 

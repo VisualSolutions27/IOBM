@@ -46,8 +46,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             get { return _selectedSimCard; }
             set
             {
+                SetProperty(ref _selectedSimCard, value);
+
                 // Prevent circullar action
-                if (value != null)
+                if (value != null && value.pkSimCardID > 0)
                 {
                     SelectedStatus = StatusCollection != null ? StatusCollection.Where(p => p.pkStatusID == value.fkStatusID).FirstOrDefault() : null;
                     SelectedCellNumber = value.CellNumber;
@@ -55,8 +57,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     SelectedPinNumber = value.PinNumber;
                     SelectedPUKNumber = value.PUKNumber;
                     SimCardState = value.IsActive;
-
-                    SetProperty(ref _selectedSimCard, value);
 
                     // Link the Simcard to its device on the device view
                     LinkSimCardToDevice();
@@ -423,15 +423,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns>True if can execute</returns>
         private bool CanExecuteAdd()
         {
-            bool result = false;
-
             // Validate if the logged-in user can administrate the company the client is linked to
-            result = _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false;
-
-            if (result)
-                result = !string.IsNullOrEmpty(SelectedCellNumber);
-
-            return result;
+            return MobileManagerEnvironment.ClientCompanyID > 0 && _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false;
         }
 
         /// <summary>
@@ -451,7 +444,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             bool result = false;
 
             // Validate if the logged-in user can administrate the company the client is linked to
-            result = MobileManagerEnvironment.ClientCompanyID == 0 || _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false;
+            result = MobileManagerEnvironment.ClientCompanyID > 0 && _securityHelper.IsUserInCompany(MobileManagerEnvironment.ClientCompanyID) ? true : false;
 
             if (result)
                 result = !string.IsNullOrEmpty(SelectedCellNumber) && !string.IsNullOrEmpty(SelectedCardNumber) && !string.IsNullOrEmpty(SelectedPinNumber) &&
@@ -465,8 +458,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void ExecuteSave()
         {
-            int selectedSimCardID = 0;
             bool result = false;
+            int selectedSimCardID = 0;
+
+            if (SelectedSimCard == null)
+                SelectedSimCard = new SimCard();
+
             SelectedSimCard.fkContractID = selectedSimCardID = _selectedContractID;
             SelectedSimCard.fkStatusID = SelectedStatus.pkStatusID;
             SelectedSimCard.Status = SelectedStatus;

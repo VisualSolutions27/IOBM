@@ -1,12 +1,16 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
+using Gijima.IOBM.Infrastructure.Helpers;
+using Gijima.IOBM.MobileManager.Common.Helpers;
 using Gijima.IOBM.MobileManager.Model.Data;
 using Prism.Events;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
+using System.Transactions;
 
 namespace Gijima.IOBM.MobileManager.Model.Models
 {
@@ -15,6 +19,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         #region Properties and Attributes
 
         private IEventAggregator _eventAggregator;
+        private AuditLogModel _activityLogger = null;
+        private DataActivityHelper _dataActivityHelper = null;
 
         #endregion
 
@@ -25,6 +31,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         public CompanyModel(IEventAggregator eventAggreagator)
         {
             _eventAggregator = eventAggreagator;
+            _activityLogger = new AuditLogModel(_eventAggregator);
+            _dataActivityHelper = new DataActivityHelper(_eventAggregator);
         }
 
         /// <summary>
@@ -84,6 +92,29 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                         companies = companies.Where(p => p.pkCompanyID > 0);
 
                     return new ObservableCollection<Company>(companies);
+                }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Find a company by company name from the database
+        /// </summary>
+        /// <param name="companyName">The company name to search for.</param>
+        /// <returns>Company</returns>
+        public Company ReadCompany(string companyName)
+        {
+            try
+            {
+                using (var db = MobileManagerEntities.GetContext())
+                {
+                    return ((DbQuery<Company>)(from company in db.Companies
+                                               select company)).Include("CompanyBillingLevels")
+                                                               .Include("CompanyBillingLevels.BillingLevel").FirstOrDefault();
                 }
             }
             catch (Exception ex)
@@ -156,6 +187,97 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             catch (Exception ex)
             {
                 _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Update an existing company entity in the database
+        /// </summary>
+        /// <param name="searchCriteria">The client search criteria to search for.</param>
+        /// <param name="updateColumn">The client entity property (column) to update.</param>
+        /// <param name="updateValue">The value to update client entity property (column) with.</param>
+        /// <param name="companyGroup">The company group the client is linked to.</param>
+        /// <param name="errorMessage">OUT The error message.</param>
+        /// <returns>True if successfull</returns>
+        public bool UpdateCompany(string searchCriteria, string updateColumn, object updateValue, CompanyGroup companyGroup, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+            Company existingCompany = null;
+            Company companyToUpdate = null;
+            bool result = false;
+
+            try
+            {
+                existingCompany = ReadCompany(searchCriteria);
+
+                if (existingCompany != null)
+                {
+                    using (TransactionScope tc = TransactionHelper.CreateTransactionScope())
+                    {
+                        using (var db = MobileManagerEntities.GetContext())
+                        {
+                            companyToUpdate = db.Companies.Where(p => p.pkCompanyID == existingCompany.pkCompanyID).FirstOrDefault();
+
+                            // Get the company table properties (Fields)
+                            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(Client));
+
+                            foreach (PropertyDescriptor property in properties)
+                            {
+                                // Find the data column (property) to update
+                                if (property.Name == updateColumn)
+                                {
+                                    // Update the property value based on the data type
+                                    if (property.PropertyType == typeof(DateTime))
+                                    {
+                                        property.SetValue(companyToUpdate, Convert.ToDateTime(updateValue));
+                                    }
+                                    else if (property.PropertyType == typeof(int))
+                                    {
+                                        property.SetValue(companyToUpdate, Convert.ToInt32(updateValue));
+                                    }
+                                    else if (property.PropertyType == typeof(decimal))
+                                    {
+                                        property.SetValue(companyToUpdate, Convert.ToDecimal(updateValue));
+                                    }
+                                    else if (property.PropertyType == typeof(bool))
+                                    {
+                                        property.SetValue(companyToUpdate, Convert.ToBoolean(updateValue));
+                                    }
+                                    else if (property.PropertyType == typeof(string))
+                                    {
+                                        property.SetValue(companyToUpdate, updateValue);
+                                    }
+                                    else
+                                    {
+                                        errorMessage = string.Format("Data type {0) not found for {1}.", property.PropertyType, updateColumn);
+                                        return false;
+                                    }
+
+                                    // Add the data activity log
+                                    result = _activityLogger.CreateDataChangeAudits<Company>(_dataActivityHelper.GetDataChangeActivities<Company>(existingCompany, companyToUpdate, companyToUpdate.pkCompanyID, db));
+
+                                    db.SaveChanges();
+                                }
+                            }
+                        }
+
+                        // Commit changes
+                        tc.Complete();
+                    }
+                }
+                else
+                {
+                    errorMessage = string.Format("Company {0} not found.", searchCriteria);
+                    return false;
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                errorMessage = string.Format("Error: {0} {1}.", ex.Message, ex.InnerException.Message);
                 return false;
             }
         }

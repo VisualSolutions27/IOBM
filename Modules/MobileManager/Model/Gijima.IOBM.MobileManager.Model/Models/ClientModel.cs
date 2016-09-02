@@ -242,30 +242,33 @@ namespace Gijima.IOBM.MobileManager.Model.Models
 
             try
             {
-                using (TransactionScope tc = TransactionHelper.CreateTransactionScope())
+                using (var db = MobileManagerEntities.GetContext())
                 {
-                    using (var db = MobileManagerEntities.GetContext())
+                    switch (searchEntity)
                     {
-                        switch (searchEntity)
-                        {
-                            case SearchEntity.ClientID:
-                                existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.ClientID).FirstOrDefault();
-                                break;
-                            case SearchEntity.PrimaryCellNumber:
-                                existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.PrimaryCellNumber).FirstOrDefault();
-                                break;
-                            case SearchEntity.EmployeeNumber:
-                                if (companyGroup == null)
-                                    existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.EmployeeNumber).FirstOrDefault();
-                                else
-                                    existingClient = new SearchEngineModel(_eventAggregator).SearchForClientByCompanyGroup(searchCriteria, SearchEntity.EmployeeNumber, companyGroup).FirstOrDefault();
-                                break;
-                            case SearchEntity.IDNumber:
-                                existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.IDNumber).FirstOrDefault();
-                                break;
-                        }
+                        case SearchEntity.ClientID:
+                            existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.ClientID).FirstOrDefault();
+                            break;
+                        case SearchEntity.PrimaryCellNumber:
+                            existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.PrimaryCellNumber).FirstOrDefault();
+                            break;
+                        case SearchEntity.EmployeeNumber:
+                            if (companyGroup == null)
+                                existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.EmployeeNumber).FirstOrDefault();
+                            else
+                                existingClient = new SearchEngineModel(_eventAggregator).SearchForClientByCompanyGroup(searchCriteria, SearchEntity.EmployeeNumber, companyGroup).FirstOrDefault();
+                            break;
+                        case SearchEntity.IDNumber:
+                            existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.IDNumber).FirstOrDefault();
+                            break;
+                    }
+                }
 
-                        if (existingClient != null)
+                if (existingClient != null)
+                {
+                    using (TransactionScope tc = TransactionHelper.CreateTransactionScope())
+                    {
+                        using (var db = MobileManagerEntities.GetContext())
                         {
                             clientToUpdate = db.Clients.Where(p => p.pkClientID == existingClient.pkClientID).FirstOrDefault();
 
@@ -305,24 +308,24 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                     }
 
                                     // Add the data activity log
-                                    result = _activityLogger.CreateDataChangeAudits<Client>(_dataActivityHelper.GetDataChangeActivities<Client>(existingClient, clientToUpdate, clientToUpdate.pkClientID, db));
+                                    result = _activityLogger.CreateDataChangeAudits<Client>(_dataActivityHelper.GetDataChangeActivities<Client>(existingClient, clientToUpdate, clientToUpdate.fkContractID, db));
 
                                     db.SaveChanges();
-
-                                    // Commit changes
-                                    tc.Complete();
                                 }
                             }
                         }
-                        else
-                        {
-                            errorMessage = string.Format("Client not found for {0} {1}.", searchEntity.ToString(), searchCriteria);
-                            return false;
-                        }
-                    }
 
-                    return result;
+                        // Commit changes
+                        tc.Complete();
+                    }
                 }
+                else
+                {
+                    errorMessage = string.Format("Client not found for {0} {1}.", searchEntity.ToString(), searchCriteria);
+                    return false;
+                }
+
+                return result;
             }
             catch (Exception ex)
             {

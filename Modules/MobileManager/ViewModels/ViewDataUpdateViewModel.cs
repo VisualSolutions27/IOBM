@@ -583,7 +583,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                         _officeHelper = new MSOfficeHelper();
 
                     // Update the worksheet data
-                    sheetData = _officeHelper.ReadExcelIntoDataTable(SelectedDataSheet.WorkBookName, SelectedDataSheet.SheetName);
+                    sheetData = _officeHelper.ReadSheetDataIntoDataTable(SelectedDataSheet.WorkBookName, SelectedDataSheet.SheetName);
 
                     // This is to fake the progress bar for importing
                     for (int i = 1; i <= SelectedDataSheet.RowCount; i++)
@@ -886,6 +886,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                                                                          updateValue,
                                                                                                          SelectedDestinationCompany,
                                                                                                          out errorMessage)); break;
+                        case DataBaseEntity.Company:
+                            result = await Task.Run(() => new CompanyModel(_eventAggregator).UpdateCompany(searchCriteria,
+                                                                                                           destinationColumn,
+                                                                                                           updateValue,
+                                                                                                           SelectedDestinationCompany,
+                                                                                                           out errorMessage)); break;
                         case DataBaseEntity.PackageSetup:
                             result = await Task.Run(() => new PackageSetupModel(_eventAggregator).UpdatePackageSetup(searchEntity,
                                                                                                                      searchCriteria,
