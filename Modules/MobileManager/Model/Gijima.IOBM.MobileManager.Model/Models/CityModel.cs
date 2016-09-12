@@ -46,14 +46,14 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     }
                     else
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0} city already exist.", city.CityName));
+                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The {0} city already exist.", city.CityName));
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }
@@ -82,7 +82,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return null;
             }
         }
@@ -103,7 +103,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     // Check to see if the city description already exist for another entity 
                     if (existingCity != null && existingCity.pkCityID != city.pkCityID)
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0} city already exist.", city.CityName));
+                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The {0} city already exist.", city.CityName));
                         return false;
                     }
                     else
@@ -121,7 +121,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }

@@ -361,14 +361,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 BillingProcessCollection = await Task.Run(() => _model.ReadBillingProcesses());
                 BillingProcessCount = BillingProcessCollection.Count;
-                BillinProcessDescription = string.Format("Executing Process - {0} of {1}", 0, BillingProcessCount);
 
                 // Read the process history
                 await ReadBillingProcessHistoryAsync();
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -386,6 +385,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 {
                     BillingProcessHistory currentProcessHistory = ProcessHistoryCollection.Where(p => p.ProcessCurrent).FirstOrDefault();
 
+                    BillingProcessProgress = currentProcessHistory.fkBillingProcessID;
+                    BillinProcessDescription = string.Format("Executing Process - {0} of {1}", BillingProcessProgress, BillingProcessCount);
+
                     // Lock all the completed processes
                     if (currentProcessHistory != null)
                         await Task.Run(() => SetCompletedBillingProcessesAsync(currentProcessHistory));
@@ -393,7 +395,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -411,7 +413,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -442,7 +444,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 

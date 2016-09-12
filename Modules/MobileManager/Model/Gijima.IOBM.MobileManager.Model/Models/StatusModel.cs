@@ -47,14 +47,14 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     }
                     else
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0} status already exist.", status.StatusDescription));
+                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The {0} status already exist.", status.StatusDescription));
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }
@@ -103,7 +103,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return null;
             }
         }
@@ -124,7 +124,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     // Check to see if the status description already exist for another entity 
                     if (existingStatus != null && existingStatus.pkStatusID != status.pkStatusID)
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0} status already exist.", status.StatusDescription));
+                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The {0} status already exist.", status.StatusDescription));
                         return false;
                     }
                     else
@@ -142,7 +142,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }

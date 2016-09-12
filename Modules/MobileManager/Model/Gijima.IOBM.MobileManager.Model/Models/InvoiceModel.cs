@@ -59,14 +59,14 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     }
                     else
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish("The invoice already exist.");
+                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish("The invoice already exist.");
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }
@@ -96,7 +96,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }
@@ -135,7 +135,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return null;
             }
         }
@@ -162,7 +162,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return null;
             }
         }
@@ -191,7 +191,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return null;
             }
         }
@@ -251,7 +251,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }
@@ -293,7 +293,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -319,7 +319,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return null;
             }
         }

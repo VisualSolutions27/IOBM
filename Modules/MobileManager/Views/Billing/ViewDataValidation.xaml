@@ -37,18 +37,34 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Row="1" Grid.Column="0" Grid.RowSpan="10">
-            <Button x:Name="ButtonStart" ToolTip="Start the billing data validation process." TabIndex="1" Margin="0,0,0,10" 
-                Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" Command="{Binding StartValidationCommand}">
-                <StackPanel Orientation="Horizontal">
-                    <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/062.png" Margin="0,1,10,1"/>
-                    <TextBlock Text="Start" VerticalAlignment="Center"/>
-                </StackPanel>
-            </Button>
+            <StackPanel Orientation="Horizontal">
+                <Button x:Name="ButtonStart" ToolTip="Start the billing data validation process." TabIndex="1" Margin="0,0,3,10" 
+                    Style="{StaticResource UXImageTextButtonStyle}" Width="80" Command="{Binding StartValidationCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/062.png" Margin="0,1,10,1"/>
+                        <TextBlock Text="Start" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+                <Button x:Name="ButtonStop" ToolTip="Stop the billing data validation process." TabIndex="1" Margin="2,0,0,10" 
+                    Style="{StaticResource UXImageTextButtonStyle}" Width="80" Command="{Binding StopValidationCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/stop_32.ico" Margin="0,1,10,1"/>
+                        <TextBlock Text="Stop" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+            </StackPanel>
             <TextBox BorderThickness="0" FontStyle="Italic" FontFamily="Arial" FontSize="14" FontWeight="Bold" TextWrapping="Wrap"
                 Text="Please start the billing data validation process to validate all the data rules configured for each data validation group.">
             </TextBox>
         </StackPanel>
         <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="10" VerticalAlignment="Bottom">
+            <Button x:Name="ButtonExport" ToolTip="Export the exceptions to Excel." TabIndex="3" Margin="0,0,0,10" 
+                Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" Command="{Binding ExportCommand}">
+                <StackPanel Orientation="Horizontal" Width="118">
+                    <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/Excel-icon.png" Margin="0,1,10,1"/>
+                    <TextBlock Text="Export to Excel" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
             <Button x:Name="ButtonApplyRule" ToolTip="Apply the data rule to fix the exceptions." TabIndex="3" Margin="0,0,0,10" 
                 Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" Command="{Binding ApplyRuleFixCommand}">
                 <StackPanel Orientation="Horizontal" Width="118">
@@ -120,7 +136,10 @@
                 Text="{Binding ValidationRuleEntitiesFailed, UpdateSourceTrigger=PropertyChanged}"/>
             <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Height="1" VerticalAlignment="Bottom" Background="Gray" Margin="0,5,0,0"></Border>
         </Grid>
-        <TextBlock Grid.Row="8" Grid.Column="2" Text="Data Validation Exceptions" Style="{StaticResource UXLabelTextStyle}" VerticalAlignment="Bottom" ></TextBlock>
+        <StackPanel Grid.Row="8" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Bottom">
+            <CheckBox Margin="1,0,5,1"/>
+            <TextBlock Text="Data Validation Exceptions" Style="{StaticResource UXLabelTextStyle}" VerticalAlignment="Bottom" ></TextBlock>
+        </StackPanel>
         <xctk:CheckListBox x:Name="ListBoxExceptions" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="3" Background="WhiteSmoke" TabIndex="2" ValueMemberPath="Message"
             ItemsSource="{Binding ValidationErrorCollection, UpdateSourceTrigger=PropertyChanged}" SelectedValue="{Binding SelectedExceptions, UpdateSourceTrigger=PropertyChanged}">
             <xctk:CheckListBox.ItemTemplate>

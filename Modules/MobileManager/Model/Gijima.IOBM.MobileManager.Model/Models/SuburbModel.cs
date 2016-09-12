@@ -46,14 +46,14 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     }
                     else
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0} suburb already exist.", suburb.SuburbName));
+                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The {0} suburb already exist.", suburb.SuburbName));
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }
@@ -83,7 +83,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return null;
             }
         }
@@ -104,7 +104,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     // Check to see if the suburb description already exist for another entity 
                     if (existingSuburb != null && existingSuburb.pkSuburbID != suburb.pkSuburbID)
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0} suburb already exist.", suburb.SuburbName));
+                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The {0} suburb already exist.", suburb.SuburbName));
                         return false;
                     }
                     else
@@ -122,7 +122,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }

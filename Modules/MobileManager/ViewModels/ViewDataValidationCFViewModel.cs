@@ -25,7 +25,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
         private DataValidationProcess _dataValidationProcess = DataValidationProcess.SingleSystemEntity;
-        private DataValidationEntityName _dataValidationEntity = DataValidationEntityName.None;
+        private DataValidationGroupName _dataValidationGroup = DataValidationGroupName.None;
 
         #region Commands
 
@@ -49,33 +49,33 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
                 if (value != null && value.enDataValidationEntity > 0)
                 {
-                    switch (_dataValidationEntity)
+                    switch (_dataValidationGroup)
                     {
-                        case DataValidationEntityName.Client:
-                            DataItemDisplayName = "PrimaryCellNumber";
-                            foreach (Client entity in DataItemCollection)
+                        case DataValidationGroupName.Client:
+                            DataEntityDisplayName = "PrimaryCellNumber";
+                            foreach (Client entity in DataEntityCollection)
                             {
                                 if (entity.pkClientID == value.DataValidationEntityID)
                                 {
-                                    SelectedDataItem = entity;
+                                    SelectedDataEntity = entity;
                                     break;
                                 }
                             }
                             break;
-                        case DataValidationEntityName.Company:
-                            DataItemDisplayName = "CompanyName";
-                            foreach (Company entity in DataItemCollection)
+                        case DataValidationGroupName.CompanyClient:
+                        case DataValidationGroupName.Company:
+                            DataEntityDisplayName = "CompanyName";
+                            foreach (Company entity in DataEntityCollection)
                             {
                                 if (entity.pkCompanyID == value.DataValidationEntityID)
                                 {
-                                    SelectedDataItem = entity;
+                                    SelectedDataEntity = entity;
                                     break;
                                 }
                             }
                             break;
                     }
 
-                    DataItemLabel = SelectedEntity.ToString();
                     SelectedDataProperty = DataPropertyCollection != null ? DataPropertyCollection.First(p => p.pkDataValidationPropertyID == value.fkDataValidationPropertyID) :
                                            DataPropertyCollection != null ? DataPropertyCollection.First(p => p.pkDataValidationPropertyID == 0) : null;
 
@@ -111,24 +111,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private DataValidationRule _selectedValidationRule = new DataValidationRule();
 
         /// <summary>
-        /// The data item display name based on the selected entity
+        /// The data entity display name based on the selected group
         /// </summary>
-        public string DataItemDisplayName
+        public string DataEntityDisplayName
         {
-            get { return _dataItemDisplayName; }
-            set { SetProperty(ref _dataItemDisplayName, value); }
+            get { return _dataEntityDisplayName; }
+            set { SetProperty(ref _dataEntityDisplayName, value); }
         }
-        private string _dataItemDisplayName = string.Empty;
-
-        /// <summary>
-        /// The data item label based on the selected entity
-        /// </summary>
-        public string DataItemLabel
-        {
-            get { return _dataItemLabel; }
-            set { SetProperty(ref _dataItemLabel, value); }
-        }
-        private string _dataItemLabel = "Data item:";
+        private string _dataEntityDisplayName = string.Empty;
 
         /// <summary>
         /// The collection of validation rules from the database
@@ -154,24 +144,24 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private ObservableCollection<string> _processCollection = null;
 
         /// <summary>
-        /// The collection of validation entities from the DataValidationEntity enum
+        /// The collection of validation group entities from the DataValidationGroupName enum
         /// </summary>
-        public ObservableCollection<string> EntityCollection
+        public ObservableCollection<string> EntityGroupCollection
         {
-            get { return _entityCollection; }
-            set { SetProperty(ref _entityCollection, value); }
+            get { return _entityGroupCollection; }
+            set { SetProperty(ref _entityGroupCollection, value); }
         }
-        private ObservableCollection<string> _entityCollection = null;
+        private ObservableCollection<string> _entityGroupCollection = null;
 
         /// <summary>
-        /// The collection of data items for the selected entity from the database
+        /// The collection of data entities for the selected group from the database
         /// </summary>
-        public ObservableCollection<object> DataItemCollection
+        public ObservableCollection<object> DataEntityCollection
         {
-            get { return _dataItemCollection; }
-            set { SetProperty(ref _dataItemCollection, value); } 
+            get { return _dataEntityCollection; }
+            set { SetProperty(ref _dataEntityCollection, value); } 
         }
-        private ObservableCollection<object> _dataItemCollection = null;
+        private ObservableCollection<object> _dataEntityCollection = null;
 
         /// <summary>
         /// The collection of company entities from the database
@@ -246,19 +236,19 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private string _selectedProcess = EnumHelper.GetDescriptionFromEnum(DataValidationProcess.SingleSystemEntity);
 
         /// <summary>
-        /// The selected selected validation entity
+        /// The selected validation entity group
         /// </summary>
-        public string SelectedEntity
+        public string SelectedEntityGroup
         {
-            get { return _selectedEntity; }
+            get { return _selectedEntityGroup; }
             set
             {
-                SetProperty(ref _selectedEntity, value);
-                _dataValidationEntity = EnumHelper.GetEnumFromDescription<DataValidationEntityName>(value);
+                SetProperty(ref _selectedEntityGroup, value);
+                _dataValidationGroup = EnumHelper.GetEnumFromDescription<DataValidationGroupName>(value);
 
-                if (_dataValidationEntity != DataValidationEntityName.None)
+                if (_dataValidationGroup != DataValidationGroupName.None)
                 {
-                    Task.Run(() => ReadEntityDataAsync());
+                    Task.Run(() => ReadDataEntitiesAsync());
                     Task.Run(() => ReadEnityPropertiesAsync());
                     Task.Run(() => ReadDataValidationRulesAsync());
                 }
@@ -268,17 +258,17 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 }
             }
         }
-        private string _selectedEntity = string.Empty;
+        private string _selectedEntityGroup = string.Empty;
 
         /// <summary>
-        /// The selected validation entity data item
+        /// The selected validation data entity
         /// </summary>
-        public object SelectedDataItem
+        public object SelectedDataEntity
         {
-            get { return _selectedDataItem; }
-            set { SetProperty(ref _selectedDataItem, value); }
+            get { return _selectedDataEntity; }
+            set { SetProperty(ref _selectedDataEntity, value); }
         }
-        private object _selectedDataItem = null;
+        private object _selectedDataEntity = null;
 
         /// <summary>
         /// The selected data validation property
@@ -321,22 +311,22 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Set the required field border colour
         /// </summary>
-        public Brush ValidEntity
+        public Brush ValidEntityGroup
         {
-            get { return _validEntity; }
-            set { SetProperty(ref _validEntity, value); }
+            get { return _validEntityGroup; }
+            set { SetProperty(ref _validEntityGroup, value); }
         }
-        private Brush _validEntity = Brushes.Red;
+        private Brush _validEntityGroup = Brushes.Red;
 
         /// <summary>
         /// Set the required field border colour
         /// </summary>
-        public Brush ValidDataItem
+        public Brush ValidDataEntity
         {
-            get { return _validDataItem; }
-            set { SetProperty(ref _validDataItem, value); }
+            get { return _validDataEntity; }
+            set { SetProperty(ref _validDataEntity, value); }
         }
-        private Brush _validDataItem = Brushes.Red;
+        private Brush _validDataEntity = Brushes.Red;
 
         /// <summary>
         /// Set the required field border colour
@@ -381,22 +371,23 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 string result = string.Empty;
                 switch (columnName)
                 {
-                    case "SelectedEntity":
-                        ValidEntity = string.IsNullOrEmpty(SelectedEntity) || SelectedEntity == "-- Please Select --" ? Brushes.Red : Brushes.Silver; break;
-                    case "SelectedDataItem":
-                        if (SelectedEntity != null && SelectedEntity != "-- Please Select --")
-                            switch (EnumHelper.GetEnumFromDescription<DataValidationEntityName>(SelectedEntity))
+                    case "SelectedEntityGroup":
+                        ValidEntityGroup = string.IsNullOrEmpty(SelectedEntityGroup) || SelectedEntityGroup == "-- Please Select --" ? Brushes.Red : Brushes.Silver; break;
+                    case "SelectedDataEntity":
+                        if (SelectedEntityGroup != null && SelectedEntityGroup != "-- Please Select --")
+                            switch (EnumHelper.GetEnumFromDescription<DataValidationGroupName>(SelectedEntityGroup))
                             {
-                                case DataValidationEntityName.Client:
-                                    ValidDataItem = SelectedDataItem == null || ((Client)SelectedDataItem).pkClientID < 1 ? Brushes.Red : Brushes.Silver; break;
-                                case DataValidationEntityName.Company:
-                                    ValidDataItem = SelectedDataItem == null || ((Company)SelectedDataItem).pkCompanyID < 1 ? Brushes.Red : Brushes.Silver; break;
+                                case DataValidationGroupName.Client:
+                                    ValidDataEntity = SelectedDataEntity != null && ((Client)SelectedDataEntity).pkClientID > 0 ? Brushes.Silver : Brushes.Red; break;
+                                case DataValidationGroupName.CompanyClient:
+                                case DataValidationGroupName.Company:
+                                    ValidDataEntity = SelectedDataEntity != null && ((Company)SelectedDataEntity).pkCompanyID > 0 ? Brushes.Silver : Brushes.Red; break;
                             }
                         else
-                            ValidDataItem = Brushes.Red;
+                            ValidDataEntity = Brushes.Red;
                         break;
                     case "SelectedDataProperty":
-                        ValidDataProperty = SelectedDataProperty == null || SelectedDataProperty.pkDataValidationPropertyID < 1 ? Brushes.Red : Brushes.Silver; break;
+                        ValidDataProperty = SelectedDataProperty != null && SelectedDataProperty.pkDataValidationPropertyID > 0 ? Brushes.Silver : Brushes.Red; break;
                     case "SelectedOperator":
                         ValidOperator = string.IsNullOrEmpty(SelectedOperator) ? Brushes.Red : Brushes.Silver; break;
                 }
@@ -431,16 +422,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             InitialiseViewControls();
 
             // Initialise the view commands
-            CancelCommand = new DelegateCommand(ExecuteCancel, CanExecuteCancel).ObservesProperty(() => SelectedEntity);
+            CancelCommand = new DelegateCommand(ExecuteCancel, CanExecuteCancel).ObservesProperty(() => SelectedEntityGroup);
             AddCommand = new DelegateCommand(ExecuteAdd, CanExecuteAdd);
-            SaveCommand = new DelegateCommand(ExecuteSave, CanExecuteSave).ObservesProperty(() => SelectedEntity)
-                                                                          .ObservesProperty(() => SelectedDataItem)
+            SaveCommand = new DelegateCommand(ExecuteSave, CanExecuteSave).ObservesProperty(() => SelectedEntityGroup)
+                                                                          .ObservesProperty(() => SelectedDataEntity)
                                                                           .ObservesProperty(() => ValidDataProperty)
                                                                           .ObservesProperty(() => ValidOperator);
 
             // Load the view data
             ReadBillingProcesses();
-            ReadDataValidationEntities();
+            ReadDataValidationGroups();
         }
 
         /// <summary>
@@ -449,7 +440,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private void InitialiseViewControls()
         {
             ValidationRuleCollection = null;
-            SelectedDataItem = null;
+            SelectedDataEntity = null;
             SelectedDataProperty = null;
             SelectedOperator = null;
             SelectedValidationValue = string.Empty;
@@ -462,11 +453,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             try
             {
-                ValidationRuleCollection = await Task.Run(() => _model.ReadDataValidationRules(EnumHelper.GetEnumFromDescription<DataValidationEntityName>(SelectedEntity)));
+                ValidationRuleCollection = await Task.Run(() => _model.ReadDataValidationRules(EnumHelper.GetEnumFromDescription<DataValidationGroupName>(SelectedEntityGroup)));
+                SelectedValidationRule = null;
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -489,55 +481,58 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
         /// <summary>
-        /// Load all the validation rule groups from the database
+        /// Load all the validation entity groups from the DataValidationGroupName enum
         /// </summary>
-        private void ReadDataValidationEntities()
+        private void ReadDataValidationGroups()
         {
             try
             {
-               EntityCollection = new ObservableCollection<string>();
+               EntityGroupCollection = new ObservableCollection<string>();
 
-                foreach (DataValidationEntityName source in Enum.GetValues(typeof(DataValidationEntityName)))
+                foreach (DataValidationGroupName source in Enum.GetValues(typeof(DataValidationGroupName)))
                 {
-                    EntityCollection.Add(EnumHelper.GetDescriptionFromEnum(source));
+                    EntityGroupCollection.Add(EnumHelper.GetDescriptionFromEnum(source));
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
         /// <summary>
-        /// Load all the lookup data for the selected entity from the database
+        /// Load all the data entities for the selected group from the database
         /// </summary>
-        private void ReadEntityDataAsync()
+        private void ReadDataEntitiesAsync()
         {
             try
             {
                 ClientCollection = null;
                 CompanyCollection = null;
 
-                switch (_dataValidationEntity)
+                switch (_dataValidationGroup)
                 {
-                    case DataValidationEntityName.Client:
-                        DataItemDisplayName = "PrimaryCellNumber";
-                        DataItemCollection = new ObservableCollection<object>(new ClientModel(_eventAggregator).ReadClients(true));
+                    case DataValidationGroupName.Client:
+                        DataEntityDisplayName = "PrimaryCellNumber";
+                        DataEntityCollection = new ObservableCollection<object>(new ClientModel(_eventAggregator).ReadClients(true));
                         break;
-                    case DataValidationEntityName.Company:
-                        DataItemDisplayName = "CompanyName";
-                        DataItemCollection = new ObservableCollection<object>(new CompanyModel(_eventAggregator).ReadCompanies(true));
+                    case DataValidationGroupName.CompanyClient:
+                    case DataValidationGroupName.Company:
+                        DataEntityDisplayName = "CompanyName";
+                        DataEntityCollection = new ObservableCollection<object>(new CompanyModel(_eventAggregator).ReadCompanies(true, true));
                         break;
                 }
+
+                SelectedDataEntity = null;
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -550,11 +545,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 OperatorCollection = null;
                 DataPropertyCollection = new ObservableCollection<DataValidationProperty>(new DataValidationPropertyModel(_eventAggregator).ReadDataValidationProperties(true)
-                                                                                                                                           .Where(p => p.enDataValidationEntity == _dataValidationEntity.Value()));
+                                                                                                                                           .Where(p => p.enDataValidationEntity == _dataValidationGroup.Value()));
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -592,7 +587,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -606,7 +601,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns></returns>
         private bool CanExecuteCancel()
         {
-            return SelectedEntity != "-- Please Select --";
+            return SelectedEntityGroup != "-- Please Select --";
         }
 
         /// <summary>
@@ -614,7 +609,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void ExecuteCancel()
         {
-            SelectedEntity = "-- Please Select --";
+            SelectedEntityGroup = "-- Please Select --";
         }
 
         /// <summary>
@@ -641,7 +636,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns></returns>
         private bool CanExecuteSave()
         {
-            return ValidEntity == Brushes.Silver && ValidDataItem == Brushes.Silver && ValidDataProperty == Brushes.Silver && ValidOperator == Brushes.Silver;
+            return ValidEntityGroup == Brushes.Silver && ValidDataEntity == Brushes.Silver && ValidDataProperty == Brushes.Silver && ValidOperator == Brushes.Silver;
         }
 
         /// <summary>
@@ -655,17 +650,18 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             if (SelectedValidationRule == null)
                 SelectedValidationRule = new DataValidationRule();
 
-            SelectedValidationRule.enDataValidationEntity = _dataValidationEntity.Value();
+            SelectedValidationRule.enDataValidationEntity = _dataValidationGroup.Value();
             SelectedValidationRule.fkDataValidationPropertyID = SelectedDataProperty.pkDataValidationPropertyID;
             SelectedValidationRule.DataValidationValue = SelectedValidationValue.ToUpper();
 
-            switch (_dataValidationEntity)
+            switch (_dataValidationGroup)
             {
-                case DataValidationEntityName.Client:
-                    SelectedValidationRule.DataValidationEntityID = ((Client)SelectedDataItem).pkClientID;
+                case DataValidationGroupName.Client:
+                    SelectedValidationRule.DataValidationEntityID = ((Client)SelectedDataEntity).pkClientID;
                     break;
-                case DataValidationEntityName.Company:
-                    SelectedValidationRule.DataValidationEntityID = ((Company)SelectedDataItem).pkCompanyID;
+                case DataValidationGroupName.CompanyClient:
+                case DataValidationGroupName.Company:
+                    SelectedValidationRule.DataValidationEntityID = ((Company)SelectedDataEntity).pkCompanyID;
                     break;
             }
 

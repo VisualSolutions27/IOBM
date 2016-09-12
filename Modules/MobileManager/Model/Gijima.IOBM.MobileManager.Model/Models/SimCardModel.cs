@@ -42,7 +42,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             {
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    if (!db.SimCards.Any(p => p.PUKNumber == simCard.PUKNumber))
+                    if (!db.SimCards.Any(p => p.CellNumber == simCard.CellNumber && p.PUKNumber == simCard.PUKNumber))
                     {
                         db.SimCards.Add(simCard);
                         db.SaveChanges();
@@ -50,14 +50,14 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     }
                     else
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0}, {1} sim card already exist.", simCard.CellNumber, simCard.PUKNumber));
+                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The {0}, {1} sim card already exist.", simCard.CellNumber, simCard.PUKNumber));
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }
@@ -86,7 +86,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return null;
             }
         }
@@ -110,7 +110,9 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                                    select simCard)).Include("Devices")
                                                                       .Include("Devices.DeviceMake")
                                                                       .Include("Devices.DeviceModel")
-                                                                      .Include("Status").ToList();
+                                                                      .Include("Status")
+                                                                      .OrderByDescending(p => p.IsActive)
+                                                                      .ThenBy(p => p.Status.StatusDescription).ToList();
 
                     if (activeOnly)
                         simCards = simCards.Where(p => p.IsActive);
@@ -120,7 +122,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return null;
             }
         }
@@ -139,11 +141,11 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     SimCard existingSimCard = db.SimCards.Where(p => p.pkSimCardID == simCard.pkSimCardID).FirstOrDefault();
 
                     // Check to see if the sim card already exist for another entity 
-                    if (existingSimCard != null && existingSimCard.pkSimCardID != simCard.pkSimCardID && 
-                        (existingSimCard.PUKNumber == simCard.PUKNumber || existingSimCard.CardNumber == simCard.CardNumber ||
-                         existingSimCard.CellNumber == simCard.CellNumber))
+                    if (existingSimCard != null && existingSimCard.pkSimCardID != simCard.pkSimCardID &&
+                        existingSimCard.CellNumber == simCard.CellNumber &&
+                        existingSimCard.PUKNumber == simCard.PUKNumber)
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0}, {1} sim card already exist.", simCard.CellNumber, simCard.PUKNumber));
+                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The {0}, {1} sim card already exist.", simCard.CellNumber, simCard.PUKNumber));
                         return false;
                     }
                     else if(existingSimCard != null)
@@ -169,7 +171,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }

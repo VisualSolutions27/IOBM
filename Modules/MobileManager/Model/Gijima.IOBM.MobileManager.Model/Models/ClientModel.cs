@@ -70,7 +70,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                         }
                         else
                         {
-                            _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0} client already exist.", client.ClientName));
+                            //_eventAggregator.GetEvent</*ApplicationMessageEvent*/>().Publish(string.Format("The {0} client already exist.", client.ClientName));
                             return false;
                         }
                     }
@@ -78,7 +78,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }
@@ -105,7 +105,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return null;
             }
         }
@@ -132,7 +132,38 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Read all or active only clients linked to the specified company from the database
+        /// </summary>
+        /// <param name="companyID">The company ID the client is linked to.</param>
+        /// <param name="activeOnly">Flag to load all or active only entities.</param>
+        /// <returns>Collection of Clients</returns>
+        public ObservableCollection<Client> ReadClientsForCompany(int companyID, bool activeOnly)
+        {
+            try
+            {
+                IEnumerable<Client> clients = null;
+
+                using (var db = MobileManagerEntities.GetContext())
+                {
+                    clients = ((DbQuery<Client>)(from client in db.Clients
+                                                 where client.fkCompanyID == companyID
+                                                 select client)).OrderBy(p => p.ClientName).ToList();
+
+                    if (activeOnly)
+                        clients = clients.Where(p => p.IsActive);
+
+                    return new ObservableCollection<Client>(clients);
+                }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return null;
             }
         }
@@ -148,12 +179,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             {
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    return db.Clients.Count(p => p.fkCompanyID == companyID);
+                    return db.Clients.Count(p => p.fkCompanyID == companyID && p.IsActive);
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return 0;
             }
         }
@@ -178,7 +209,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                         // Check to see if the client name already exist for another entity 
                         if (existingClient != null && existingClient.pkClientID != client.pkClientID)
                         {
-                            _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0} client already exist.", client.ClientName));
+                            //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The {0} client already exist.", client.ClientName));
                             result = false;
                         }
                         else
@@ -218,7 +249,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }
@@ -329,7 +360,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 errorMessage = string.Format("Error: {0} {1}.", ex.Message, ex.InnerException.Message);
                 return false;
             }

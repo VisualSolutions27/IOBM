@@ -217,27 +217,29 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     }
 
     /// <summary>
-    /// The <see cref="DataValidationEntityName"/> enumeration a list of 
+    /// The <see cref="DataValidationGroupName"/> enumeration a list of 
     /// data entities to validate on.
     /// </summary>
-    public enum DataValidationEntityName
+    public enum DataValidationGroupName
     {
         [Description("-- Please Select --")]
         None = 0,
         [Description("Client Data")]
         Client = 1,
+        [Description("Company Client Data")]
+        CompanyClient = 2,
+        [Description("Package Client Data")]
+        PackageClient = 3,
         [Description("Company Data")]
-        Company = 2,
-        [Description("Contract Data")]
-        Contract = 3,
+        Company = 4,
         [Description("Package Data")]
-        Package = 4,
+        Package = 5,
         [Description("Device Data")]
-        Device = 5,
+        Device = 6,
         [Description("Simcard Data")]
-        SimCard = 6,
+        SimCard = 7,
         [Description("Status Data")]
-        Status = 7
+        Status = 8
     }
 
     /// <summary>
@@ -254,7 +256,7 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         EmployeeNumber = 2,
         [Description("Client Name")]
         ClientName = 3,
-        [Description("Clent Land Line")]
+        [Description("Client Land Line")]
         LandLine = 4,
         [Description("Client ID Number")]
         IDNumber = 5,
@@ -278,7 +280,7 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         IsSplitBilling = 14,
         [Description("Client Voice Allowance")]
         VoiceAllowance = 15,
-        [Description("Clent SP Limit")]
+        [Description("Client SP Limit")]
         SPLimit = 16,
         [Description("Company Name")]
         CompanyName = 17,
@@ -427,7 +429,7 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         {
             return Convert.ToInt16(type);
         }
-        public static short Value(this DataValidationEntityName type)
+        public static short Value(this DataValidationGroupName type)
         {
             return Convert.ToInt16(type);
         }

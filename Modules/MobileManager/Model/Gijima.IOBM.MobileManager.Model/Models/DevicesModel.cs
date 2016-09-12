@@ -52,14 +52,14 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     }
                     else
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0}, {1} device already exist.", device.DeviceMake.MakeDescription, device.DeviceModel.ModelDescription));
+                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The {0}, {1} device already exist.", device.DeviceMake.MakeDescription, device.DeviceModel.ModelDescription));
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }
@@ -88,7 +88,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return null;
             }
         }
@@ -113,7 +113,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                                                 .Include("DeviceModel")
                                                                 .Include("SimCard")
                                                                 .Include("Status")
-                                                                .OrderBy(p => p.DeviceMake.MakeDescription).ToList();
+                                                                .OrderByDescending(p => p.IsActive)
+                                                                .ThenBy(p => p.Status.StatusDescription).ToList();
 
                     if (activeOnly)
                         devices = devices.Where(p => p.IsActive);
@@ -123,7 +124,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return null;
             }
         }
@@ -145,7 +146,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     if (existingDevice != null && existingDevice.pkDeviceID != device.pkDeviceID && 
                         existingDevice.fkDeviceMakeID == device.fkDeviceMakeID && existingDevice.fkDeviceModelID == device.fkDeviceModelID)
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The {0}, {1} device already exist.", device.DeviceMake.MakeDescription, device.DeviceModel.ModelDescription));
+                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The {0}, {1} device already exist.", device.DeviceMake.MakeDescription, device.DeviceModel.ModelDescription));
                         return false;
                     }
                     else if (existingDevice != null)
@@ -174,7 +175,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }

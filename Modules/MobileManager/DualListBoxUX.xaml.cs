@@ -128,7 +128,7 @@ namespace Gijima.IOBM.MobileManager
 
 		#region Public Events
 
-		//public event EventHandler<MessageEventArgs> Feedback;
+		//public event EventHandler<ApplicationMessageEventArgs> Feedback;
 
 		#endregion
 

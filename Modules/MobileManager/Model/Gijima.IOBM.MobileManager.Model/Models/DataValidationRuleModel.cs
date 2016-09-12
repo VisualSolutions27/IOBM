@@ -53,14 +53,14 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     }
                     else
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish("The data validation rule already exist.");
+                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish("The data validation rule already exist.");
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }
@@ -70,7 +70,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// </summary>
         /// <param name="validationEntity">The data validation entity linked to the rules.</param>
         /// <returns>Collection of DataValidationRules</returns>
-        public ObservableCollection<DataValidationRule> ReadDataValidationRules(DataValidationEntityName validationEntity)
+        public ObservableCollection<DataValidationRule> ReadDataValidationRules(DataValidationGroupName validationEntity)
         {
             try
             {
@@ -82,7 +82,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 {
                     switch (validationEntity)
                     {
-                        case DataValidationEntityName.Client:
+                        case DataValidationGroupName.Client:
                             rules = (from validationRule in db.DataValidationRules
                                      join validationProperty in db.DataValidationProperties
                                      on validationRule.fkDataValidationPropertyID equals validationProperty.pkDataValidationPropertyID
@@ -105,7 +105,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                          ModifiedDate = validationRule.ModifiedDate
                                      }).ToList();
                             break;
-                        case DataValidationEntityName.Company:
+                        case DataValidationGroupName.CompanyClient:
                             rules = (from validationRule in db.DataValidationRules
                                      join validationProperty in db.DataValidationProperties
                                      on validationRule.fkDataValidationPropertyID equals validationProperty.pkDataValidationPropertyID
@@ -137,7 +137,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                             pkDataValidationRuleID = rule.pkDataValidationRuleID,
                             enValidationProcess = rule.enValidationProcess,
                             enDataValidationEntity = rule.enDataValidationEntity,
-                            EntityDescription = EnumHelper.GetDescriptionFromEnum((DataValidationEntityName)rule.enDataValidationEntity).ToString(),
+                            EntityDescription = EnumHelper.GetDescriptionFromEnum((DataValidationGroupName)rule.enDataValidationEntity).ToString(),
                             DataValidationEntityID = rule.DataValidationEntityID,
                             DataDescription = rule.DataDescription,
                             fkDataValidationPropertyID = rule.fkDataValidationPropertyID,
@@ -153,12 +153,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                         });
                     }
 
-                    return new ObservableCollection<DataValidationRule>(validationRules);
+                    return new ObservableCollection<DataValidationRule>(validationRules.OrderBy(p => p.DataDescription).ThenBy(p => p.EntityDescription));
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return null;
             }
         }
@@ -179,7 +179,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     // Check to see if the validation rule name already exist for another entity 
                     if (existingValidationRule != null && existingValidationRule.pkDataValidationRuleID != validationRule.pkDataValidationRuleID)
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish("The validationRule already exist.");
+                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish("The validationRule already exist.");
                         return false;
                     }
                     else
@@ -202,11 +202,11 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }
-       
+
         /// <summary>
         /// Validate the data based on the specified data validation rule
         /// </summary>
@@ -216,21 +216,22 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         {
             try
             {
-                switch (((DataValidationEntityName)validationRule.enDataValidationEntity))
+                switch (((DataValidationGroupName)validationRule.enDataValidationEntity))
                 {
-                    case DataValidationEntityName.Client:
+                    case DataValidationGroupName.Client:
                         break;
-                    case DataValidationEntityName.Company:
-                        return ValidateCompanyData(validationRule);
+                    case DataValidationGroupName.CompanyClient:
+                        return ValidateCompanyClientData(validationRule);
                 }
                 return true;
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }
+
         /// <summary>
         /// Update the relevant enetity based on the validation result info
         /// </summary>
@@ -251,9 +252,9 @@ namespace Gijima.IOBM.MobileManager.Model.Models
 
                     if (rule != null)
                     {
-                        switch ((DataValidationEntityName)validationExceptionInfo.enDataValidationEntity)
+                        switch ((DataValidationGroupName)validationExceptionInfo.enDataValidationEntity)
                         {
-                            case DataValidationEntityName.Client:
+                            case DataValidationGroupName.Client:
                                 result = new ClientModel(_eventAggregator).UpdateClient(SearchEntity.ClientID, 
                                                                                         validationExceptionInfo.DataValidationEntityID.ToString(),
                                                                                         ((DataValidationPropertyName)rule.DataValidationProperty.enDataValidationProperty).ToString(),
@@ -307,7 +308,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }
@@ -317,10 +318,11 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// </summary>
         /// <param name="validationRule">The validation rule entity to update.</param>
         /// <returns>True if successfull</returns>
-        private bool ValidateCompanyData(DataValidationRule validationRule)
+        private bool ValidateCompanyClientData(DataValidationRule validationRule)
         {
             try
             {
+                DataValidationException validationResult = null;
                 int entityID = 0;
                 string entityName = string.Empty;
                 string entityValue = string.Empty;
@@ -357,10 +359,10 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                 {
                                     entityID = client.pkClientID;
                                     entityName = string.Format("{0} ({1})", client.ClientName, client.PrimaryCellNumber);
-                                    entityValue = db.Entry(client).Property(validationRule.PropertyName).CurrentValue != null ? 
+                                    entityValue = db.Entry(client).Property(validationRule.PropertyName).CurrentValue != null ?
                                                   db.Entry(client).Property(validationRule.PropertyName).CurrentValue.ToString() : string.Empty;
 
-                                    switch (((DataTypeName)validationRule.DataValidationProperty.enDataType))
+                                    switch (EnumHelper.GetEnumFromDescription<DataTypeName>(validationRule.DataTypeDescription))
                                     {
                                         case DataTypeName.String:
                                             ruleValue = string.Format("{0} {1} {2}", validationRule.PropertyName.ToUpper(),
@@ -414,31 +416,38 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                     });
 
                                     // Update the validation result values
+                                    validationResult = new DataValidationException();
                                     if (result)
-                                        _eventAggregator.GetEvent<DataValiationResultEvent>().Publish(new DataValidationException()
+                                    {
+                                        validationResult = new DataValidationException()
                                         {
                                             fkBillingProcessID = BillingExecutionState.DataValidation.Value(),
                                             fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID,
                                             BillingPeriod = string.Format("{0}{1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year),
-                                            enDataValidationEntity = DataValidationEntityName.Client.Value(),
+                                            enDataValidationEntity = DataValidationGroupName.Client.Value(),
                                             DataValidationEntityID = client.pkClientID,
                                             Result = true
-                                        });
+                                        };
+
+                                        _eventAggregator.GetEvent<DataValiationResultEvent>().Publish(validationResult);
+                                    }
                                     else
                                     {
-                                        _eventAggregator.GetEvent<DataValiationResultEvent>().Publish(new DataValidationException()
+                                        validationResult = new DataValidationException()
                                         {
                                             fkBillingProcessID = BillingExecutionState.DataValidation.Value(),
                                             fkDataValidationPropertyID = validationRule.pkDataValidationRuleID,
                                             BillingPeriod = string.Format("{0}{1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year),
-                                            enDataValidationEntity = DataValidationEntityName.Client.Value(),
+                                            enDataValidationEntity = DataValidationGroupName.Client.Value(),
                                             DataValidationEntityID = client.pkClientID,
                                             CanApplyRule = canApplyRule,
                                             Message = string.Format("{0} failed for {1} linked to company {2} - current value ({3}) - expected ({4}).",
-                                                                    validationRule.PropertyDescription.ToUpper(), entityName, validationRule.EntityDescription,
+                                                                    validationRule.PropertyDescription.ToUpper(), entityName, validationRule.DataDescription,
                                                                     entityValue, ruleValue),
                                             Result = false
-                                        });
+                                        };
+
+                                        _eventAggregator.GetEvent<DataValiationResultEvent>().Publish(validationResult);
                                     }
                                 }
 
@@ -457,7 +466,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }

@@ -72,7 +72,7 @@ namespace Gijima.IOBM.Infrastructure.Helpers
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return null;
             }
 }

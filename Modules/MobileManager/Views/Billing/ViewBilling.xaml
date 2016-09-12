@@ -136,7 +136,7 @@
                     </Button>
                 </Grid>
             </xctk:WizardPage>
-            <!--<xctk:WizardPage x:Name="WizardPage2" ExteriorPanelBackground="White" Title="Billing Wizard" Description="This Wizard page exposes functionality to execute the data validation process and to correct any resulting exceptions." 
+            <xctk:WizardPage x:Name="WizardPage2" ExteriorPanelBackground="White" Title="Billing Wizard" Description="This Wizard page exposes functionality to execute the data validation process and to correct any resulting exceptions." 
                 CanSelectNextPage="{Binding DataValidationProcessCompleted, UpdateSourceTrigger=PropertyChanged}" NextPage="{Binding ElementName=WizardPage3}" PreviousPage="{Binding ElementName=WizardPage1}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -149,7 +149,7 @@
                     </Grid.ColumnDefinitions>
                     <local:ViewDataValidation Grid.Row="2" Grid.Column="0"/>
                 </Grid>                
-            </xctk:WizardPage>-->
+            </xctk:WizardPage>
             <xctk:WizardPage x:Name="WizardPage3" ExteriorPanelBackground="White" Title="Billing Wizard" Description="This Wizard page exposes functionality to execute the supplier data import process and to correct any resulting exceptions." 
                 CanSelectNextPage="{Binding DataImportProcessCompleted, UpdateSourceTrigger=PropertyChanged}" NextPage="{Binding ElementName=WizardPage4}" PreviousPage="{Binding ElementName=WizardPage2}">
                 <Grid>

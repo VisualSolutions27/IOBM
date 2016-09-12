@@ -41,6 +41,8 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public string AddressLine2 { get; set; }
         public string ModifiedBy { get; set; }
         public System.DateTime ModifiedDate { get; set; }
+        public bool IsSaIDNumber { get; set; }
+        public bool IsPrivate { get; set; }
         public bool IsActive { get; set; }
     
         public virtual ClientBilling ClientBilling { get; set; }

@@ -47,15 +47,15 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     }
                     else
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The data validation property {0} already exist.", 
-                                                                                        ((DataValidationPropertyName)validationProperty.enDataValidationProperty)).ToString());
+                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The data validation property {0} already exist.", 
+                        //                                                                ((DataValidationPropertyName)validationProperty.enDataValidationProperty)).ToString());
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }
@@ -82,7 +82,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return null;
             }
         }
@@ -104,8 +104,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     // Check to see if the data validation rule property already exist for another entity 
                     if (existingDataValidationProperty != null && existingDataValidationProperty.pkDataValidationPropertyID != validationProperty.pkDataValidationPropertyID)
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The data validation property {0} already exist.", 
-                                                                                        ((DataValidationPropertyName)validationProperty.enDataValidationProperty)).ToString());
+                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The data validation property {0} already exist.", 
+                        //                                                                ((DataValidationPropertyName)validationProperty.enDataValidationProperty)).ToString());
                         return false;
                     }
                     else
@@ -126,7 +126,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }

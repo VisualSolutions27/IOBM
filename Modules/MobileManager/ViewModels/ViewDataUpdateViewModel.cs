@@ -560,7 +560,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -612,7 +612,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     ExceptionsCollection = new ObservableCollection<string>();
 
                 ++ImportUpdatesFailed;
-                ExceptionsCollection.Add(string.Format("Error importing data sheet {0} - {1} {2}.", SelectedDataSheet.SheetName, ex.Message, ex.InnerException.Message));
+                ExceptionsCollection.Add(string.Format("Error importing data sheet {0} - {1} {2}.", SelectedDataSheet.SheetName, ex.Message,
+                                                                                                    ex.InnerException != null ? ex.InnerException.Message : string.Empty));
             }
         }
 
@@ -648,7 +649,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -692,7 +693,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -730,7 +731,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -783,7 +784,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 

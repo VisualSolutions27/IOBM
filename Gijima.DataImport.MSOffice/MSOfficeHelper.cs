@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Gijima.DataImport.MSOffice
 {
@@ -152,9 +153,25 @@ namespace Gijima.DataImport.MSOffice
                     foreach (Row row in rows)
                     {
                         DataRow dataRow = dt.NewRow();
-                        for (int i = 0; i < row.Descendants<Cell>().Count(); i++)
+                        int colIdx = 0;
+
+                        foreach (Cell cell in row.Descendants<Cell>())
                         {
-                            dataRow[i] = GetCellValue(document, row.Descendants<Cell>().ElementAt(i));
+                            int cellColumnIndex = (int)GetColumnIndexFromName(GetColumnName(cell.CellReference));
+                            cellColumnIndex--;
+
+                            if (colIdx < cellColumnIndex)
+                            {
+                                do
+                                {
+                                    dataRow[colIdx] = "";
+                                    colIdx++;
+                                }
+                                while (colIdx < cellColumnIndex);
+                            }
+
+                            dataRow[colIdx] = GetCellValue(document, cell);
+                            colIdx++;
                         }
 
                         dt.Rows.Add(dataRow);
@@ -176,6 +193,9 @@ namespace Gijima.DataImport.MSOffice
         /// <returns>Cell Value</returns>
         private string GetCellValue(SpreadsheetDocument document, Cell cell)
         {
+            if (cell.CellValue == null)
+                return string.Empty;
+
             SharedStringTablePart stringTablePart = document.WorkbookPart.SharedStringTablePart;
             string value = cell.CellValue.InnerXml;
 
@@ -185,33 +205,98 @@ namespace Gijima.DataImport.MSOffice
                 return value;
         }
 
-        //public DataTable ReadExcelIntoDataTable(string workBook, string sheetName)
-        //{
-        //    try
-        //    {
-        //        using (OleDbConnection dbConnection = new OleDbConnection())
-        //        {
-        //            DataTable dt = new DataTable();
-        //            dbConnection.ConnectionString = "Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + workBook + "; Extended Properties =\"Excel 12.0;HDR=YES;IMEX=1\"";
+        /// <summary>
+        /// Given a cell name, parses the specified cell to get the column name.
+        /// </summary>
+        /// <param name="cellReference">Address of the cell (ie. B2)</param>
+        /// <returns>Column Name (ie. B)</returns>
+        public string GetColumnName(string cellReference)
+        {
+            // Create a regular expression to match the column name portion of the cell name.
+            Regex regex = new Regex("[A-Za-z]+");
+            Match match = regex.Match(cellReference);
+            return match.Value;
+        }
 
-        //            using (OleDbCommand dbCommand = new OleDbCommand())
-        //            {
-        //                dbCommand.CommandText = "Select * from [" + sheetName + "$]";
-        //                dbCommand.Connection = dbConnection;
+        /// <summary>
+        /// Given just the column name (no row index), it will return the zero based column index.
+        /// Note: This method will only handle columns with a length of up to two (ie. A to Z and AA to ZZ). 
+        /// A length of three can be implemented when needed.
+        /// </summary>
+        /// <param name="columnName">Column Name (ie. A or AB)</param>
+        /// <returns>Zero based index if the conversion was successful; otherwise null</returns>
+        public int? GetColumnIndexFromName(string columnName)
+        {
+            //return columnIndex;
+            string name = columnName;
+            int number = 0;
+            int pow = 1;
 
-        //                using (OleDbDataAdapter da = new OleDbDataAdapter())
-        //                {
-        //                    da.SelectCommand = dbCommand;
-        //                    da.Fill(dt);
-        //                    return dt;
-        //                }
-        //            }
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw new Exception(ex.InnerException.Message);
-        //    }
-        //}
+            for (int i = name.Length - 1; i >= 0; i--)
+            {
+                number += (name[i] - 'A' + 1) * pow;
+                pow *= 26;
+            }
+            return number;
+        }
+
+        /// <summary>
+        /// Export the data in the data table to excel
+        /// </summary>
+        /// <param name="dt">The data table to export.</param>
+        /// <param name="destination">The excel file to export to.</param>
+        public void ExportDataTableToExcel(DataTable dt, string destination)
+        {
+            using (var workbook = SpreadsheetDocument.Create(destination, DocumentFormat.OpenXml.SpreadsheetDocumentType.Workbook))
+            {
+                var workbookPart = workbook.AddWorkbookPart();
+                workbook.WorkbookPart.Workbook = new Workbook();
+                workbook.WorkbookPart.Workbook.Sheets = new Sheets();
+
+                var sheetPart = workbook.WorkbookPart.AddNewPart<WorksheetPart>();
+                var sheetData = new SheetData();
+                sheetPart.Worksheet = new Worksheet(sheetData);
+
+                Sheets sheets = workbook.WorkbookPart.Workbook.GetFirstChild<Sheets>();
+                string relationshipId = workbook.WorkbookPart.GetIdOfPart(sheetPart);
+
+                uint sheetId = 1;
+                if (sheets.Elements<Sheet>().Count() > 0)
+                {
+                    sheetId = sheets.Elements<Sheet>().Select(s => s.SheetId.Value).Max() + 1;
+                }
+
+                Sheet sheet = new Sheet() { Id = relationshipId, SheetId = sheetId, Name = dt.TableName };
+                sheets.Append(sheet);
+                Row headerRow = new Row();
+                List<String> columns = new List<string>();
+
+                foreach (DataColumn column in dt.Columns)
+                {
+                    columns.Add(column.ColumnName);
+                    Cell cell = new Cell();
+                    cell.DataType = CellValues.String;
+                    cell.CellValue = new CellValue(column.ColumnName);
+                    headerRow.AppendChild(cell);
+                }
+
+                sheetData.AppendChild(headerRow);
+
+                foreach (DataRow dsrow in dt.Rows)
+                {
+                    Row newRow = new Row();
+
+                    foreach (String col in columns)
+                    {
+                        Cell cell = new Cell();
+                        cell.DataType = CellValues.String;
+                        cell.CellValue = new CellValue(dsrow[col].ToString()); 
+                        newRow.AppendChild(cell);
+                    }
+
+                    sheetData.AppendChild(newRow);
+                }
+            }
+        }
     }
 }

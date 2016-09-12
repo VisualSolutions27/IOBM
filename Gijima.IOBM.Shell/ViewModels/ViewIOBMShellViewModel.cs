@@ -179,6 +179,15 @@ namespace Gijima.IOBM.Shell.ViewModels
             new IOBMSecurityModel(_eventAggregator).SyncSolutionUser((User)sender);
         }
 
+        /// <summary>
+        /// Display application info or error info to the user
+        /// </summary>
+        /// <param name="sender">The application user enetity.</param>
+        private void AppMessage_Event(object sender)
+        {
+            new IOBMSecurityModel(_eventAggregator).SyncSolutionUser((User)sender);
+        }
+
         #endregion
 
         #region Methods

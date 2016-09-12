@@ -79,17 +79,17 @@
                 <ColumnDefinition Width="10" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Row="0" Grid.Column="0" Text="Entity:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-            <Border Grid.Row="0" Grid.Column="1" BorderThickness="1" BorderBrush="{Binding ValidEntity}">
-                <ComboBox x:Name="ComboBoxEntities" ToolTip="Select the validation entity." TabIndex="1" IsSynchronizedWithCurrentItem="True"
-                    ItemsSource="{Binding EntityCollection}" SelectedItem="{Binding SelectedEntity, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Height="22" >
+            <TextBlock Grid.Row="0" Grid.Column="0" Text="Group:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+            <Border Grid.Row="0" Grid.Column="1" BorderThickness="1" BorderBrush="{Binding ValidEntityGroup}">
+                <ComboBox x:Name="ComboBoxValidationGroup" ToolTip="Select the data validation group." TabIndex="1" IsSynchronizedWithCurrentItem="True"
+                    ItemsSource="{Binding EntityGroupCollection}" SelectedItem="{Binding SelectedEntityGroup, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Height="22" >
                 </ComboBox>
             </Border>
-            <TextBlock Grid.Row="0" Grid.Column="3" Text="{Binding DataItemLabel}" Style="{StaticResource UXLabelTextStyle}" Margin="0,0,5,0"></TextBlock>
-            <Border Grid.Row="0" Grid.Column="4" BorderThickness="1" BorderBrush="{Binding ValidDataItem}">
-                <ComboBox x:Name="ComboBoxDataItems" ToolTip="{Binding DataItemTooltip, UpdateSourceTrigger=PropertyChanged}" TabIndex="2" IsSynchronizedWithCurrentItem="True"
-                    ItemsSource="{Binding DataItemCollection}" DisplayMemberPath="{Binding DataItemDisplayName}" Height="22"
-                    SelectedItem="{Binding SelectedDataItem, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
+            <TextBlock Grid.Row="0" Grid.Column="3" Text="Data entity:" Style="{StaticResource UXLabelTextStyle}" Margin="0,0,5,0"></TextBlock>
+            <Border Grid.Row="0" Grid.Column="4" BorderThickness="1" BorderBrush="{Binding ValidDataEntity}">
+                <ComboBox x:Name="ComboBoxDataEntity" ToolTip="{Binding DataItemTooltip, UpdateSourceTrigger=PropertyChanged}" TabIndex="2" IsSynchronizedWithCurrentItem="True"
+                    ItemsSource="{Binding DataEntityCollection}" DisplayMemberPath="{Binding DataEntityDisplayName}" Height="22"
+                    SelectedItem="{Binding SelectedDataEntity, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
                 </ComboBox>
             </Border>
             <TextBlock Grid.Row="0" Grid.Column="6" Text="Data field:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>

@@ -341,7 +341,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -363,7 +363,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -392,7 +392,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -466,7 +466,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
             SelectedSimCard.fkContractID = selectedSimCardID = _selectedContractID;
             SelectedSimCard.fkStatusID = SelectedStatus.pkStatusID;
-            SelectedSimCard.Status = SelectedStatus;
+            //SelectedSimCard.Status = SelectedStatus;
             SelectedSimCard.CellNumber = SelectedCellNumber.Trim();
             SelectedSimCard.CardNumber = SelectedCardNumber.ToUpper().Trim();
             SelectedSimCard.PinNumber = SelectedPinNumber.ToUpper().Trim();

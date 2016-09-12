@@ -15,6 +15,7 @@ using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Security;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Common.Events;
+using System.Windows;
 
 namespace Gijima.IOBM.MobileManager.ViewModels
 {
@@ -52,58 +53,84 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             get { return _selectedClient; }
             set
             {
-                SetProperty(ref _selectedClient, value);
-
-                if (value != null && value.pkClientID > 0)
+                try
                 {
-                    SelectedContract = value.Contract != null ? value.Contract : null;
-                    if (CompanyCollection != null)
-                        SelectedCompany = value.fkCompanyID > 0 ? CompanyCollection.Where(p => p.pkCompanyID == value.fkCompanyID).FirstOrDefault() 
-                                                                : CompanyCollection.Where(p => p.pkCompanyID == 0).FirstOrDefault();
-                    if (ClientLocationCollection != null)
-                        SelectedClientLocation = value.fkClientLocationID > 0 ? ClientLocationCollection.Where(p => p.pkClientLocationID == value.fkClientLocationID).FirstOrDefault() 
-                                                                              : ClientLocationCollection.Where(p => p.pkClientLocationID == 0).FirstOrDefault();
-                    if (SuburbCollection != null)
-                        SelectedSuburb = value.fkSuburbID > 0 ? SuburbCollection.Where(p => p.pkSuburbID == value.fkSuburbID).FirstOrDefault()
-                                                              : SuburbCollection.Where(p => p.pkSuburbID == 0).FirstOrDefault();
-                    if (StatusCollection != null)
-                        SelectedStatus = value.Contract != null ? StatusCollection.Where(p => p.pkStatusID == value.Contract.fkStatusID).FirstOrDefault() 
-                                                                : StatusCollection.Where(p => p.pkStatusID == 0).FirstOrDefault();
-                    if (PackageCollection != null)
-                        SelectedPackage = value.Contract != null ? PackageCollection.Where(p => p.pkPackageID == value.Contract.fkPackageID).FirstOrDefault()
-                                                                 : PackageCollection.Where(p => p.pkPackageID == 0).FirstOrDefault();
-                    SetClientBilling(value.ClientBilling);
-                    SelectedCellNumber = value.PrimaryCellNumber;
-                    SelectedClientName = value.ClientName;
-                    SelectedClientIDNumber = value.IDNumber;
-                    SelectedClientAdminFee = value.AdminFee > 0 ? value.AdminFee.ToString() : SelectedCompany != null ? SelectedCompany.AdminFee.ToString() : "0";
-                    SelectedClientAddressLine = value.AddressLine1;
-                    SelectedClientWBSNumber = !string.IsNullOrWhiteSpace(value.WBSNumber) ? value.WBSNumber : SelectedCompany != null ? SelectedCompany.WBSNumber : null;
-                    SelectedClientCostCode = !string.IsNullOrWhiteSpace(value.CostCode) ? value.CostCode : SelectedCompany != null ? SelectedCompany.CostCode : null;
-                    SelectedClientIPAddress = !string.IsNullOrWhiteSpace(value.IPAddress) ? value.IPAddress : SelectedCompany != null ? SelectedCompany.IPAddress : null;
-                    SelectedClientState = value.IsActive;
-                    SelectedCostType = value.Contract != null ? ((CostType)value.Contract.enCostType).ToString() : "NONE";
-                    SelectedPackageType = SelectedPackage != null ? ((PackageType)SelectedPackage.enPackageType).ToString() : "NONE";
-                    SelectedContractAccNumber = value.Contract != null ? value.Contract.AccountNumber : null;
-                    SelectedContractStartDate = value.Contract != null && value.Contract.ContractStartDate != null ? value.Contract.ContractStartDate.Value : DateTime.MinValue;
-                    SelectedContractEndDate = value.Contract != null && value.Contract.ContractEndDate.Value != null ? value.Contract.ContractEndDate.Value : DateTime.MinValue;
-                    DeleteButtonImage = value.IsActive ? "278.png" : "delete.png";
-                    DeleteButtonToolTip = value.IsActive ? "in-active" : "active";
+                    SetProperty(ref _selectedClient, value);
 
-                    MobileManagerEnvironment.SelectedClientID = value.pkClientID;
-                    MobileManagerEnvironment.ClientCompanyID = value.fkCompanyID;
-                    MobileManagerEnvironment.SelectedContractID = value.fkContractID;
-
-                    // Publish these event to populate the devices, Simcards and accounts linked to the contract
-                    if (value.Contract != null)
+                    if (value != null && value.pkClientID > 0)
                     {
-                        _eventAggregator.GetEvent<ReadSimCardsEvent>().Publish(value.Contract.pkContractID);
-                        _eventAggregator.GetEvent<ReadDevicesEvent>().Publish(value.Contract.pkContractID);
-                        _eventAggregator.GetEvent<ReadInvoicesEvent>().Publish(value.pkClientID);
-                    }
+                        // Set the client properties
+                        if (CompanyCollection != null)
+                            SelectedCompany = value.fkCompanyID > 0 ? CompanyCollection.Where(p => p.pkCompanyID == value.fkCompanyID).FirstOrDefault()
+                                                                    : CompanyCollection.Where(p => p.pkCompanyID == 0).FirstOrDefault();
+                        if (ClientLocationCollection != null)
+                            SelectedClientLocation = value.fkClientLocationID > 0 ? ClientLocationCollection.Where(p => p.pkClientLocationID == value.fkClientLocationID).FirstOrDefault()
+                                                                                  : ClientLocationCollection.Where(p => p.pkClientLocationID == 0).FirstOrDefault();
+                        if (SuburbCollection != null)
+                            SelectedSuburb = value.fkSuburbID > 0 ? SuburbCollection.Where(p => p.pkSuburbID == value.fkSuburbID).FirstOrDefault()
+                                                                  : SuburbCollection.Where(p => p.pkSuburbID == 0).FirstOrDefault();
+                        SelectedCellNumber = value.PrimaryCellNumber;
+                        SelectedClientName = value.ClientName;
+                        SelectedClientIDNumber = value.IDNumber;
+                        SelectedClientAdminFee = value.AdminFee > 0 ? value.AdminFee.ToString() : SelectedCompany != null ? SelectedCompany.AdminFee.ToString() : "0";
+                        SelectedClientAddressLine = value.AddressLine1;
+                        SelectedClientWBSNumber = !string.IsNullOrWhiteSpace(value.WBSNumber) ? value.WBSNumber : SelectedCompany != null ? SelectedCompany.WBSNumber : null;
+                        SelectedClientCostCode = !string.IsNullOrWhiteSpace(value.CostCode) ? value.CostCode : SelectedCompany != null ? SelectedCompany.CostCode : null;
+                        SelectedClientIPAddress = !string.IsNullOrWhiteSpace(value.IPAddress) ? value.IPAddress : SelectedCompany != null ? SelectedCompany.IPAddress : null;
+                        SelectedClientState = value.IsActive;
+                        CompanyClient = value.IsPrivate ? false : true;
+                        PrivateClient = value.IsPrivate ? true : false;
+                        SaIDNumber = value.IsSaIDNumber ? true : false;
+                        OtherIDNumber = value.IsSaIDNumber ? false : true;
 
-                    // Publish this event to set the admin tab as default tab
-                    _eventAggregator.GetEvent<NavigationEvent>().Publish(0);
+                        // Set the contract properties
+                        SelectedContract = value.Contract != null ? value.Contract : null;
+                        if (StatusCollection != null)
+                            SelectedStatus = value.Contract != null ? StatusCollection.Where(p => p.pkStatusID == value.Contract.fkStatusID).FirstOrDefault()
+                                                                    : StatusCollection.Where(p => p.pkStatusID == 0).FirstOrDefault();
+                        if (PackageCollection != null)
+                            SelectedPackage = value.Contract != null ? PackageCollection.Where(p => p.pkPackageID == value.Contract.fkPackageID).FirstOrDefault()
+                                                                     : PackageCollection.Where(p => p.pkPackageID == 0).FirstOrDefault();
+                        SelectedCostType = value.Contract != null ? ((CostType)value.Contract.enCostType).ToString() : "NONE";
+                        SelectedPackageType = SelectedPackage != null ? ((PackageType)SelectedPackage.enPackageType).ToString() : "NONE";
+                        SelectedContractAccNumber = value.Contract != null ? value.Contract.AccountNumber : null;
+                        SelectedPackageCost = value.Contract != null && value.Contract.PackageSetup != null ? value.Contract.PackageSetup.Cost.ToString() : "0";
+                        SelectedPackageRandValue = value.Contract != null && value.Contract.PackageSetup != null ? value.Contract.PackageSetup.RandValue.ToString() : "0";
+                        SelectedPackageMBData = value.Contract != null && value.Contract.PackageSetup != null ? value.Contract.PackageSetup.MBData.ToString() : "0";
+                        SelectedPackageSMSNumber = value.Contract != null && value.Contract.PackageSetup != null ? value.Contract.PackageSetup.SMSNumber.ToString() : "0";
+                        SelectedPackageTalkTime = value.Contract != null && value.Contract.PackageSetup != null ? value.Contract.PackageSetup.TalkTimeMinutes.ToString() : "0";
+                        SelectedPackageSPULValue = value.Contract != null && value.Contract.PackageSetup != null ? value.Contract.PackageSetup.SPULValue.ToString() : "0";
+                        SelectedContractStartDate = value.Contract != null && value.Contract.ContractStartDate != null ? value.Contract.ContractStartDate.Value : DateTime.MinValue;
+                        SelectedContractEndDate = value.Contract != null && value.Contract.ContractEndDate.Value != null ? value.Contract.ContractEndDate.Value : DateTime.MinValue;
+
+                        // Set billing properties
+                        SetClientBilling(value.ClientBilling);
+
+                        // Set the delete button to delete or un-delete client
+                        DeleteButtonImage = value.IsActive ? "278.png" : "delete.png";
+                        DeleteButtonToolTip = value.IsActive ? "in-active" : "active";
+
+                        // The the global application properties
+                        MobileManagerEnvironment.SelectedClientID = value.pkClientID;
+                        MobileManagerEnvironment.ClientCompanyID = value.fkCompanyID;
+                        MobileManagerEnvironment.SelectedContractID = value.fkContractID;
+
+                        // Publish these event to populate the devices, Simcards and accounts linked to the contract
+                        if (value.Contract != null)
+                        {
+                            _eventAggregator.GetEvent<ReadSimCardsEvent>().Publish(value.Contract.pkContractID);
+                            _eventAggregator.GetEvent<ReadDevicesEvent>().Publish(value.Contract.pkContractID);
+                            _eventAggregator.GetEvent<ReadInvoicesEvent>().Publish(value.pkClientID);
+                        }
+
+                        // Publish this event to set the admin tab as default tab
+                        _eventAggregator.GetEvent<NavigationEvent>().Publish(0);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("texzt");
+                    //_message = new ApplicationMessage("ViewCellularViewModel", ex, MessageBoxImage.Error  )
                 }
             }
         }
@@ -124,6 +151,66 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private bool _selectedClientState;
 
         /// <summary>
+        /// Indicate if its a company client
+        /// </summary>
+        public bool CompanyClient
+        {
+            get { return _companyClient; }
+            set
+            {
+                SetProperty(ref _companyClient, value);
+                if (value == true)
+                    ValidAdminFee = !string.IsNullOrWhiteSpace(SelectedClientAdminFee) && Convert.ToDecimal(SelectedClientAdminFee) < 1 ? Brushes.Red : Brushes.Silver;
+            }
+        }
+        private bool _companyClient = true;
+
+        /// <summary>
+        /// Indicate if its a private client
+        /// </summary>
+        public bool PrivateClient
+        {
+            get { return _privateClient; }
+            set
+            {
+                SetProperty(ref _privateClient, value);
+                if (value == true)
+                    ValidAdminFee = Brushes.Silver;
+            }
+        }
+        private bool _privateClient;
+
+        /// <summary>
+        /// Indicate if its a south african ID number
+        /// </summary>
+        public bool SaIDNumber
+        {
+            get { return _saIDNumber; }
+            set
+            {
+                SetProperty(ref _saIDNumber, value);
+                if (value == true)
+                    ValidClientIDNumber = SelectedClientIDNumber.Length == 13 ? Brushes.Silver : Brushes.Red;
+            }
+        }
+        private bool _saIDNumber = true;
+
+        /// <summary>
+        /// Indicate if its a other ID number
+        /// </summary>
+        public bool OtherIDNumber
+        {
+            get { return _otherIDNumber; }
+            set
+            {
+                SetProperty(ref _otherIDNumber, value);
+                if (value == true)
+                    ValidClientIDNumber = Brushes.Silver;
+            }
+        }
+        private bool _otherIDNumber;
+
+        /// <summary>
         /// Set the required field fore colour
         /// </summary>
         public Brush ClientStateColour
@@ -142,6 +229,66 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set { SetProperty(ref _selectedIPAddress, value); }
         }
         private string _selectedIPAddress = string.Empty;
+
+        /// <summary>
+        /// The entered package cost
+        /// </summary>
+        public string SelectedPackageCost
+        {
+            get { return _selectedPackageCost; }
+            set { SetProperty(ref _selectedPackageCost, value); }
+        }
+        private string _selectedPackageCost = "0";
+
+        /// <summary>
+        /// The entered package rand value
+        /// </summary>
+        public string SelectedPackageRandValue
+        {
+            get { return _selectedPackageRandValue; }
+            set { SetProperty(ref _selectedPackageRandValue, value); }
+        }
+        private string _selectedPackageRandValue = "0";
+
+        /// <summary>
+        /// The entered package MB data
+        /// </summary>
+        public string SelectedPackageMBData
+        {
+            get { return _selectedPackageMBData; }
+            set { SetProperty(ref _selectedPackageMBData, value); }
+        }
+        private string _selectedPackageMBData = "0";
+
+        /// <summary>
+        /// The entered package SPUL value
+        /// </summary>
+        public string SelectedPackageSPULValue
+        {
+            get { return _selectedPackageSPULValue; }
+            set { SetProperty(ref _selectedPackageSPULValue, value); }
+        }
+        private string _selectedPackageSPULValue = "0";
+
+        /// <summary>
+        /// The entered package talk time
+        /// </summary>
+        public string SelectedPackageTalkTime
+        {
+            get { return _selectedPackageTalkTime; }
+            set { SetProperty(ref _selectedPackageTalkTime, value); }
+        }
+        private string _selectedPackageTalkTime = "0";
+
+        /// <summary>
+        /// The entered package SMS number
+        /// </summary>
+        public string SelectedPackageSMSNumber
+        {
+            get { return _selectedPackageSMSNumber; }
+            set { SetProperty(ref _selectedPackageSMSNumber, value); }
+        }
+        private string _selectedPackageSMSNumber = "0";
 
         /// <summary>
         /// The delete button active/in-active image
@@ -369,7 +516,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         public Package SelectedPackage
         {
             get { return _selectedPackage; }
-            set { SetProperty(ref _selectedPackage, value); }
+            set
+            {
+                SetProperty(ref _selectedPackage, value);
+                SetPackageDefaults();
+            }
         }
         private Package _selectedPackage;
 
@@ -464,6 +615,86 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private string _selectedVoiceAllowance;
 
         /// <summary>
+        /// Indicate if client use int dailing
+        /// </summary>
+        public bool SelectedIntDailing
+        {
+            get { return _selectedIntDailing; }
+            set
+            {
+                SetProperty(ref _selectedIntDailing, value);
+                if (value == false)
+                    SelectedPermanentDailing = value;
+            }
+        }
+        private bool _selectedIntDailing;
+
+        /// <summary>
+        /// Indicate if client use permanent int dailing
+        /// </summary>
+        public bool SelectedPermanentDailing
+        {
+            get { return _selectedPermanentDailing; }
+            set { SetProperty(ref _selectedPermanentDailing, value); }
+        }
+        private bool _selectedPermanentDailing;
+
+        /// <summary>
+        /// Indicate if client use roaming
+        /// </summary>
+        public bool SelectedIntRoaming
+        {
+            get { return _selectedIntRoaming; }
+            set
+            {
+                SetProperty(ref _selectedIntRoaming, value);
+                SelectedRoamingCountry = string.Empty;
+                SelectedRoamingFromDate = SelectedRoamingToDate = value == true ? DateTime.Now : DateTime.MinValue;
+                ValidSelectedRoaming = value;
+                if (value == false)
+                    SelectedPermanentRoaming = value;
+            }
+        }
+        private bool _selectedIntRoaming;
+
+        /// <summary>
+        /// Indicate if client use permanent roaming
+        /// </summary>
+        public bool SelectedPermanentRoaming
+        {
+            get { return _selectedPermanentRoaming; }
+            set
+            {
+                SetProperty(ref _selectedPermanentRoaming, value);
+                if (value == true)
+                {
+                    SelectedRoamingCountry = string.Empty;
+                    SelectedRoamingFromDate = SelectedRoamingToDate = DateTime.MinValue;
+                    ValidSelectedRoaming = false;
+                    ValidRoamingCountry = Brushes.Silver;
+                }
+                else
+                {
+                    SelectedRoamingCountry = string.Empty;
+                    SelectedRoamingFromDate = SelectedRoamingToDate = SelectedIntRoaming ? DateTime.Now : DateTime.MinValue;
+                    ValidSelectedRoaming = SelectedIntRoaming ? true : false;
+                }
+            }
+        }
+        private bool _selectedPermanentRoaming;
+
+        /// <summary>
+        /// Indicate if roaming dates must be enable/disabled
+        /// </summary>
+        public bool ValidSelectedRoaming
+        {
+            get { return _validSelectedRoaming; }
+            set { SetProperty(ref _validSelectedRoaming, value); }
+        }
+        private bool _validSelectedRoaming;
+
+
+        /// <summary>
         /// Indicate if client has split billing
         /// </summary>
         public string SelectedRoamingCountry
@@ -479,7 +710,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         public DateTime SelectedRoamingFromDate
         {
             get { return _selectedRoamingFromDate; }
-            set { SetProperty(ref _selectedRoamingFromDate, value); }
+            set
+            {
+                SetProperty(ref _selectedRoamingFromDate, value);
+
+                if (value.Date > SelectedRoamingToDate.Date)
+                    SelectedRoamingToDate = value;
+            }
         }
         private DateTime _selectedRoamingFromDate;
 
@@ -489,24 +726,15 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         public DateTime SelectedRoamingToDate
         {
             get { return _selectedRoamingToDate; }
-            set { SetProperty(ref _selectedRoamingToDate, value); }
-        }
-        private DateTime _selectedRoamingToDate;
-
-        /// <summary>
-        /// Indicate if client has split billing
-        /// </summary>
-        public bool SelectedIntRoaming
-        {
-            get { return _selectedIntRoaming; }
             set
             {
-                SelectedRoamingCountry = string.Empty;
-                SelectedRoamingFromDate = SelectedRoamingToDate = value == true ? DateTime.Now : DateTime.MinValue; 
-                SetProperty(ref _selectedIntRoaming, value);
+                SetProperty(ref _selectedRoamingToDate, value);
+
+                if (SelectedRoamingFromDate.Date > value.Date)
+                    SelectedRoamingFromDate = value;
             }
         }
-        private bool _selectedIntRoaming;
+        private DateTime _selectedRoamingToDate;
 
         #endregion
 
@@ -752,8 +980,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     case "SelectedClientName":
                         ValidClientName = string.IsNullOrEmpty(SelectedClientName) ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedClientIDNumber":
-                        //ValidClientIDNumber = string.IsNullOrEmpty(SelectedClientIDNumber) || SelectedClientIDNumber.Length < 13 ? Brushes.Red : Brushes.Silver; break;
-                        ValidClientIDNumber = string.IsNullOrEmpty(SelectedClientIDNumber) ? Brushes.Red : Brushes.Silver; break;
+                        ValidClientIDNumber = string.IsNullOrEmpty(SelectedClientIDNumber) || (SaIDNumber && SelectedClientIDNumber.Length != 13) ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedCompany":
                         ValidCompany = SelectedCompany != null && SelectedCompany.pkCompanyID < 1 ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedClientLocation":
@@ -763,7 +990,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     case "SelectedClientCostCode":
                         ValidCostCode = string.IsNullOrEmpty(SelectedClientCostCode) ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedClientAdminFee":
-                        ValidAdminFee = !string.IsNullOrWhiteSpace(SelectedClientAdminFee) && Convert.ToDecimal(SelectedClientAdminFee) < 1 ? Brushes.Red : Brushes.Silver; break;
+                        ValidAdminFee = !string.IsNullOrWhiteSpace(SelectedClientAdminFee) && (CompanyClient && Convert.ToDecimal(SelectedClientAdminFee) < 1) ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedContractAccNumber":
                         ValidAccountNumber = string.IsNullOrEmpty(SelectedContractAccNumber) ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedClientAddressLine":
@@ -781,39 +1008,37 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                  SelectedContractStartDate.Date == DateTime.MinValue.Date ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedContractEndDate":
                         ValidContractEndDate = SelectedContractEndDate == null || 
-                                               SelectedContractEndDate < SelectedContractStartDate ||
+                                               SelectedContractEndDate.Date < SelectedContractStartDate.Date ||
                                                SelectedContractEndDate.Date == DateTime.MinValue.Date ? Brushes.Red : Brushes.Silver; break;
                     case "SplitBilling":
                         ValidSplitBilling = !SplitBilling && !NoSplitBilling ? Brushes.Red : Brushes.Silver;
                         ValidVoiceAllowance = SplitBilling && (string.IsNullOrWhiteSpace(SelectedVoiceAllowance) || Convert.ToDecimal(SelectedVoiceAllowance) < 1) ? Brushes.Red : Brushes.Silver;
                         ValidRoamingCountry = SelectedIntRoaming && string.IsNullOrEmpty(SelectedRoamingCountry) ? Brushes.Red : Brushes.Silver;
-                        ValidRoamingFromDate = SplitBilling && (SelectedClientBilling == null ||
-                                               SelectedClientBilling.RoamingFromDate == DateTime.MinValue) ? Brushes.Red : Brushes.Silver;
-                        ValidRoamingToDate = SplitBilling && (SelectedClientBilling == null ||
-                                             SelectedClientBilling.RoamingToDate < SelectedClientBilling.RoamingFromDate ||
-                                             SelectedClientBilling.RoamingToDate == DateTime.MinValue) ? Brushes.Red : Brushes.Silver; break;
+                        ValidRoamingFromDate = SplitBilling && SelectedIntRoaming && SelectedRoamingFromDate.Date == DateTime.MinValue.Date ? Brushes.Red : Brushes.Silver;
+                        ValidRoamingToDate = SplitBilling && SelectedIntRoaming && (SelectedRoamingToDate.Date < SelectedRoamingFromDate.Date ||
+                                             SelectedRoamingToDate.Date == DateTime.MinValue.Date) ? Brushes.Red : Brushes.Silver; break;
                     case "NoSplitBilling":
                         if (NoSplitBilling)
                             ValidSplitBilling = ValidVoiceAllowance = ValidRoamingCountry = ValidRoamingFromDate = ValidRoamingToDate = Brushes.Silver;
                         ValidSplitBilling = !SplitBilling && !NoSplitBilling ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedIntRoaming":
                         ValidRoamingCountry = SelectedIntRoaming && string.IsNullOrEmpty(SelectedRoamingCountry) ? Brushes.Red : Brushes.Silver;
-                        ValidRoamingFromDate = SplitBilling && SelectedIntRoaming && (SelectedClientBilling == null || SelectedClientBilling.RoamingToDate == null ||
-                                               SelectedClientBilling.RoamingFromDate == DateTime.MinValue) ? Brushes.Red : Brushes.Silver;
-                        ValidRoamingToDate = SplitBilling && SelectedIntRoaming && (SelectedClientBilling == null || SelectedClientBilling.RoamingToDate == null ||
-                                             SelectedClientBilling.RoamingToDate < SelectedClientBilling.RoamingFromDate ||
-                                             SelectedClientBilling.RoamingToDate == DateTime.MinValue) ? Brushes.Red : Brushes.Silver; break;
+                        ValidRoamingFromDate = SplitBilling && SelectedIntRoaming && (SelectedRoamingFromDate == null ||
+                                               SelectedRoamingFromDate.Date == DateTime.MinValue.Date) ? Brushes.Red : Brushes.Silver;
+                        ValidRoamingToDate = SplitBilling && SelectedIntRoaming && (SelectedRoamingToDate == null ||
+                                             SelectedRoamingToDate.Date < SelectedRoamingFromDate.Date ||
+                                             SelectedRoamingToDate.Date == DateTime.MinValue.Date) ? Brushes.Red : Brushes.Silver; break;
+                    case "SelectedPermanentRoaming":
+                        ValidRoamingCountry = !SelectedPermanentRoaming && string.IsNullOrEmpty(SelectedRoamingCountry) ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedVoiceAllowance":
                         ValidVoiceAllowance = SplitBilling && (string.IsNullOrWhiteSpace(SelectedVoiceAllowance) || Convert.ToDecimal(SelectedVoiceAllowance) < 1) ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedRoamingCountry":
                         ValidRoamingCountry = SelectedIntRoaming && string.IsNullOrEmpty(SelectedRoamingCountry) ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedRoamingFromDate":
-                        ValidRoamingFromDate = SplitBilling && (SelectedClientBilling == null ||
-                                               SelectedClientBilling.RoamingFromDate == DateTime.MinValue) ? Brushes.Red : Brushes.Silver; break;
+                        ValidRoamingFromDate = SplitBilling && SelectedIntRoaming && !SelectedPermanentRoaming && SelectedRoamingFromDate.Date == DateTime.MinValue.Date ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedRoamingToDate":
-                        ValidRoamingToDate = SplitBilling && (SelectedClientBilling == null ||
-                                             SelectedClientBilling.RoamingToDate < SelectedClientBilling.RoamingFromDate ||
-                                             SelectedClientBilling.RoamingToDate == DateTime.MinValue) ? Brushes.Red : Brushes.Silver; break;
+                        ValidRoamingToDate = SplitBilling && SelectedIntRoaming && !SelectedPermanentRoaming && (SelectedRoamingToDate.Date < SelectedRoamingFromDate.Date ||
+                                             SelectedRoamingToDate.Date == DateTime.MinValue.Date) ? Brushes.Red : Brushes.Silver; break;
                 }
                 return result;
             }
@@ -865,6 +1090,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SaveCommand = new DelegateCommand(ExecuteSave, CanExecuteSave).ObservesProperty(() => SelectedCellNumber)
                                                                           .ObservesProperty(() => SelectedClientName)
                                                                           .ObservesProperty(() => SelectedClientIDNumber)
+                                                                          .ObservesProperty(() => CompanyClient)
+                                                                          .ObservesProperty(() => PrivateClient)
+                                                                          .ObservesProperty(() => SaIDNumber)
+                                                                          .ObservesProperty(() => OtherIDNumber)
                                                                           .ObservesProperty(() => SelectedCompany)
                                                                           .ObservesProperty(() => SelectedClientLocation)
                                                                           .ObservesProperty(() => SelectedClientWBSNumber)
@@ -877,6 +1106,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                                           .ObservesProperty(() => NoSplitBilling)
                                                                           .ObservesProperty(() => SelectedVoiceAllowance)
                                                                           .ObservesProperty(() => SelectedIntRoaming)
+                                                                          .ObservesProperty(() => SelectedPermanentRoaming)
                                                                           .ObservesProperty(() => SelectedRoamingCountry)
                                                                           .ObservesProperty(() => SelectedRoamingFromDate)
                                                                           .ObservesProperty(() => SelectedRoamingToDate)
@@ -924,7 +1154,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedClientWBSNumber = SelectedClientCostCode = SelectedClientIPAddress = string.Empty;
             SelectedContractStartDate = SelectedContractEndDate = DateTime.MinValue;
             SelectedClientAdminFee = "0";
-            SelectedClientState = true;
+            SelectedClientState = SaIDNumber = CompanyClient = true;
             SelectedCostType = SelectedPackageType = "NONE";
             DeleteButtonImage = "278.png";
             DeleteButtonToolTip = "active";
@@ -964,7 +1194,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
        
@@ -981,6 +1211,27 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     SelectedClientCostCode = SelectedCompany.CostCode != null ? SelectedCompany.CostCode : string.Empty;
                     SelectedClientIPAddress = SelectedCompany.IPAddress != null ? SelectedCompany.IPAddress : string.Empty;
                     SelectedClientAdminFee = SelectedCompany.AdminFee.ToString();
+                }
+            }
+            catch (Exception ex)
+            { }
+        }
+
+        /// <summary>
+        /// Set the package defaults for the client 
+        /// </summary>
+        private void SetPackageDefaults()
+        {
+            try
+            {
+                if (SelectedPackage != null)
+                {
+                    SelectedPackageCost = SelectedPackage.Cost.ToString();
+                    SelectedPackageRandValue = SelectedPackage.RandValue.ToString();
+                    SelectedPackageMBData = SelectedPackage.MBData.ToString();
+                    SelectedPackageSMSNumber = SelectedPackage.SMSNumber.ToString();
+                    SelectedPackageTalkTime = SelectedPackage.TalkTimeMinutes.ToString();
+                    SelectedPackageSPULValue = SelectedPackage.SPULValue.ToString();
                 }
             }
             catch (Exception ex)
@@ -1035,7 +1286,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -1050,7 +1301,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -1065,7 +1316,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -1080,7 +1331,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -1095,7 +1346,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
 
@@ -1193,9 +1444,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 result = SelectedClient != null && SelectedClientLocation != null && SelectedClientLocation.pkClientLocationID > 0 && 
                          SelectedCompany != null && SelectedCompany.pkCompanyID > 0 && SelectedSuburb != null && SelectedSuburb.pkSuburbID > 0 &&
                          !string.IsNullOrEmpty(SelectedCellNumber) && SelectedCellNumber.Length == 10 && !string.IsNullOrEmpty(SelectedClientName) &&
-                         !string.IsNullOrEmpty(SelectedClientIDNumber) && SelectedClientIDNumber.Length == 13 &&  !string.IsNullOrEmpty(SelectedClientWBSNumber) &&
+                         !string.IsNullOrEmpty(SelectedClientIDNumber) && (SaIDNumber ? SelectedClientIDNumber.Length == 13 : true) &&  
+                         !string.IsNullOrEmpty(SelectedClientWBSNumber) &&
                          !string.IsNullOrEmpty(SelectedClientCostCode) && !string.IsNullOrEmpty(SelectedClientAddressLine) &&
-                         (!string.IsNullOrWhiteSpace(SelectedClientAdminFee) && Convert.ToDecimal(SelectedClientAdminFee) > 0);
+                         !string.IsNullOrWhiteSpace(SelectedClientAdminFee) && (CompanyClient ? Convert.ToDecimal(SelectedClientAdminFee) > 0 : true);
 
             // Validate contract data
             if (result)
@@ -1206,9 +1458,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             // Validate billing data
             if (result && SplitBilling)
                 result = SelectedClientBilling != null && (SplitBilling || NoSplitBilling) && 
-                         (SplitBilling ? (!string.IsNullOrWhiteSpace(SelectedVoiceAllowance) && Convert.ToDecimal(SelectedVoiceAllowance) > 0) : false) && (SelectedIntRoaming ? !string.IsNullOrEmpty(SelectedRoamingCountry) : true) &&
-                         (SplitBilling && SelectedIntRoaming ? SelectedRoamingFromDate.Date > DateTime.MinValue.Date : true) &&
-                         (SplitBilling && SelectedIntRoaming ? SelectedRoamingToDate.Date > SelectedRoamingFromDate.Date && SelectedRoamingToDate.Date > DateTime.MinValue.Date : true);
+                         (SplitBilling ? (!string.IsNullOrWhiteSpace(SelectedVoiceAllowance) && Convert.ToDecimal(SelectedVoiceAllowance) > 0) : false) && 
+                         (SelectedIntRoaming && !SelectedPermanentRoaming ? !string.IsNullOrEmpty(SelectedRoamingCountry) : true) &&
+                         (SplitBilling && SelectedIntRoaming && !SelectedPermanentRoaming ? SelectedRoamingFromDate.Date > DateTime.MinValue.Date : true) &&
+                         (SplitBilling && SelectedIntRoaming && !SelectedPermanentRoaming ? SelectedRoamingToDate.Date > SelectedRoamingFromDate.Date && SelectedRoamingToDate.Date > DateTime.MinValue.Date : true);
 
             return result;
         }
@@ -1222,11 +1475,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             // Client Data
             SelectedClient.PrimaryCellNumber = SelectedCellNumber.Trim();
             SelectedClient.ClientName = SelectedClientName.ToUpper().Trim();
+            SelectedClient.IsSaIDNumber = SaIDNumber;
             SelectedClient.IDNumber = SelectedClientIDNumber;
             SelectedClient.fkCompanyID = SelectedCompany.pkCompanyID;
             SelectedClient.fkClientLocationID = SelectedClientLocation.pkClientLocationID;
             SelectedClient.WBSNumber = SelectedClientWBSNumber.ToUpper().Trim(); 
             SelectedClient.CostCode = SelectedClientCostCode.ToUpper().Trim();
+            SelectedClient.IsPrivate = PrivateClient;
             SelectedClient.IPAddress = SelectedClientIPAddress;
             SelectedClient.AdminFee = Convert.ToDecimal(SelectedClientAdminFee);
             SelectedClient.AddressLine1 = SelectedClientAddressLine.ToUpper().Trim();
@@ -1251,11 +1506,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             // Package Setup Data
             if (SelectedClient.Contract.PackageSetup == null)
                 SelectedClient.Contract.PackageSetup = new PackageSetup();
-            SelectedClient.Contract.PackageSetup.Cost = SelectedContract != null ? SelectedContract.PackageSetup.Cost : 0;
-            SelectedClient.Contract.PackageSetup.TalkTimeMinutes = SelectedContract != null ? SelectedContract.PackageSetup.TalkTimeMinutes : 0;
-            SelectedClient.Contract.PackageSetup.SMSNumber = SelectedContract != null ? SelectedContract.PackageSetup.SMSNumber : 0;
-            SelectedClient.Contract.PackageSetup.MBData = SelectedContract != null ? SelectedContract.PackageSetup.MBData : 0;
-            SelectedClient.Contract.PackageSetup.RandValue = SelectedContract != null ? SelectedContract.PackageSetup.RandValue : 0;
+            SelectedClient.Contract.PackageSetup.Cost = !string.IsNullOrEmpty(SelectedPackageCost) ? Convert.ToDecimal(SelectedPackageCost) : 0;
+            SelectedClient.Contract.PackageSetup.TalkTimeMinutes = !string.IsNullOrEmpty(SelectedPackageTalkTime) ? Convert.ToInt32(SelectedPackageTalkTime) : 0;
+            SelectedClient.Contract.PackageSetup.SMSNumber = !string.IsNullOrEmpty(SelectedPackageSMSNumber) ? Convert.ToInt32(SelectedPackageSMSNumber) : 0;
+            SelectedClient.Contract.PackageSetup.MBData = !string.IsNullOrEmpty(SelectedPackageMBData) ? Convert.ToInt32(SelectedPackageMBData) : 0;
+            SelectedClient.Contract.PackageSetup.RandValue = !string.IsNullOrEmpty(SelectedPackageRandValue) ? Convert.ToDecimal(SelectedPackageRandValue) : 0;
+            SelectedClient.Contract.PackageSetup.SPULValue = !string.IsNullOrEmpty(SelectedPackageSPULValue) ? Convert.ToDecimal(SelectedPackageSPULValue) : 0;
             SelectedClient.Contract.PackageSetup.ModifiedBy = SecurityHelper.LoggedInUserFullName;
             SelectedClient.Contract.PackageSetup.ModifiedDate = DateTime.Now;
             SelectedClient.Contract.PackageSetup.IsActive = SelectedClientState;
@@ -1266,8 +1522,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedClient.ClientBilling.WDPAllowance = SelectedClientBilling.WDPAllowance;
             SelectedClient.ClientBilling.VoiceAllowance = Convert.ToDecimal(SelectedVoiceAllowance);
             SelectedClient.ClientBilling.SPLimit = SelectedClientBilling.SPLimit;
+            SelectedClient.ClientBilling.AllowanceLimit = SelectedClientBilling.AllowanceLimit;
             SelectedClient.ClientBilling.InternationalDailing = SelectedClientBilling.InternationalDailing;
+            SelectedClient.ClientBilling.PermanentIntDailing = SelectedPermanentDailing;
             SelectedClient.ClientBilling.InternationalRoaming = SelectedIntRoaming;
+            SelectedClient.ClientBilling.PermanentIntRoaming = SelectedPermanentRoaming;
             SelectedClient.ClientBilling.CountryVisiting = SelectedRoamingCountry != null ? SelectedRoamingCountry.ToUpper().Trim() : null;
             SelectedClient.ClientBilling.RoamingFromDate = SelectedRoamingFromDate > DateTime.MinValue ? SelectedRoamingFromDate : (DateTime?)null;  
             SelectedClient.ClientBilling.RoamingToDate = SelectedRoamingToDate > DateTime.MinValue ? SelectedRoamingToDate : (DateTime?)null;

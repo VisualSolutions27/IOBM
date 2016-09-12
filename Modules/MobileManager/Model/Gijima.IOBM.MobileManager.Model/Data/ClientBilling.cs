@@ -27,8 +27,11 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public Nullable<decimal> WDPAllowance { get; set; }
         public decimal VoiceAllowance { get; set; }
         public Nullable<decimal> SPLimit { get; set; }
+        public Nullable<decimal> AllowanceLimit { get; set; }
         public bool InternationalDailing { get; set; }
+        public bool PermanentIntDailing { get; set; }
         public bool InternationalRoaming { get; set; }
+        public bool PermanentIntRoaming { get; set; }
         public string CountryVisiting { get; set; }
         public Nullable<System.DateTime> RoamingFromDate { get; set; }
         public Nullable<System.DateTime> RoamingToDate { get; set; }
@@ -38,8 +41,8 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public System.DateTime ModifiedDate { get; set; }
         public bool IsActive { get; set; }
     
-        public virtual CompanyBillingLevel CompanyBillingLevel { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Client> Clients { get; set; }
+        public virtual CompanyBillingLevel CompanyBillingLevel { get; set; }
     }
 }

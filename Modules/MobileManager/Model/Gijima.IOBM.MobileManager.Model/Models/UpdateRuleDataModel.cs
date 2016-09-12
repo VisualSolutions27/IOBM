@@ -47,16 +47,16 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     }
                     else
                     {
-                        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The data update rule source {0} and destination {1} already exist.", 
-                                                                                       ((DataUpdateColumn)updateRuleData.enDataUpdateColumn).ToString(),
-                                                                                       ((DataUpdateEntity)updateRuleData.enDataUpdateEntity).ToString()));
+                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The data update rule source {0} and destination {1} already exist.", 
+                        //                                                               ((DataUpdateColumn)updateRuleData.enDataUpdateColumn).ToString(),
+                        //                                                               ((DataUpdateEntity)updateRuleData.enDataUpdateEntity).ToString()));
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }
@@ -83,7 +83,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return null;
             }
         }
@@ -105,7 +105,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 //    // Check to see if the validation rule data name already exist for another entity 
                 //    if (existingDataValidationOption != null && existingDataValidationOption.pkDataValidationOptionID != validationRulesData.pkDataValidationOptionID)
                 //    {
-                //        _eventAggregator.GetEvent<MessageEvent>().Publish(string.Format("The validation rule data {0} already exist.", validationRulesData.ValidationDataName));
+                //        _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The validation rule data {0} already exist.", validationRulesData.ValidationDataName));
                 //        return false;
                 //    }
                 //    else
@@ -128,7 +128,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<MessageEvent>().Publish(ex);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }

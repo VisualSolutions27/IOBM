@@ -120,7 +120,7 @@ namespace Gijima.Controls.WPF
 
 		#region Public Events
 
-		//public event EventHandler<MessageEventArgs> Feedback;
+		//public event EventHandler<ApplicationMessageEventArgs> Feedback;
 
 		#endregion
 
