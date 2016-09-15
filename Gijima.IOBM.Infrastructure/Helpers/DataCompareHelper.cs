@@ -33,27 +33,48 @@ namespace Gijima.IOBM.Infrastructure.Helpers
         {
             try
             {
-                switch (stringOperator)
+                string[] compareToValues = valueToCompareTo.Split(';');
+
+                foreach (string value in compareToValues)
                 {
-                    case StringOperator.Contains:
-                        return valueToCompare.ToUpper().Trim().Contains(valueToCompareTo.ToUpper().Trim());
-                    case StringOperator.Equal:
-                        return string.Equals(valueToCompare.ToUpper().Trim(), valueToCompareTo.ToUpper().Trim());
-                    case StringOperator.Format:
-                        return false;
-                    case StringOperator.LenghtSmaller:
-                        return valueToCompare.Length < Convert.ToInt32(valueToCompare);
-                    case StringOperator.LengthEqual:
-                        return valueToCompare.Length == Convert.ToInt32(valueToCompareTo);
-                    case StringOperator.LengthGreater:
-                        return valueToCompare.Length > Convert.ToInt32(valueToCompareTo);
-                    case StringOperator.PostFix:
-                        return valueToCompare.EndsWith(valueToCompareTo);
-                    case StringOperator.PreFix:
-                        return valueToCompare.StartsWith(valueToCompareTo);
-                    default:
-                        return false;
+                    switch (stringOperator)
+                    {
+                        case StringOperator.Contains:
+                            if (valueToCompare.ToUpper().Trim().Contains(value.ToUpper().Trim()))
+                                return true;
+                            break;
+                        case StringOperator.Equal:
+                            if (string.Equals(valueToCompare.ToUpper().Trim(), value.ToUpper().Trim()))
+                                return true;
+                            break;
+                       case StringOperator.Format:
+                            return false;
+                        case StringOperator.LenghtSmaller:
+                            if (valueToCompare.Length < Convert.ToInt32(value))
+                                return true;
+                            break;
+                        case StringOperator.LengthEqual:
+                            if (valueToCompare.Length == Convert.ToInt32(value))
+                                return true;
+                            break;
+                        case StringOperator.LengthGreater:
+                            if (valueToCompare.Length > Convert.ToInt32(value))
+                                return true;
+                            break;
+                        case StringOperator.PostFix:
+                            if (valueToCompare.EndsWith(value))
+                                return true;
+                            break;
+                        case StringOperator.PreFix:
+                            if (valueToCompare.StartsWith(value))
+                                return true;
+                            break;
+                        default:
+                            return false;
+                    }
                 }
+
+                return false;
             }
             catch (Exception ex)
             {
@@ -73,24 +94,41 @@ namespace Gijima.IOBM.Infrastructure.Helpers
         {
             try
             {
-                int intToCompare = Convert.ToInt32(valueToCompare);
-                int intToCompareTo = Convert.ToInt32(valueToCompareTo);
+                string[] compareToValues = valueToCompareTo.Split(';');
 
-                switch (numericOperator)
+                foreach (string value in compareToValues)
                 {
-                    case NumericOperator.Equal:
-                        return intToCompare == intToCompareTo;
-                    case NumericOperator.Greater:
-                        return intToCompare > intToCompareTo;
-                    case NumericOperator.GreaterEqual:
-                        return intToCompare >= intToCompareTo;
-                    case NumericOperator.Smaller:
-                        return intToCompare < intToCompareTo;
-                    case NumericOperator.SmallerEqual:
-                        return intToCompare <= intToCompareTo;
-                    default:
-                        return false;
+                    int intToCompare = Convert.ToInt32(valueToCompare);
+                    int intToCompareTo = Convert.ToInt32(value);
+
+                    switch (numericOperator)
+                    {
+                        case NumericOperator.Equal:
+                            if (intToCompare == intToCompareTo)
+                                return true;
+                            break;
+                        case NumericOperator.Greater:
+                            if (intToCompare > intToCompareTo)
+                                return true;
+                            break;
+                        case NumericOperator.GreaterEqual:
+                            if (intToCompare >= intToCompareTo)
+                                return true;
+                            break;
+                        case NumericOperator.Smaller:
+                            if (intToCompare < intToCompareTo)
+                                return true;
+                            break;
+                        case NumericOperator.SmallerEqual:
+                            if (intToCompare <= intToCompareTo)
+                                return true;
+                            break;
+                        default:
+                            return false;
+                    }
                 }
+
+                return false;
             }
             catch (Exception ex)
             {
@@ -110,24 +148,41 @@ namespace Gijima.IOBM.Infrastructure.Helpers
         {
             try
             {
-                decimal intToCompare = Convert.ToDecimal(valueToCompare);
-                decimal intToCompareTo = Convert.ToDecimal(valueToCompareTo);
+                string[] compareToValues = valueToCompareTo.Split(';');
 
-                switch (decimalOperator)
+                foreach (string value in compareToValues)
                 {
-                    case NumericOperator.Equal:
-                        return intToCompare == intToCompareTo;
-                    case NumericOperator.Greater:
-                        return intToCompare > intToCompareTo;
-                    case NumericOperator.GreaterEqual:
-                        return intToCompare >= intToCompareTo;
-                    case NumericOperator.Smaller:
-                        return intToCompare < intToCompareTo;
-                    case NumericOperator.SmallerEqual:
-                        return intToCompare <= intToCompareTo;
-                    default:
-                        return false;
+                    decimal intToCompare = Convert.ToDecimal(valueToCompare);
+                    decimal intToCompareTo = Convert.ToDecimal(value);
+
+                    switch (decimalOperator)
+                    {
+                        case NumericOperator.Equal:
+                            if (intToCompare == intToCompareTo)
+                                return true;
+                            break;
+                        case NumericOperator.Greater:
+                            if (intToCompare > intToCompareTo)
+                                return true;
+                            break;
+                        case NumericOperator.GreaterEqual:
+                            if (intToCompare >= intToCompareTo)
+                                return true;
+                            break;
+                        case NumericOperator.Smaller:
+                            if (intToCompare < intToCompareTo)
+                                return true;
+                            break;
+                        case NumericOperator.SmallerEqual:
+                            if (intToCompare <= intToCompareTo)
+                                return true;
+                            break;
+                        default:
+                            return false;
+                    }
                 }
+
+                return false;
             }
             catch (Exception ex)
             {

@@ -21,6 +21,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
         private CompanyBillingLevelModel _model = null;
         private IEventAggregator _eventAggregator;
+        private int _companyGroupID = 0;
 
         #region Commands
 
@@ -28,21 +29,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         public DelegateCommand AddCommand { get; set; }
         public DelegateCommand DeleteCommand { get; set; }
         public DelegateCommand SaveCommand { get; set; }
+        public DelegateCommand GroupCommand { get; set; }
         public DelegateCommand BillingLevelCommand { get; set; }
 
         #endregion
 
         #region Properties
-
-        /// <summary>
-        /// The company ID linked to billing levels
-        /// </summary>
-        public int CompanyID
-        {
-            get { return _companyID; }
-            set { SetProperty(ref _companyID, value); }
-        }
-        private int _companyID;
 
         /// <summary>
         /// Holds the selected (current) company billing level entity
@@ -55,6 +47,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 if (value != null)
                 {
                     SelectedBillingLevel = BillingLevelCollection != null ? BillingLevelCollection.First(p => p.pkBillingLevelID == value.fkBillingLevelID) : null;
+                    SelectedGroup = GroupCollection != null ? GroupCollection.First(p => p.pkCompanyGroupID == value.fkCompanyGroupID) : null;
                     BillingAmount = value.Amount;
                     SetProperty(ref _selectedCompanyBillingLevel, value);
                 }
@@ -95,6 +88,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private BillingLevel _selectedBillingLevel;
 
         /// <summary>
+        /// The selected company group
+        /// </summary>
+        public CompanyGroup SelectedGroup
+        {
+            get { return _selectedGroup; }
+            set { SetProperty(ref _selectedGroup, value); }
+        }
+        private CompanyGroup _selectedGroup;
+
+        /// <summary>
         /// The entered billing amount
         /// </summary>
         public decimal BillingAmount
@@ -118,6 +121,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         }
         private ObservableCollection<BillingLevel> _billingLevelCollection = null;
 
+        /// <summary>
+        /// The collection of company groups from the database
+        /// </summary>
+        public ObservableCollection<CompanyGroup> GroupCollection
+        {
+            get { return _groupCollection; }
+            set { SetProperty(ref _groupCollection, value); }
+        }
+        private ObservableCollection<CompanyGroup> _groupCollection = null;
+
         #endregion
 
         #region Input Validation
@@ -131,6 +144,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set { SetProperty(ref _validBillingLevel, value); }
         }
         private Brush _validBillingLevel = Brushes.Red;
+
+        /// <summary>
+        /// Set the required field border colour
+        /// </summary>
+        public Brush ValidGroup
+        {
+            get { return _validGroup; }
+            set { SetProperty(ref _validGroup, value); }
+        }
+        private Brush _validGroup = Brushes.Red;
 
         /// <summary>
         /// Set the required field border colour
@@ -167,6 +190,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 {
                     case "SelectedBillingLevel":
                         ValidBillingLevel = SelectedBillingLevel != null && SelectedBillingLevel.pkBillingLevelID < 1 ? Brushes.Red : Brushes.Silver; break;
+                    case "SelectedGroup":
+                        ValidGroup = SelectedGroup != null && SelectedGroup.pkCompanyGroupID < 1 ? Brushes.Red : Brushes.Silver; break;
                     case "BillingAmount":
                         ValidBillingAmount = BillingAmount < 1 ? Brushes.Red : Brushes.Silver; break;
                 }
@@ -185,10 +210,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Constructor
         /// </summary>
-        public ViewCompanyBillingLevelViewModel(IEventAggregator eventAggragator, int companyID = 0)
+        public ViewCompanyBillingLevelViewModel(IEventAggregator eventAggragator, int companyGroupID = 0)
         {           
             _eventAggregator = eventAggragator;
-            _companyID = companyID;
+            _companyGroupID = companyGroupID;
             InitialiseCompanyBillingLevelView();
          }
 
@@ -205,11 +230,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             AddCommand = new DelegateCommand(ExecuteAdd);
             DeleteCommand = new DelegateCommand(ExecuteDelete, CanExecuteDelete).ObservesProperty(() => SelectedCompanyBillingLevel);
             SaveCommand = new DelegateCommand(ExecuteSave, CanExecuteSave).ObservesProperty(() => SelectedBillingLevel)
+                                                                          .ObservesProperty(() => SelectedGroup)
                                                                           .ObservesProperty(() => BillingAmount);
+            GroupCommand = new DelegateCommand(ExecuteShowCompanyGroupView, CanExecuteMaintenace);
             BillingLevelCommand = new DelegateCommand(ExecuteShowBillingLevelView, CanExecuteMaintenace);
 
             // Load the view data
             await ReadCompanyBillingLevelsAsync();
+            await ReadCompanyGroupsAsync();
             await ReadBillingLevelsAsync();
         }
 
@@ -228,7 +256,22 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             try
             {
-                CompanyBillingLevelCollection = await Task.Run(() => _model.ReadCompanyBillingLevels(CompanyID));
+                CompanyBillingLevelCollection = await Task.Run(() => _model.ReadCompanyBillingLevels(_companyGroupID, true));
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+            }
+        }
+
+        /// <summary>
+        /// Load all the company groups from the database
+        /// </summary>
+        private async Task ReadCompanyGroupsAsync()
+        {
+            try
+            {
+                GroupCollection = await Task.Run(() => new CompanyGroupModel(_eventAggregator).ReadCompanyGroups(true));
             }
             catch (Exception ex)
             {
@@ -250,6 +293,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
             }
         }
+
+        #region Command Execution
 
         /// <summary>
         /// Set view command buttons enabled/disabled state
@@ -293,7 +338,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns></returns>
         private bool CanExecuteSave()
         {
-            return SelectedBillingLevel != null && SelectedBillingLevel.pkBillingLevelID > 0 && BillingAmount > 0;
+            return SelectedBillingLevel != null && SelectedGroup.pkCompanyGroupID > 0 &&
+                   SelectedBillingLevel.pkBillingLevelID > 0 && BillingAmount > 0;
         }
 
         /// <summary>
@@ -302,7 +348,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private async void ExecuteSave()
         {
             bool result = false;
-            SelectedCompanyBillingLevel.fkCompanyID = CompanyID;
+            SelectedCompanyBillingLevel.fkCompanyGroupID = SelectedGroup.pkCompanyGroupID;
             SelectedCompanyBillingLevel.fkBillingLevelID = SelectedBillingLevel.pkBillingLevelID;
             SelectedCompanyBillingLevel.Amount = BillingAmount;
             SelectedCompanyBillingLevel.ModifiedBy = SecurityHelper.LoggedInDomainName;
@@ -338,6 +384,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         }
 
         /// <summary>
+        /// Execute when the company group view command button is clicked 
+        /// </summary>
+        private async void ExecuteShowCompanyGroupView()
+        {
+            PopupWindow popupWindow = new PopupWindow(new ViewCompanyGroup(), "Company Group Maintenance", PopupWindow.PopupButtonType.Close);
+            popupWindow.ShowDialog();
+            await ReadCompanyGroupsAsync();
+        }
+
+        /// <summary>
         /// Execute when the billing view command button is clicked 
         /// </summary>
         private async void ExecuteShowBillingLevelView()
@@ -346,6 +402,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             popupWindow.ShowDialog();
             await ReadBillingLevelsAsync();
         }
+
+        #endregion
 
         #endregion
     }

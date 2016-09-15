@@ -81,9 +81,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 using (var db = MobileManagerEntities.GetContext())
                 {
                     companies = ((DbQuery<Company>)(from company in db.Companies
-                                                    select company)).Include("CompanyBillingLevels")
-                                                                    .Include("CompanyBillingLevels.BillingLevel")
-                                                                    .OrderBy(p => p.CompanyName).ToList();
+                                                    select company)).OrderBy(p => p.CompanyName).ToList();
 
                     if (activeOnly)
                         companies = companies.Where(p => p.IsActive);
@@ -205,6 +203,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             errorMessage = string.Empty;
             Company existingCompany = null;
             Company companyToUpdate = null;
+            Type propertyType = null;
             bool result = false;
 
             try
@@ -227,24 +226,30 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                 // Find the data column (property) to update
                                 if (property.Name == updateColumn)
                                 {
+                                    // Get the property type for nullable and non-nullable properties
+                                    if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                                        propertyType = property.PropertyType.GetGenericArguments()[0];
+                                    else
+                                        propertyType = property.PropertyType;
+
                                     // Update the property value based on the data type
-                                    if (property.PropertyType == typeof(DateTime))
+                                    if (propertyType == typeof(DateTime))
                                     {
                                         property.SetValue(companyToUpdate, Convert.ToDateTime(updateValue));
                                     }
-                                    else if (property.PropertyType == typeof(int))
+                                    else if (propertyType == typeof(int))
                                     {
                                         property.SetValue(companyToUpdate, Convert.ToInt32(updateValue));
                                     }
-                                    else if (property.PropertyType == typeof(decimal))
+                                    else if (propertyType == typeof(decimal))
                                     {
                                         property.SetValue(companyToUpdate, Convert.ToDecimal(updateValue));
                                     }
-                                    else if (property.PropertyType == typeof(bool))
+                                    else if (propertyType == typeof(bool))
                                     {
                                         property.SetValue(companyToUpdate, Convert.ToBoolean(updateValue));
                                     }
-                                    else if (property.PropertyType == typeof(string))
+                                    else if (propertyType == typeof(string))
                                     {
                                         property.SetValue(companyToUpdate, updateValue);
                                     }

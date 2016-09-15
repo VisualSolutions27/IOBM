@@ -17,13 +17,13 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public Company()
         {
-            this.CompanyBillingLevels = new HashSet<CompanyBillingLevel>();
-            this.UserInCompanies = new HashSet<UserInCompany>();
             this.Clients = new HashSet<Client>();
+            this.UserInCompanies = new HashSet<UserInCompany>();
         }
     
         public int pkCompanyID { get; set; }
         public int fkCompanyGroupID { get; set; }
+        public Nullable<int> fkBillingLevelGroupID { get; set; }
         public string CompanyName { get; set; }
         public string WBSNumber { get; set; }
         public string CostCode { get; set; }
@@ -33,12 +33,11 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public System.DateTime ModifiedDate { get; set; }
         public bool IsActive { get; set; }
     
-        public virtual CompanyGroup CompanyGroup { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<CompanyBillingLevel> CompanyBillingLevels { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<UserInCompany> UserInCompanies { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Client> Clients { get; set; }
+        public virtual CompanyGroup CompanyGroup { get; set; }
+        public virtual CompanyGroup CompanyGroup1 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<UserInCompany> UserInCompanies { get; set; }
     }
 }

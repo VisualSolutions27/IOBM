@@ -269,6 +269,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             errorMessage = string.Empty;
             Client existingClient = null;
             Client clientToUpdate = null;
+            Type propertyType = null;
             bool result = false;
 
             try
@@ -311,24 +312,30 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                 // Find the data column (property) to update
                                 if (property.Name == updateColumn)
                                 {
+                                    // Get the property type for nullable and non-nullable properties
+                                    if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                                        propertyType = property.PropertyType.GetGenericArguments()[0];
+                                    else
+                                        propertyType = property.PropertyType;
+
                                     // Update the property value based on the data type
-                                    if (property.PropertyType == typeof(DateTime))
+                                    if (propertyType == typeof(DateTime))
                                     {
                                         property.SetValue(clientToUpdate, Convert.ToDateTime(updateValue));
                                     }
-                                    else if (property.PropertyType == typeof(int))
+                                    else if (propertyType == typeof(int))
                                     {
                                         property.SetValue(clientToUpdate, Convert.ToInt32(updateValue));
                                     }
-                                    else if (property.PropertyType == typeof(decimal))
+                                    else if (propertyType == typeof(decimal))
                                     {
                                         property.SetValue(clientToUpdate, Convert.ToDecimal(updateValue));
                                     }
-                                    else if (property.PropertyType == typeof(bool))
+                                    else if (propertyType == typeof(bool))
                                     {
                                         property.SetValue(clientToUpdate, Convert.ToBoolean(updateValue));
                                     }
-                                    else if (property.PropertyType == typeof(string))
+                                    else if (propertyType == typeof(string))
                                     {
                                         property.SetValue(clientToUpdate, updateValue);
                                     }

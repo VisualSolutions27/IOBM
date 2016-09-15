@@ -33,9 +33,6 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public virtual DbSet<BillingProcessHistory> BillingProcessHistories { get; set; }
         public virtual DbSet<City> Cities { get; set; }
         public virtual DbSet<ClientLocation> ClientLocations { get; set; }
-        public virtual DbSet<Company> Companies { get; set; }
-        public virtual DbSet<CompanyBillingLevel> CompanyBillingLevels { get; set; }
-        public virtual DbSet<CompanyGroup> CompanyGroups { get; set; }
         public virtual DbSet<Contract> Contracts { get; set; }
         public virtual DbSet<DataValidationException> DataValidationExceptions { get; set; }
         public virtual DbSet<DataValidationProperty> DataValidationProperties { get; set; }
@@ -61,6 +58,9 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public virtual DbSet<AppSetting> AppSettings { get; set; }
         public virtual DbSet<Client> Clients { get; set; }
         public virtual DbSet<ClientBilling> ClientBillings { get; set; }
+        public virtual DbSet<Company> Companies { get; set; }
+        public virtual DbSet<CompanyGroup> CompanyGroups { get; set; }
+        public virtual DbSet<CompanyBillingLevel> CompanyBillingLevels { get; set; }
     
         public virtual ObjectResult<sp_report_Invoice_Result> sp_report_Invoice(Nullable<int> invoiceID)
         {

@@ -16,6 +16,7 @@ using Gijima.IOBM.MobileManager.Security;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Common.Events;
 using System.Windows;
+using Gijima.IOBM.Infrastructure.Helpers;
 
 namespace Gijima.IOBM.MobileManager.ViewModels
 {
@@ -129,7 +130,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("texzt");
                     //_message = new ApplicationMessage("ViewCellularViewModel", ex, MessageBoxImage.Error  )
                 }
             }
@@ -323,6 +323,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private ObservableCollection<Company> _companyCollection = null;
 
         /// <summary>
+        /// The collection of company billing levels from the database
+        /// </summary>
+        public ObservableCollection<CompanyBillingLevel> BillingLevelCollection
+        {
+            get { return _billingLevelCollection; }
+            set { SetProperty(ref _billingLevelCollection, value); }
+        }
+        private ObservableCollection<CompanyBillingLevel> _billingLevelCollection = null;
+
+        /// <summary>
         /// The collection of client locations from the database
         /// </summary>
         public ObservableCollection<ClientLocation> ClientLocationCollection
@@ -416,9 +426,73 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 SetProperty(ref _selectedCompany, value);
                 SetCompanyDefaults();
+                ReadCompanyBillingLevelsAsync();
             }
         }
         private Company _selectedCompany;
+        
+        /// <summary>
+        /// The selected company billing level
+        /// </summary>
+        public CompanyBillingLevel SelectedBillingLevel
+        {
+            get { return _selectedBillingLevel; }
+            set
+            {
+                SetProperty(ref _selectedBillingLevel, value);
+
+                if (SelectedPackageType != null && value != null && value.pkCompanyBillingLevelID > 0)
+                {
+                    if (((PackageType)Enum.Parse(typeof(PackageType), SelectedPackageType)) == PackageType.DATA)
+                    {
+                        AllowVoiceAllowance = false;
+                        AllowWDPAllowance = true;
+                        SelectedWDPAllowance = value.Amount.ToString();
+                    }
+                    else if (SplitBilling && ((PackageType)Enum.Parse(typeof(PackageType), SelectedPackageType)) == PackageType.VOICE)
+                    {
+                        AllowVoiceAllowance = true;
+                        AllowWDPAllowance = false;
+                        SelectedVoiceAllowance = value.Amount.ToString();
+                    }
+                }
+                else
+                {
+                    AllowVoiceAllowance = AllowWDPAllowance = false;
+                }
+            }
+        }
+        private CompanyBillingLevel _selectedBillingLevel;
+
+        /// <summary>
+        /// Indicated if company billing level can be selected
+        /// </summary>
+        public bool AllowBillingLevels
+        {
+            get { return _allowBillingLevels; }
+            set { SetProperty(ref _allowBillingLevels, value); }
+        }
+        private bool _allowBillingLevels;
+
+        /// <summary>
+        /// Indicated if a WDP allowance must be entered
+        /// </summary>
+        public bool AllowWDPAllowance
+        {
+            get { return _allowWDPAllowance; }
+            set { SetProperty(ref _allowWDPAllowance, value); }
+        }
+        private bool _allowWDPAllowance;
+
+        /// <summary>
+        /// Indicated if a Voice allowance must be entered
+        /// </summary>
+        public bool AllowVoiceAllowance
+        {
+            get { return _allowVoiceAllowance; }
+            set { SetProperty(ref _allowVoiceAllowance, value); }
+        }
+        private bool _allowVoiceAllowance;
 
         /// <summary>
         /// The selected client location
@@ -540,7 +614,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         public string SelectedPackageType
         {
             get { return _selectedPackageType; }
-            set { SetProperty(ref _selectedPackageType, value); }
+            set { SetProperty(ref _selectedPackageType, value);}
         }
         private string _selectedPackageType;
 
@@ -580,7 +654,31 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         public bool SplitBilling
         {
             get { return _splitBilling; }
-            set { SetProperty(ref _splitBilling, value); }
+            set
+            {
+                SetProperty(ref _splitBilling, value);
+
+                if (BillingLevelCollection != null)
+                {
+                    AllowBillingLevels = value;
+                    SelectedBillingLevel = BillingLevelCollection != null ? BillingLevelCollection.Where(p => p.pkCompanyBillingLevelID == 0).FirstOrDefault() : null;
+                }
+                else
+                {
+                    if (((PackageType)Enum.Parse(typeof(PackageType), SelectedPackageType)) == PackageType.DATA)
+                    {
+                        AllowVoiceAllowance = false;
+                        AllowWDPAllowance = value;
+                        SelectedWDPAllowance = "0";
+                    }
+                    else if (SplitBilling && ((PackageType)Enum.Parse(typeof(PackageType), SelectedPackageType)) == PackageType.VOICE)
+                    {
+                        AllowVoiceAllowance = value;
+                        AllowWDPAllowance = false;
+                        SelectedVoiceAllowance = "0";
+                    }
+                }
+            }
         }
         private bool _splitBilling;
 
@@ -592,20 +690,21 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             get { return _noSplitBilling; }
             set
             {
+                SetProperty(ref _noSplitBilling, value);
+
                 if (value == true)
                 {
                     SelectedClientBilling = new ClientBilling();
-                    SelectedVoiceAllowance = "0";
+                    SelectedVoiceAllowance = SelectedWDPAllowance = "0";
+                    SelectedBillingLevel = BillingLevelCollection != null ? BillingLevelCollection.Where(p => p.pkCompanyBillingLevelID == 0).FirstOrDefault() : null; 
                     SelectedIntRoaming = false;
                 }
-
-                SetProperty(ref _noSplitBilling, value);
             }
         }
         private bool _noSplitBilling;
        
         /// <summary>
-        /// Indicate if client has split billing
+        /// The enteredvoice allowance
         /// </summary>
         public string SelectedVoiceAllowance
         {
@@ -613,6 +712,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set { SetProperty(ref _selectedVoiceAllowance, value); }
         }
         private string _selectedVoiceAllowance;
+
+        /// <summary>
+        /// The entered WDP allowance
+        /// </summary>
+        public string SelectedWDPAllowance
+        {
+            get { return _selectedWDPAllowance; }
+            set { SetProperty(ref _selectedWDPAllowance, value); }
+        }
+        private string _selectedWDPAllowance;
 
         /// <summary>
         /// Indicate if client use int dailing
@@ -692,7 +801,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set { SetProperty(ref _validSelectedRoaming, value); }
         }
         private bool _validSelectedRoaming;
-
 
         /// <summary>
         /// Indicate if client has split billing
@@ -915,6 +1023,26 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Set the required field border colour
         /// </summary>
+        public Brush ValidBillingLevel
+        {
+            get { return _validBillingLevel; }
+            set { SetProperty(ref _validBillingLevel, value); }
+        }
+        private Brush _validBillingLevel = Brushes.Red;
+
+        /// <summary>
+        /// Set the required field border colour
+        /// </summary>
+        public Brush ValidWDPAllowance
+        {
+            get { return _validWDPAllowance; }
+            set { SetProperty(ref _validWDPAllowance, value); }
+        }
+        private Brush _validWDPAllowance = Brushes.Red;
+
+        /// <summary>
+        /// Set the required field border colour
+        /// </summary>
         public Brush ValidVoiceAllowance
         {
             get { return _validVoiceAllowance; }
@@ -1012,15 +1140,20 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                SelectedContractEndDate.Date == DateTime.MinValue.Date ? Brushes.Red : Brushes.Silver; break;
                     case "SplitBilling":
                         ValidSplitBilling = !SplitBilling && !NoSplitBilling ? Brushes.Red : Brushes.Silver;
-                        ValidVoiceAllowance = SplitBilling && (string.IsNullOrWhiteSpace(SelectedVoiceAllowance) || Convert.ToDecimal(SelectedVoiceAllowance) < 1) ? Brushes.Red : Brushes.Silver;
                         ValidRoamingCountry = SelectedIntRoaming && string.IsNullOrEmpty(SelectedRoamingCountry) ? Brushes.Red : Brushes.Silver;
                         ValidRoamingFromDate = SplitBilling && SelectedIntRoaming && SelectedRoamingFromDate.Date == DateTime.MinValue.Date ? Brushes.Red : Brushes.Silver;
                         ValidRoamingToDate = SplitBilling && SelectedIntRoaming && (SelectedRoamingToDate.Date < SelectedRoamingFromDate.Date ||
                                              SelectedRoamingToDate.Date == DateTime.MinValue.Date) ? Brushes.Red : Brushes.Silver; break;
+                    case "SelectedBillingLevel":
+                        ValidBillingLevel = SplitBilling && BillingLevelCollection != null && BillingLevelCollection.Count > 0 && SelectedBillingLevel != null && SelectedBillingLevel.pkCompanyBillingLevelID < 1 ? Brushes.Red : Brushes.Silver; break;
                     case "NoSplitBilling":
                         if (NoSplitBilling)
-                            ValidSplitBilling = ValidVoiceAllowance = ValidRoamingCountry = ValidRoamingFromDate = ValidRoamingToDate = Brushes.Silver;
+                        {
+                            ValidSplitBilling = ValidBillingLevel = ValidVoiceAllowance = ValidWDPAllowance = ValidRoamingCountry = ValidRoamingFromDate = ValidRoamingToDate = Brushes.Silver;
+                            AllowVoiceAllowance = AllowWDPAllowance = AllowBillingLevels = false;
+                        }
                         ValidSplitBilling = !SplitBilling && !NoSplitBilling ? Brushes.Red : Brushes.Silver; break;
+                        //ValidBillingLevel = SplitBilling && !NoSplitBilling && BillingLevelCollection != null &&? Brushes.Red : Brushes.Silver; break;
                     case "SelectedIntRoaming":
                         ValidRoamingCountry = SelectedIntRoaming && string.IsNullOrEmpty(SelectedRoamingCountry) ? Brushes.Red : Brushes.Silver;
                         ValidRoamingFromDate = SplitBilling && SelectedIntRoaming && (SelectedRoamingFromDate == null ||
@@ -1031,7 +1164,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     case "SelectedPermanentRoaming":
                         ValidRoamingCountry = !SelectedPermanentRoaming && string.IsNullOrEmpty(SelectedRoamingCountry) ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedVoiceAllowance":
-                        ValidVoiceAllowance = SplitBilling && (string.IsNullOrWhiteSpace(SelectedVoiceAllowance) || Convert.ToDecimal(SelectedVoiceAllowance) < 1) ? Brushes.Red : Brushes.Silver; break;
+                        ValidVoiceAllowance = SplitBilling && AllowVoiceAllowance && ((PackageType)Enum.Parse(typeof(PackageType), SelectedPackageType)) == PackageType.VOICE &&
+                                              (string.IsNullOrWhiteSpace(SelectedVoiceAllowance) || 
+                                               Convert.ToDecimal(SelectedVoiceAllowance) < 1) ? Brushes.Red : Brushes.Silver; break;
+                    case "SelectedWDPAllowance":
+                        ValidWDPAllowance = SplitBilling && AllowWDPAllowance && ((PackageType)Enum.Parse(typeof(PackageType), SelectedPackageType)) == PackageType.DATA &&
+                                            (string.IsNullOrWhiteSpace(SelectedWDPAllowance) || 
+                                             Convert.ToDecimal(SelectedWDPAllowance) < 1) ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedRoamingCountry":
                         ValidRoamingCountry = SelectedIntRoaming && string.IsNullOrEmpty(SelectedRoamingCountry) ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedRoamingFromDate":
@@ -1104,6 +1243,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                                           .ObservesProperty(() => SelectedSuburb)
                                                                           .ObservesProperty(() => SplitBilling)
                                                                           .ObservesProperty(() => NoSplitBilling)
+                                                                          .ObservesProperty(() => SelectedBillingLevel)
+                                                                          .ObservesProperty(() => SelectedWDPAllowance)
                                                                           .ObservesProperty(() => SelectedVoiceAllowance)
                                                                           .ObservesProperty(() => SelectedIntRoaming)
                                                                           .ObservesProperty(() => SelectedPermanentRoaming)
@@ -1252,7 +1393,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 {
                     SplitBilling = true;
                     NoSplitBilling = false;
+                    SelectedBillingLevel = BillingLevelCollection != null ? BillingLevelCollection.Where(p => p.pkCompanyBillingLevelID == clientBilling.fkCompanyBillingLevelID).FirstOrDefault() : null;
                     SelectedVoiceAllowance = clientBilling.VoiceAllowance.ToString();
+                    SelectedWDPAllowance = clientBilling.WDPAllowance.ToString();
                     SelectedIntRoaming = clientBilling.InternationalRoaming;
                     SelectedRoamingCountry = clientBilling.CountryVisiting;
                     SelectedRoamingFromDate = clientBilling.RoamingFromDate != null ? clientBilling.RoamingFromDate.Value : DateTime.MinValue.Date;
@@ -1262,7 +1405,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 {
                     SplitBilling = false;
                     NoSplitBilling = true;
-                    SelectedVoiceAllowance = "0";
+                    SelectedBillingLevel = null;
+                    SelectedVoiceAllowance = SelectedWDPAllowance = "0";
+                    AllowVoiceAllowance = AllowWDPAllowance = false;
                     SelectedIntRoaming = false;
                     SelectedRoamingCountry = string.Empty;
                     SelectedRoamingFromDate = DateTime.MinValue.Date;
@@ -1363,6 +1508,35 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
         }
 
+        /// <summary>
+        /// Populate the company billing levels from the selected company from the database
+        /// </summary>
+        private async void ReadCompanyBillingLevelsAsync()
+        {
+            try
+            {
+                if (SelectedCompany != null && SelectedCompany.pkCompanyID > 0 && SelectedCompany.fkBillingLevelGroupID != null)
+                    BillingLevelCollection = await Task.Run(() => new CompanyBillingLevelModel(_eventAggregator).ReadCompanyBillingLevels(SelectedCompany.fkBillingLevelGroupID.Value));
+
+                if (BillingLevelCollection != null && BillingLevelCollection.Count > 1)
+                {
+                    AllowBillingLevels = SplitBilling ? true : false;
+                    SelectedBillingLevel = BillingLevelCollection != null && SelectedClientBilling != null ? 
+                                           BillingLevelCollection.Where(p => p.pkCompanyBillingLevelID == SelectedClientBilling.fkCompanyBillingLevelID).FirstOrDefault() : null;
+                }
+                else
+                {
+                    BillingLevelCollection = null;
+                    SelectedBillingLevel = null;
+                    AllowBillingLevels = false;
+                }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+            }
+        }
+        
         #endregion
 
         #region Command Execution
@@ -1412,6 +1586,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             // Validate if the logged-in user can administrate the company the client is linked to
             return SelectedClient != null && SelectedStatus != null && (SelectedStatus.StatusDescription == "CANCELLED" ||
+                                                                        SelectedStatus.StatusDescription == "REALLOCATED" ||
                                                                         SelectedStatus.StatusDescription == "TRANSFERED") ? true : false;
         }
 
@@ -1458,7 +1633,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             // Validate billing data
             if (result && SplitBilling)
                 result = SelectedClientBilling != null && (SplitBilling || NoSplitBilling) && 
-                         (SplitBilling ? (!string.IsNullOrWhiteSpace(SelectedVoiceAllowance) && Convert.ToDecimal(SelectedVoiceAllowance) > 0) : false) && 
+                         (SplitBilling && BillingLevelCollection == null ? true :
+                          SplitBilling && BillingLevelCollection.Count > 1 && SelectedBillingLevel != null ? SelectedBillingLevel.pkCompanyBillingLevelID > 0 : false) && 
+                         (SplitBilling ? (!string.IsNullOrWhiteSpace(SelectedWDPAllowance) && Convert.ToDecimal(SelectedWDPAllowance) > 0 ||
+                                          !string.IsNullOrWhiteSpace(SelectedVoiceAllowance) && Convert.ToDecimal(SelectedVoiceAllowance) > 0) : false) && 
                          (SelectedIntRoaming && !SelectedPermanentRoaming ? !string.IsNullOrEmpty(SelectedRoamingCountry) : true) &&
                          (SplitBilling && SelectedIntRoaming && !SelectedPermanentRoaming ? SelectedRoamingFromDate.Date > DateTime.MinValue.Date : true) &&
                          (SplitBilling && SelectedIntRoaming && !SelectedPermanentRoaming ? SelectedRoamingToDate.Date > SelectedRoamingFromDate.Date && SelectedRoamingToDate.Date > DateTime.MinValue.Date : true);
@@ -1519,7 +1697,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             if (SelectedClient.ClientBilling == null)
                 SelectedClient.ClientBilling = new ClientBilling();
             SelectedClient.ClientBilling.IsSplitBilling = SplitBilling;
-            SelectedClient.ClientBilling.WDPAllowance = SelectedClientBilling.WDPAllowance;
+            SelectedClient.ClientBilling.fkCompanyBillingLevelID = SelectedBillingLevel != null ? SelectedBillingLevel.pkCompanyBillingLevelID : (Int32?)null;
+            SelectedClient.ClientBilling.WDPAllowance = Convert.ToDecimal(SelectedWDPAllowance);
             SelectedClient.ClientBilling.VoiceAllowance = Convert.ToDecimal(SelectedVoiceAllowance);
             SelectedClient.ClientBilling.SPLimit = SelectedClientBilling.SPLimit;
             SelectedClient.ClientBilling.AllowanceLimit = SelectedClientBilling.AllowanceLimit;

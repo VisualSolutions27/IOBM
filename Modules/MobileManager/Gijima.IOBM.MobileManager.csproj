@@ -123,6 +123,7 @@
     <Compile Include="ViewModels\ViewCityViewModel.cs" />
     <Compile Include="ViewModels\ViewClientSiteViewModel.cs" />
     <Compile Include="ViewModels\ViewCompanyBillingLevelViewModel.cs" />
+    <Compile Include="ViewModels\ViewCompanyGroupViewModel.cs" />
     <Compile Include="ViewModels\ViewDataUpdateViewModel.cs" />
     <Compile Include="ViewModels\ViewDataValidationCFViewModel.cs" />
     <Compile Include="ViewModels\ViewCompanyViewModel.cs" />
@@ -165,6 +166,9 @@
     </Compile>
     <Compile Include="Views\Maintenance\ViewCity.xaml.cs">
       <DependentUpon>ViewCity.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\Maintenance\ViewCompanyGroup.xaml.cs">
+      <DependentUpon>ViewCompanyGroup.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Maintenance\ViewDeviceModel.xaml.cs">
       <DependentUpon>ViewDeviceModel.xaml</DependentUpon>
@@ -265,6 +269,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Maintenance\ViewCity.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\Maintenance\ViewCompanyGroup.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

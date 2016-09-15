@@ -68,14 +68,16 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// <summary>
         /// Read all the data validation rules for the specified group from the database
         /// </summary>
+        /// <param name="validationProcess">The data validation process linked to the rules.</param>
         /// <param name="validationEntity">The data validation entity linked to the rules.</param>
         /// <returns>Collection of DataValidationRules</returns>
-        public ObservableCollection<DataValidationRule> ReadDataValidationRules(DataValidationGroupName validationEntity)
+        public ObservableCollection<DataValidationRule> ReadDataValidationRules(DataValidationProcess validationProcess, DataValidationGroupName validationEntity)
         {
             try
             {
                 List<DataValidationRule> validationRules = new List<DataValidationRule>();
                 var rules = (dynamic)null;
+                short processID = validationProcess.Value();
                 short entityID = validationEntity.Value();
 
                 using (var db = MobileManagerEntities.GetContext())
@@ -88,7 +90,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                      on validationRule.fkDataValidationPropertyID equals validationProperty.pkDataValidationPropertyID
                                      join client in db.Clients
                                      on validationRule.DataValidationEntityID equals client.pkClientID
-                                     where validationRule.enDataValidationEntity == entityID
+                                     where validationRule.enValidationProcess == processID &&
+                                           validationRule.enDataValidationEntity == entityID
                                      select new
                                      {
                                          pkDataValidationRuleID = validationRule.pkDataValidationRuleID,
@@ -111,7 +114,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                      on validationRule.fkDataValidationPropertyID equals validationProperty.pkDataValidationPropertyID
                                      join company in db.Companies
                                      on validationRule.DataValidationEntityID equals company.pkCompanyID
-                                     where validationRule.enDataValidationEntity == entityID
+                                     where validationRule.enValidationProcess == processID &&
+                                           validationRule.enDataValidationEntity == entityID
                                      select new
                                      {
                                          pkDataValidationRuleID = validationRule.pkDataValidationRuleID,

@@ -511,7 +511,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             try
             {
-                ValidationRuleCollection = await Task.Run(() => _model.ReadDataValidationRules((DataValidationGroupName)Enum.Parse(typeof(DataValidationGroupName), validationGroup)));
+                ValidationRuleCollection = await Task.Run(() => _model.ReadDataValidationRules(DataValidationProcess.Billing, (DataValidationGroupName)Enum.Parse(typeof(DataValidationGroupName), validationGroup)));
             }
             catch (Exception ex)
             {
@@ -798,10 +798,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             // If NO validations exceptions found the set 
             // the data validation process as complete
             // else save the exceptions to the database
-            if (ValidationErrorCollection.Count == 0)
-                await CompleteBillingProcessHistoryAsync(BillingExecutionState.DataValidation);
-            else
-                await CreateValidationRuleExceptionsAsync();
+            if (ValidationRuleCollection != null && ValidationErrorCollection != null && ValidationRuleCollection.Count > 0)
+            {
+                if (ValidationErrorCollection.Count == 0)
+                    await CompleteBillingProcessHistoryAsync(BillingExecutionState.DataValidation);
+                else
+                    await CreateValidationRuleExceptionsAsync();
+            }
 
             // Disable the stop button
             ValidationStarted = false;

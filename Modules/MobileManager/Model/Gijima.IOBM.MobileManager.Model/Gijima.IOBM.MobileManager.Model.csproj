@@ -197,7 +197,9 @@
     <Compile Include="Models\ClientLocationModel.cs" />
     <Compile Include="Models\ClientModel.cs" />
     <Compile Include="Models\CompanyBillingLevelModel.cs" />
+    <Compile Include="Models\CompanyGroupModel.cs" />
     <Compile Include="Models\CompanyModel.cs" />
+    <Compile Include="Models\ContractModel.cs" />
     <Compile Include="Models\DevicesMakeModel.cs" />
     <Compile Include="Models\DevicesModel.cs" />
     <Compile Include="Models\DevicesModelModel.cs" />

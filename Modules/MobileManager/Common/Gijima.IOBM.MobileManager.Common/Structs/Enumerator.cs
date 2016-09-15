@@ -52,6 +52,7 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         Email,
         CompanyName,
         PackageName,
+        CellNumber,
         AccountNumber,
         Other
     }
@@ -204,16 +205,12 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     {
         [Description("-- Please Select --")]
         None = 0,
-        [Description("Single System Entity")]
-        SingleSystemEntity = 1,
-        [Description("Multiple System Entities")]
-        MultipleSystemEntities = 2,
-        [Description("Single Billing Entity")]
-        SingleBillingEntity = 3,
-        [Description("Multiple Billing Entities")]
-        MultipleBillingEntities = 4,
-        [Description("External Import Entities")]
-        ExternalImportEntities = 5
+        [Description("System Data")]
+        System = 1,
+        [Description("Billing Data")]
+        Billing = 2,
+        [Description("External Data")]
+        External = 3
     }
 
     /// <summary>
@@ -226,20 +223,20 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         None = 0,
         [Description("Client Data")]
         Client = 1,
-        [Description("Company Client Data")]
-        CompanyClient = 2,
-        [Description("Package Client Data")]
-        PackageClient = 3,
         [Description("Company Data")]
-        Company = 4,
+        Company = 2,
+        [Description("Company Client Data")]
+        CompanyClient = 3,
         [Description("Package Data")]
-        Package = 5,
+        Package = 4,
+        [Description("Package Client Data")]
+        PackageClient = 5,
         [Description("Device Data")]
         Device = 6,
         [Description("Simcard Data")]
         SimCard = 7,
-        [Description("Status Data")]
-        Status = 8
+        [Description("Status Client Data")]
+        StatusClient = 8
     }
 
     /// <summary>
@@ -394,7 +391,7 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         ClientBilling = 3,
         [Description("Billing Level Data")]
         CompanyBillingLevel = 4,
-        [Description("Cantract Data")]
+        [Description("Contract Data")]
         Contract = 5,
         [Description("Package Data")]
         Package = 6

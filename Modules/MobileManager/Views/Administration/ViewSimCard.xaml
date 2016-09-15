@@ -112,7 +112,7 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Status" Binding="{Binding Status.StatusDescription}" Width="Auto" />
                         <DataGridTextColumn Header="State" Binding="{Binding IsActive, Converter={StaticResource UIDataConvertionHelper}, ConverterParameter='State'}" Width="Auto" />
-                        <DataGridTextColumn Header="Cell Number" Binding="{Binding CellNumber}" Width="*" />
+                        <DataGridTextColumn Header="Cell Number" Binding="{Binding CellNumber}" Width="Auto" />
                         <DataGridTextColumn Header="Card Number" Binding="{Binding CardNumber}" Width="Auto" />
                         <DataGridTextColumn Header="Pin Number" Binding="{Binding PinNumber}" Width="Auto" />
                         <DataGridTextColumn Header="PUK Number" Binding="{Binding PUKNumber}" Width="Auto" />

@@ -900,6 +900,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                                                                                      updateValue,
                                                                                                                      SelectedDestinationCompany,
                                                                                                                      out errorMessage)); break;
+                        case DataBaseEntity.Contract:
+                            result = await Task.Run(() => new ContractModel(_eventAggregator).UpdateContract(searchEntity,
+                                                                                                             searchCriteria,
+                                                                                                             destinationColumn,
+                                                                                                             updateValue,
+                                                                                                             SelectedDestinationCompany,
+                                                                                                             out errorMessage)); break;
                     }
 
                     if (result)

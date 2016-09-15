@@ -38,7 +38,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             {
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    if (!db.CompanyBillingLevels.Any(p => p.fkBillingLevelID == companyBillingLevel.fkBillingLevelID))
+                    if (!db.CompanyBillingLevels.Any(p => p.fkCompanyGroupID == companyBillingLevel.fkCompanyGroupID &&
+                                                          p.fkBillingLevelID == companyBillingLevel.fkBillingLevelID))
                     {
                         db.CompanyBillingLevels.Add(companyBillingLevel);
                         db.SaveChanges();
@@ -61,9 +62,10 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// <summary>
         /// Read all the company billing levels from the database
         /// </summary>
-        /// <param name="companyID">The companyId linked to the billing levels.</param>
+        /// <param name="companyGroupID">The company group linked to the billing levels.</param>
+        /// <param name="excludeDefault">Flag to include or exclude the default entity.</param>
         /// <returns>Collection of CompanyBillingLevels</returns>
-        public ObservableCollection<CompanyBillingLevel> ReadCompanyBillingLevels(int companyID)
+        public ObservableCollection<CompanyBillingLevel> ReadCompanyBillingLevels(int companyGroupID, bool excludeDefault = false)
         {
             try
             {
@@ -73,9 +75,14 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 {
                     companyBillingLevels = ((DbQuery<CompanyBillingLevel>)(from companyLevel in db.CompanyBillingLevels
                                                                            join billingLevel in db.BillingLevels on companyLevel.fkBillingLevelID equals billingLevel.pkBillingLevelID
-                                                                           where companyLevel.fkCompanyID == companyID
+                                                                           where companyLevel.fkCompanyGroupID == 0 ||
+                                                                                 companyLevel.fkCompanyGroupID == companyGroupID
                                                                            select companyLevel)).Include("BillingLevel")
+                                                                                                .Include("CompanyGroup")
                                                                                                 .OrderBy(p => p.BillingLevel.LevelDescription).ToList();
+
+                    if (excludeDefault)
+                        companyBillingLevels = companyBillingLevels.Where(p => p.pkCompanyBillingLevelID > 0);
 
                     return new ObservableCollection<CompanyBillingLevel>(companyBillingLevels);
                 }

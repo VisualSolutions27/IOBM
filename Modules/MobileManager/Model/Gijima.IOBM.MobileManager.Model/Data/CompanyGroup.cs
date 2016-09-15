@@ -18,6 +18,8 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public CompanyGroup()
         {
             this.Companies = new HashSet<Company>();
+            this.Companies1 = new HashSet<Company>();
+            this.CompanyBillingLevels = new HashSet<CompanyBillingLevel>();
         }
     
         public int pkCompanyGroupID { get; set; }
@@ -28,5 +30,9 @@ namespace Gijima.IOBM.MobileManager.Model.Data
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<Company> Companies { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<Company> Companies1 { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<CompanyBillingLevel> CompanyBillingLevels { get; set; }
     }
 }

@@ -11,7 +11,7 @@ using System.Transactions;
 
 namespace Gijima.IOBM.MobileManager.Model.Models
 {
-    public class PackageSetupModel
+    public class ContractModel
     {
         #region Properties and Attributes
 
@@ -24,7 +24,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// <summary>
         /// Constructure
         /// </summary>
-        public PackageSetupModel()
+        public ContractModel()
         {
         }
 
@@ -32,7 +32,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// Constructure
         /// </summary>
         /// <param name="eventAggreagator"></param>
-        public PackageSetupModel(IEventAggregator eventAggreagator)
+        public ContractModel(IEventAggregator eventAggreagator)
         {
             _eventAggregator = eventAggreagator;
             _activityLogger = new AuditLogModel(_eventAggregator);
@@ -40,21 +40,20 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         }
 
         /// <summary>
-        /// Update an existing package setup entity in the database
+        /// Update an existing client contract entity in the database
         /// </summary>
-        /// <param name="searchEntity">The client data to search on.</param>
-        /// <param name="searchCriteria">The client search criteria to search for.</param>
-        /// <param name="updateColumn">The client entity property (column) to update.</param>
-        /// <param name="updateValue">The value to update client entity property (column) with.</param>
+        /// <param name="searchEntity">The contract data to search on.</param>
+        /// <param name="searchCriteria">The contract search criteria to search for.</param>
+        /// <param name="updateColumn">The contract entity property (column) to update.</param>
+        /// <param name="updateValue">The value to update contract entity property (column) with.</param>
         /// <param name="companyGroup">The company group the client is linked to.</param>
         /// <param name="errorMessage">OUT The error message.</param>
         /// <returns>True if successfull</returns>
-        public bool UpdatePackageSetup(SearchEntity searchEntity, string searchCriteria, string updateColumn, object updateValue, CompanyGroup companyGroup, out string errorMessage)
+        public bool UpdateContract(SearchEntity searchEntity, string searchCriteria, string updateColumn, object updateValue, CompanyGroup companyGroup, out string errorMessage)
         {
             errorMessage = string.Empty;
-            Client existingClient = null;
-            Contract clientContract = null;
-            PackageSetup packageSetupCurrent = null;
+            Contract existingContract = null;
+            Contract contractToUpdate = null;
             Type propertyType = null;
             bool result = false;
 
@@ -64,45 +63,31 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 {
                     switch (searchEntity)
                     {
-                        case SearchEntity.ClientID:
-                            existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.ClientID).FirstOrDefault();
+                        case SearchEntity.CellNumber:
+                            existingContract = db.Contracts.Where(p => p.CellNumber == searchCriteria).FirstOrDefault();
                             break;
-                        case SearchEntity.PrimaryCellNumber:
-                            existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.PrimaryCellNumber).FirstOrDefault();
-                            break;
-                        case SearchEntity.EmployeeNumber:
-                            if (companyGroup == null)
-                                existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.EmployeeNumber).FirstOrDefault();
-                            else
-                                existingClient = new SearchEngineModel(_eventAggregator).SearchForClientByCompanyGroup(searchCriteria, SearchEntity.EmployeeNumber, companyGroup).FirstOrDefault();
-                            break;
-                        case SearchEntity.IDNumber:
-                            existingClient = new SearchEngineModel(_eventAggregator).SearchForClient(searchCriteria, SearchEntity.IDNumber).FirstOrDefault();
+                        case SearchEntity.AccountNumber:
+                            existingContract = db.Contracts.Where(p => p.AccountNumber == searchCriteria).FirstOrDefault();
                             break;
                     }
 
-                    if (existingClient == null)
+                    if (existingContract == null)
                     {
-                        errorMessage = string.Format("Client not found for {0} {1}.", searchEntity.ToString(), searchCriteria);
+                        errorMessage = string.Format("Contract not found for {0} {1}.", searchEntity.ToString(), searchCriteria);
                         return false;
                     }
-
-                    clientContract = db.Contracts.Where(p => p.pkContractID == existingClient.fkContractID).FirstOrDefault();
-
-                    if (clientContract != null)
-                        packageSetupCurrent = db.PackageSetups.Where(p => p.pkPackageSetupID == clientContract.fkPackageSetupID).FirstOrDefault();
                 }
 
-                if (packageSetupCurrent != null)
+                if (existingContract != null)
                 {
                     using (TransactionScope tc = TransactionHelper.CreateTransactionScope())
                     {
                         using (var db = MobileManagerEntities.GetContext())
                         {
-                            PackageSetup packageSetupToUpdate = db.PackageSetups.Where(p => p.pkPackageSetupID == clientContract.fkPackageSetupID).FirstOrDefault();
+                            contractToUpdate = db.Contracts.Where(p => p.pkContractID == existingContract.pkContractID).FirstOrDefault();
 
-                            // Get the client table properties (Fields)
-                            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(PackageSetup));
+                            // Get the contract table properties (Fields)
+                            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(Contract));
 
                             foreach (PropertyDescriptor property in properties)
                             {
@@ -116,13 +101,21 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                         propertyType = property.PropertyType;
 
                                     // Update the property value based on the data type
-                                    if (propertyType == typeof(int))
+                                    if (propertyType == typeof(DateTime))
                                     {
-                                        property.SetValue(packageSetupToUpdate, Convert.ToInt32(updateValue));
+                                        property.SetValue(contractToUpdate, Convert.ToDateTime(updateValue));
                                     }
-                                    else if (propertyType == typeof(decimal))
+                                    else if (propertyType == typeof(int))
                                     {
-                                        property.SetValue(packageSetupToUpdate, Convert.ToDecimal(updateValue));
+                                        property.SetValue(contractToUpdate, Convert.ToInt32(updateValue));
+                                    }
+                                    else if (propertyType == typeof(bool))
+                                    {
+                                        property.SetValue(contractToUpdate, Convert.ToBoolean(updateValue));
+                                    }
+                                    else if (propertyType == typeof(string))
+                                    {
+                                        property.SetValue(contractToUpdate, updateValue);
                                     }
                                     else
                                     {
@@ -131,7 +124,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                     }
 
                                     // Add the data activity log
-                                    result = _activityLogger.CreateDataChangeAudits<PackageSetup>(_dataActivityHelper.GetDataChangeActivities<PackageSetup>(packageSetupCurrent, packageSetupToUpdate, existingClient.fkContractID, db));
+                                    result = _activityLogger.CreateDataChangeAudits<Contract>(_dataActivityHelper.GetDataChangeActivities<Contract>(existingContract, contractToUpdate, contractToUpdate.pkContractID, db));
 
                                     db.SaveChanges();
                                 }
@@ -144,7 +137,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 }
                 else
                 {
-                    errorMessage = string.Format("Client package not found for {0} {1}.", searchEntity.ToString(), searchCriteria);
+                    errorMessage = string.Format("Client contract not found for {0} {1}.", searchEntity.ToString(), searchCriteria);
                     return false;
                 }
 
@@ -159,3 +152,4 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         }
     }
 }
+

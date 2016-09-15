@@ -21,15 +21,15 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         }
     
         public int pkCompanyBillingLevelID { get; set; }
-        public int fkCompanyID { get; set; }
+        public int fkCompanyGroupID { get; set; }
         public int fkBillingLevelID { get; set; }
         public decimal Amount { get; set; }
         public string ModifiedBy { get; set; }
         public System.DateTime ModifiedDate { get; set; }
     
         public virtual BillingLevel BillingLevel { get; set; }
-        public virtual Company Company { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<ClientBilling> ClientBillings { get; set; }
+        public virtual CompanyGroup CompanyGroup { get; set; }
     }
 }

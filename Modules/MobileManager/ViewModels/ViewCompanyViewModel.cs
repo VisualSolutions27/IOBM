@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -28,6 +29,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         public DelegateCommand CancelCommand { get; set; }
         public DelegateCommand AddCommand { get; set; }
         public DelegateCommand SaveCommand { get; set; }
+        public DelegateCommand GroupCommand { get; set; }
         public DelegateCommand BillingLevelCommand { get; set; }
 
         #endregion
@@ -45,6 +47,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 if (value != null)
                 {
                     SelectedCompanyName = value.CompanyName;
+                    SelectedGroup = GroupCollection != null ? GroupCollection.First(p => p.pkCompanyGroupID == value.fkCompanyGroupID) : null;
                     SelectedWBSNumber = value.WBSNumber;
                     SelectedCostCode = value.CostCode;
                     SelectedIPAddress = value.IPAddress;
@@ -98,6 +101,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
         #region View Lookup Data Collections
 
+        /// <summary>
+        /// The collection of company groups from the database
+        /// </summary>
+        public ObservableCollection<CompanyGroup> GroupCollection
+        {
+            get { return _groupCollection; }
+            set { SetProperty(ref _groupCollection, value); }
+        }
+        private ObservableCollection<CompanyGroup> _groupCollection = null;
+
         #endregion
 
         #region Required Fields
@@ -111,6 +124,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set { SetProperty(ref _selectedCompanyName, value); }
         }
         private string _selectedCompanyName = string.Empty;
+
+        /// <summary>
+        /// The selected company group
+        /// </summary>
+        public CompanyGroup SelectedGroup
+        {
+            get { return _selectedGroup; }
+            set { SetProperty(ref _selectedGroup, value); }
+        }
+        private CompanyGroup _selectedGroup;
 
         /// <summary>
         /// The entered wbs number
@@ -145,6 +168,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set { SetProperty(ref _validCompanyName, value); }
         }
         private Brush _validCompanyName = Brushes.Red;
+
+        /// <summary>
+        /// Set the required field border colour
+        /// </summary>
+        public Brush ValidGroup
+        {
+            get { return _validGroup; }
+            set { SetProperty(ref _validGroup, value); }
+        }
+        private Brush _validGroup = Brushes.Red;
 
         /// <summary>
         /// Set the required field border colour
@@ -191,6 +224,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 {
                     case "SelectedCompanyName":
                         ValidCompanyName = string.IsNullOrEmpty(SelectedCompanyName) ? Brushes.Red : Brushes.Silver; break;
+                    case "SelectedGroup":
+                        ValidGroup = SelectedGroup != null && SelectedGroup.pkCompanyGroupID < 1 ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedWBSNumber":
                         ValidWBSNumber = string.IsNullOrEmpty(SelectedWBSNumber) ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedCostCode":
@@ -228,11 +263,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             CancelCommand = new DelegateCommand(ExecuteCancel, CanExecuteCancel).ObservesProperty(() => SelectedCompanyName);
             AddCommand = new DelegateCommand(ExecuteAdd);
             SaveCommand = new DelegateCommand(ExecuteSave, CanExecuteSave).ObservesProperty(() => SelectedCompanyName)
+                                                                          .ObservesProperty(() => SelectedGroup)
                                                                           .ObservesProperty(() => SelectedWBSNumber)
                                                                           .ObservesProperty(() => SelectedCostCode);
             BillingLevelCommand = new DelegateCommand(ExecuteShowBillingLevelView, CanExecuteMaintenace).ObservesProperty(() => SelectedCompany);
 
             // Load the view data
+            await ReadCompanyGroupsAsync();
             await ReadCompaniesAsync();
         }
 
@@ -262,6 +299,21 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         #region Lookup Data Loading
 
         /// <summary>
+        /// Load all the company groups from the database
+        /// </summary>
+        private async Task ReadCompanyGroupsAsync()
+        {
+            try
+            {
+                GroupCollection = await Task.Run(() => new CompanyGroupModel(_eventAggregator).ReadCompanyGroups(true));
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+            }
+        }
+
+        /// <summary>
         /// Load all the companie's billing levels from the database
         /// </summary>
         private async void ReadCompanyBillingLevelsAsync()
@@ -271,13 +323,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 List<ListBoxItem> billingLevelItems = new List<ListBoxItem>();
                 ListBoxItem billingLevelItem = null;
 
-                ObservableCollection<CompanyBillingLevel> collection = await Task.Run(() => new CompanyBillingLevelModel(_eventAggregator).ReadCompanyBillingLevels(SelectedCompany.pkCompanyID));
-
-                foreach (CompanyBillingLevel billingLevel in collection)
+                if (SelectedCompany.fkBillingLevelGroupID != null)
                 {
-                    billingLevelItem = new ListBoxItem();
-                    billingLevelItem.Content = string.Format("{0} - R{1}", billingLevel.BillingLevel.LevelDescription, billingLevel.Amount);
-                    billingLevelItems.Add(billingLevelItem);
+                    ObservableCollection<CompanyBillingLevel> collection = await Task.Run(() => new CompanyBillingLevelModel(_eventAggregator).ReadCompanyBillingLevels(SelectedCompany.fkBillingLevelGroupID.Value, true));
+
+                    foreach (CompanyBillingLevel billingLevel in collection)
+                    {
+                        billingLevelItem = new ListBoxItem();
+                        billingLevelItem.Content = string.Format("{0} - R{1}", billingLevel.BillingLevel.LevelDescription, billingLevel.Amount);
+                        billingLevelItems.Add(billingLevelItem);
+                    }
                 }
 
                 CompanyBillingLevelCollection = billingLevelItems;
@@ -315,7 +370,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns></returns>
         private bool CanExecuteSave()
         {
-            return !string.IsNullOrWhiteSpace(SelectedCompanyName) && !string.IsNullOrWhiteSpace(SelectedWBSNumber) && !string.IsNullOrWhiteSpace(SelectedCostCode);
+            return !string.IsNullOrWhiteSpace(SelectedCompanyName) && !string.IsNullOrWhiteSpace(SelectedWBSNumber) &&
+                   !string.IsNullOrWhiteSpace(SelectedCostCode) && SelectedGroup != null && SelectedGroup.pkCompanyGroupID > 0;
         }
 
         /// <summary>
@@ -333,6 +389,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             bool result = false;
             SelectedCompany.CompanyName = SelectedCompanyName.ToUpper();
+            SelectedCompany.fkCompanyGroupID = SelectedGroup.pkCompanyGroupID;
             SelectedCompany.WBSNumber = SelectedWBSNumber.ToUpper();
             SelectedCompany.CostCode = SelectedCostCode.ToUpper();
             SelectedCompany.ModifiedBy = SecurityHelper.LoggedInDomainName;
@@ -365,8 +422,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void ExecuteShowBillingLevelView()
         {
+            int companyGroupID = SelectedCompany.fkBillingLevelGroupID != null ? SelectedCompany.fkBillingLevelGroupID.Value : 0;
             ViewCompanyBillingLevel view = new ViewCompanyBillingLevel();
-            ViewCompanyBillingLevelViewModel viewModel = new ViewCompanyBillingLevelViewModel(_eventAggregator, SelectedCompany.pkCompanyID);
+            ViewCompanyBillingLevelViewModel viewModel = new ViewCompanyBillingLevelViewModel(_eventAggregator, companyGroupID);
             view.DataContext = viewModel;
             PopupWindow popupWindow = new PopupWindow(view, "Company Billing Level Maintenance", PopupWindow.PopupButtonType.Close);
             popupWindow.ShowDialog();
