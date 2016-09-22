@@ -171,6 +171,43 @@ namespace Gijima.IOBM.Shell.ViewModels
         }
 
         /// <summary>
+        /// Receive the application message to display to the user
+        /// </summary>
+        /// <param name="sender">The application message.</param>
+        private void ApplicationMessage_Event(object sender)
+        {
+            ApplicationMessage appMessage = (ApplicationMessage)sender;
+
+            if (appMessage != null)
+            {
+                switch (appMessage.MessageType)
+                {
+                    case ApplicationMessage.MessageTypes.SystemError:
+                        MessageBox.Show(appMessage.Message.ToString(), string.Format("{0} - {1}",
+                                        appMessage.Owner.ToUpper(),
+                                        appMessage.Header.ToUpper()),
+                                        MessageBoxButton.OK,
+                                        MessageBoxImage.Error);
+                        break;
+                    case ApplicationMessage.MessageTypes.ProcessError:
+                        MessageBox.Show(appMessage.Message.ToString(), string.Format("{0} - {1}",
+                                        appMessage.Owner.ToUpper(),
+                                        appMessage.Header.ToUpper()),
+                                        MessageBoxButton.OK,
+                                        MessageBoxImage.Exclamation);
+                        break;
+                    default:
+                        MessageBox.Show(appMessage.Message.ToString(), string.Format("{0} - {1}",
+                                        appMessage.Owner.ToUpper(),
+                                        appMessage.Header.ToUpper()),
+                                        MessageBoxButton.OK,
+                                        MessageBoxImage.Information);
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
         /// Sync the solution user with the application user
         /// </summary>
         /// <param name="sender">The application user enetity.</param>
@@ -201,6 +238,9 @@ namespace Gijima.IOBM.Shell.ViewModels
 
             // Subscribe to this event to get the application info
             _eventAggregator.GetEvent<ApplicationInfoEvent>().Subscribe(ApplicationInfo_Event, true);
+
+            // Subscribe to this event to display processing and exception messages to the user
+            _eventAggregator.GetEvent<ApplicationMessageEvent>().Subscribe(ApplicationMessage_Event, true);
 
             // Subscribe to this event so the solution user and the mobile manager user can be synced
             _eventAggregator.GetEvent<MobileManagerSecurityEvent>().Subscribe(MobileManagerSecurity_Event, true);

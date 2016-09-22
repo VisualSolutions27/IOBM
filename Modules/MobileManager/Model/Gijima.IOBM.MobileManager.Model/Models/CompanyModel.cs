@@ -286,5 +286,36 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 return false;
             }
         }
+
+        /// <summary>
+        /// Update an existing company's billing level group ID
+        /// </summary>
+        /// <param name="companyID">The company entity to update.</param>
+        /// <param name="billingLevelGroupID">The billing level group ID.</param>
+        /// <returns>True if successfull</returns>
+        public bool UpdateCompanyBillingLevelGroup(int companyID, int billingLevelGroupID)
+        {
+            try
+            {
+                using (var db = MobileManagerEntities.GetContext())
+                {
+                    Company existingCompany = db.Companies.Where(p => p.pkCompanyID == companyID).FirstOrDefault();
+
+                    if (existingCompany != null)
+                    {
+                        existingCompany.fkBillingLevelGroupID = billingLevelGroupID;
+                        db.SaveChanges();
+                        return true;
+                    }
+
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                return false;
+            }
+        }
     }
 }

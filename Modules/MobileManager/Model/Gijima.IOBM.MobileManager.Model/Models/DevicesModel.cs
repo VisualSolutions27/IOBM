@@ -1,5 +1,6 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
 using Gijima.IOBM.Infrastructure.Helpers;
+using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
 using Prism.Events;
 using System;
@@ -42,6 +43,23 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             {
                 using (var db = MobileManagerEntities.GetContext())
                 {
+                    // Get the re-allacted status ID to be used in re-allaction valdation
+                    int reAllocatedStatusID = db.Status.Where(p => p.StatusDescription == "REALLOCATED").First().pkStatusID;
+
+                    // If a device gets re-allocated ensure that all the required properties 
+                    // is valid to allow re-alloaction
+                    if (db.Devices.Any(p => p.IMENumber.ToUpper().Trim() == device.IMENumber.ToUpper().Trim() &&
+                                            p.fkStatusID != reAllocatedStatusID &&
+                                            p.IsActive == true))
+                    {                       
+                        _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                        .Publish(new ApplicationMessage("DevicesModel",
+                                                                        "The device is still allocated to another client.",
+                                                                        "CreateDevice",
+                                                                        ApplicationMessage.MessageTypes.Information));
+                        return false;
+                    }
+
                     if (!db.Devices.Any(p => p.fkDeviceMakeID == device.fkDeviceMakeID && 
                                              p.fkDeviceModelID == device.fkDeviceModelID &&
                                              p.fkContractID == device.fkContractID))
@@ -52,14 +70,23 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     }
                     else
                     {
-                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The {0}, {1} device already exist.", device.DeviceMake.MakeDescription, device.DeviceModel.ModelDescription));
+                        _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                        .Publish(new ApplicationMessage("DevicesModel",
+                                                                        "The device already exist.",
+                                                                        "CreateDevice",
+                                                                        ApplicationMessage.MessageTypes.Information));
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("DevicesModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException !=null ? ex.InnerException.Message : string.Empty),
+                                                                "CreateDevice",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }
@@ -88,7 +115,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("DevicesModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadDevices",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return null;
             }
         }
@@ -124,7 +156,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("DevicesModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadDevicesForContract",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return null;
             }
         }
@@ -146,7 +183,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     if (existingDevice != null && existingDevice.pkDeviceID != device.pkDeviceID && 
                         existingDevice.fkDeviceMakeID == device.fkDeviceMakeID && existingDevice.fkDeviceModelID == device.fkDeviceModelID)
                     {
-                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The {0}, {1} device already exist.", device.DeviceMake.MakeDescription, device.DeviceModel.ModelDescription));
+                        _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                        .Publish(new ApplicationMessage("DevicesModel",
+                                                                        string.Format("The {0}, {1} device already exist.",
+                                                                        device.DeviceMake.MakeDescription, device.DeviceModel.ModelDescription),
+                                                                        "UpdateDevice",
+                                                                        ApplicationMessage.MessageTypes.Information));
                         return false;
                     }
                     else if (existingDevice != null)
@@ -175,7 +217,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("DevicesModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "UpdateDevice",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }

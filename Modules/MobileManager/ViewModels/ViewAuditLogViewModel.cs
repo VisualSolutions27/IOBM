@@ -173,7 +173,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             // Load all the activity logs for the client
             DataActivityLog activityLogInfo = new DataActivityLog();
             activityLogInfo.ActivityProcess = ActivityProcess.Administration.Value();
-            activityLogInfo.EntityID = MobileManagerEnvironment.SelectedContractID;
+            activityLogInfo.EntityID = MobileManagerEnvironment.ClientContractID;
             ReadActivityLogFilters(activityLogInfo);
             SelectedActivityLogFilter = AdminActivityFilter.None.ToString();
         }

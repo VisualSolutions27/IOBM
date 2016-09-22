@@ -1,23 +1,45 @@
-﻿namespace Gijima.IOBM.Infrastructure.Structs
+﻿using Gijima.IOBM.MobileManager.Common.Structs;
+
+namespace Gijima.IOBM.Infrastructure.Structs
 {
     public static class MobileManagerEnvironment
     {
         #region Properties & Attributes
 
         /// <summary>
+        /// The selected process menu option.
+        /// </summary>
+        public static ProcessMenuOption SelectedProcessMenu { get; set; }
+
+        /// <summary>
+        /// The selected system tools menu option.
+        /// </summary>
+        public static ToolsMenuOption SelectedToolsMenu { get; set; }
+
+        /// <summary>
+        /// The selected configuration menu option.
+        /// </summary>
+        public static ConfigMenuOption SelectedConfigMenu { get; set; }
+
+        /// <summary>
         /// The selected client ID.
         /// </summary>
-        public static int SelectedClientID { get; set; }
+        public static int ClientID { get; set; }
 
         /// <summary>
         /// The selected contract ID.
         /// </summary>
-        public static int SelectedContractID { get; set; }
+        public static int ClientContractID { get; set; }
 
         /// <summary>
         /// The selected client company ID.
         /// </summary>
         public static int ClientCompanyID { get; set; }
+
+        /// <summary>
+        /// The selected client primary cell number.
+        /// </summary>
+        public static string ClientPrimaryCell { get; set; }
 
         /// <summary>
         /// The current billing period.

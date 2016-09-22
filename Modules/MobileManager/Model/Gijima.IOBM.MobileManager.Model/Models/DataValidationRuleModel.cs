@@ -44,7 +44,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             {
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    if (!db.DataValidationRules.Any(p => p.fkDataValidationPropertyID == validationRule.fkDataValidationPropertyID &&
+                    if (!db.DataValidationRules.Any(p => p.enValidationProcess == validationRule.enValidationProcess &&
+                                                         p.fkDataValidationPropertyID == validationRule.fkDataValidationPropertyID &&
                                                          p.DataValidationEntityID == validationRule.DataValidationEntityID))
                     {
                         db.DataValidationRules.Add(validationRule);
@@ -53,14 +54,23 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     }
                     else
                     {
-                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish("The data validation rule already exist.");
+                        _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                        .Publish(new ApplicationMessage("DataValidationRuleModel",
+                                                                        "The validation rule already exist.",
+                                                                        "CreateDataValidationRule",
+                                                                        ApplicationMessage.MessageTypes.Information));
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("DataValidationRuleModel",
+                                                                string.Format("Error! {0} {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "CreateDataValidationRule",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }
@@ -132,7 +142,34 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                          ModifiedDate = validationRule.ModifiedDate
                                      }).ToList();
                             break;
+                        case DataValidationGroupName.Device:
+                        case DataValidationGroupName.SimCard:
+                            rules = (from validationRule in db.DataValidationRules
+                                     join validationProperty in db.DataValidationProperties
+                                     on validationRule.fkDataValidationPropertyID equals validationProperty.pkDataValidationPropertyID
+                                     where validationRule.enValidationProcess == processID &&
+                                           validationRule.enDataValidationEntity == entityID
+                                     select new
+                                     {
+                                         pkDataValidationRuleID = validationRule.pkDataValidationRuleID,
+                                         enValidationProcess = validationRule.enValidationProcess,
+                                         enDataValidationEntity = validationRule.enDataValidationEntity,
+                                         DataValidationEntityID = validationRule.DataValidationEntityID,
+                                         DataDescription = "None",
+                                         fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID,
+                                         enDataValidationProperty = validationProperty.enDataValidationProperty,
+                                         enDataType = validationProperty.enDataType,
+                                         enDataValidationOperator = validationRule.enDataValidationOperator,
+                                         DataValidationValue = validationRule.DataValidationValue,
+                                         ModifiedBy = validationRule.ModifiedBy,
+                                         ModifiedDate = validationRule.ModifiedDate
+                                     }).ToList();
+                            break;
                     }
+
+                    // If no rules found return null
+                    if (rules == null)
+                        return null;
 
                     foreach (var rule in rules)
                     {
@@ -153,7 +190,6 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                             DataValidationValue = rule.DataValidationValue,
                             ModifiedBy = rule.ModifiedBy,
                             ModifiedDate = rule.ModifiedDate,
-
                         });
                     }
 
@@ -162,7 +198,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("DataValidationRuleModel",
+                                                                string.Format("Error! {0} {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadDataValidationRules",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return null;
             }
         }
@@ -183,7 +224,11 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     // Check to see if the validation rule name already exist for another entity 
                     if (existingValidationRule != null && existingValidationRule.pkDataValidationRuleID != validationRule.pkDataValidationRuleID)
                     {
-                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish("The validationRule already exist.");
+                        _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                        .Publish(new ApplicationMessage("DataValidationRuleModel",
+                                                                        "The validation rule already exist.",
+                                                                        "CreateDataValidationRule",
+                                                                        ApplicationMessage.MessageTypes.Information));
                         return false;
                     }
                     else
@@ -206,7 +251,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("DataValidationRuleModel",
+                                                                string.Format("Error! {0} {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "UpdateDataValidationRule",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }
@@ -226,12 +276,19 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                         break;
                     case DataValidationGroupName.CompanyClient:
                         return ValidateCompanyClientData(validationRule);
+                    case DataValidationGroupName.SimCard:
+                        return ValidateCompanySimCardData(validationRule);
                 }
                 return true;
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("DataValidationRuleModel",
+                                                                string.Format("Error! {0} {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ValidateDataValidationRule",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }
@@ -312,7 +369,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("DataValidationRuleModel",
+                                                                string.Format("Error! {0} {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ApplyDataRule",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }
@@ -470,7 +532,168 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("DataValidationRuleModel",
+                                                                string.Format("Error! {0} {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ValidateCompanyClientData",
+                                                                ApplicationMessage.MessageTypes.SystemError));
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Validate the simcard data based on the specified data validation rule
+        /// </summary>
+        /// <param name="validationRule">The validation rule entity to update.</param>
+        /// <returns>True if successfull</returns>
+        private bool ValidateCompanySimCardData(DataValidationRule validationRule)
+        {
+            try
+            {
+                DataValidationException validationResult = null;
+                string entityName = string.Empty;
+                string entityValue = string.Empty;
+                string ruleValue = string.Empty;
+                bool canApplyRule = false;
+                bool result = true;
+
+                using (var db = MobileManagerEntities.GetContext())
+                {
+                    // Get all the active simcards
+                    List<SimCard> simCards = db.SimCards.Where(p => p.IsActive).ToList();
+
+                    if (simCards.Count > 0)
+                    {
+                        // Get the Client table properties (Fields)
+                        PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(SimCard));
+
+                        foreach (PropertyDescriptor property in properties)
+                        {
+                            // Only validate when the rule's data name
+                            // match the property name
+                            if (validationRule.PropertyName == property.Name)
+                            {
+                                // Initialise the progress values
+                                _eventAggregator.GetEvent<ProgressBarInfoEvent>().Publish(new ProgressBarInfo()
+                                {
+                                    CurrentValue = 1,
+                                    MaxValue = simCards.Count,
+                                });
+
+                                // Validate the data rule values for each simcard         
+                                foreach (SimCard sim in simCards)
+                                {
+                                    entityName = string.Format("{0}", sim.CellNumber);
+                                    entityValue = db.Entry(sim).Property(validationRule.PropertyName).CurrentValue != null ?
+                                                  db.Entry(sim).Property(validationRule.PropertyName).CurrentValue.ToString() : string.Empty;
+
+                                    switch (EnumHelper.GetEnumFromDescription<DataTypeName>(validationRule.DataTypeDescription))
+                                    {
+                                        case DataTypeName.String:
+                                            ruleValue = string.Format("{0} {1} {2}", validationRule.PropertyName.ToUpper(),
+                                                                                     ((StringOperator)validationRule.enDataValidationOperator).ToString(),
+                                                                                     validationRule.DataValidationValue);
+                                            result = _dataComparer.CompareStringValues((StringOperator)validationRule.enDataValidationOperator,
+                                                                                       entityValue,
+                                                                                       validationRule.DataValidationValue);
+                                            // If the operator is 'Equal' the the rule can be auto applied to fixed failures
+                                            canApplyRule = (StringOperator)validationRule.enDataValidationOperator == StringOperator.Equal ? true : false;
+                                            break;
+                                        case DataTypeName.DateTime:
+                                            ruleValue = string.Format("{0} {1} {2}", validationRule.PropertyName.ToUpper(),
+                                                                                     ((DateOperator)validationRule.enDataValidationOperator).ToString(),
+                                                                                     validationRule.DataValidationValue);
+                                            break;
+                                        case DataTypeName.Integer:
+                                            ruleValue = string.Format("{0} {1} {2}", validationRule.PropertyName.ToUpper(),
+                                                                                     ((NumericOperator)validationRule.enDataValidationOperator).ToString(),
+                                                                                     validationRule.DataValidationValue);
+                                            result = _dataComparer.CompareNumericValues((NumericOperator)validationRule.enDataValidationOperator,
+                                                                                        entityValue,
+                                                                                        validationRule.DataValidationValue);
+                                            // If the operator is 'Equal' the the rule can be auto applied to fixed failures
+                                            canApplyRule = (NumericOperator)validationRule.enDataValidationOperator == NumericOperator.Equal ? true : false;
+                                            break;
+                                        case DataTypeName.Decimal:
+                                            ruleValue = string.Format("{0} {1} {2}", validationRule.PropertyName.ToUpper(),
+                                                                                     ((NumericOperator)validationRule.enDataValidationOperator).ToString(),
+                                                                                     validationRule.DataValidationValue);
+                                            result = _dataComparer.CompareDecimalValues((NumericOperator)validationRule.enDataValidationOperator,
+                                                                                        entityValue,
+                                                                                        validationRule.DataValidationValue);
+                                            // If the operator is 'Equal' the the rule can be auto applied to fixed failures
+                                            canApplyRule = (NumericOperator)validationRule.enDataValidationOperator == NumericOperator.Equal ? true : false;
+                                            break;
+                                        case DataTypeName.Bool:
+                                            ruleValue = string.Format("{0} {1} {2}", validationRule.PropertyName.ToUpper(),
+                                                                                     ((StringOperator)validationRule.enDataValidationOperator).ToString(),
+                                                                                     validationRule.DataValidationValue);
+                                            break;
+                                        default:
+                                            break;
+                                    }
+
+                                    // Update the progress values for each simcard
+                                    _eventAggregator.GetEvent<ProgressBarInfoEvent>().Publish(new ProgressBarInfo()
+                                    {
+                                        CurrentValue = simCards.IndexOf(sim),
+                                        MaxValue = simCards.Count,
+                                    });
+
+                                    // Update the validation result values
+                                    validationResult = new DataValidationException();
+                                    if (result)
+                                    {
+                                        validationResult = new DataValidationException()
+                                        {
+                                            fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID,
+                                            enDataValidationEntity = DataValidationGroupName.SimCard.Value(),
+                                            DataValidationEntityID = sim.pkSimCardID,
+                                            Result = true
+                                        };
+
+                                        _eventAggregator.GetEvent<DataValiationResultEvent>().Publish(validationResult);
+                                    }
+                                    else
+                                    {
+                                        validationResult = new DataValidationException()
+                                        {
+                                            fkDataValidationPropertyID = validationRule.pkDataValidationRuleID,
+                                            enDataValidationEntity = DataValidationGroupName.Client.Value(),
+                                            DataValidationEntityID = sim.pkSimCardID,
+                                            CanApplyRule = canApplyRule,
+                                            Message = string.Format("{0} failed for {1} - current value ({2}) - expected ({3}).",
+                                                                    validationRule.PropertyDescription.ToUpper(), entityName, 
+                                                                    entityValue, ruleValue),
+                                            Result = false
+                                        };
+
+                                        _eventAggregator.GetEvent<DataValiationResultEvent>().Publish(validationResult);
+                                    }
+                                }
+
+                                // Update the progress values for the last client
+                                _eventAggregator.GetEvent<ProgressBarInfoEvent>().Publish(new ProgressBarInfo()
+                                {
+                                    CurrentValue = simCards.Count,
+                                    MaxValue = simCards.Count,
+                                });
+                            }
+                        }
+                    }
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("DataValidationRuleModel",
+                                                                string.Format("Error! {0} {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ValidateSimCardData",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }

@@ -426,7 +426,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                                           .ObservesProperty(() => ValidOperator);
 
             // Load the view data
-            ReadBillingProcesses();
+            ReadDataValidationProcesses();
         }
 
         /// <summary>
@@ -462,10 +462,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         #region Lookup Data Loading
 
         /// <summary>
-        /// Load all the billing processes from the  
-        /// billing process enum's
+        /// Load all the data validation processes from the  
+        /// DataValidationProcess enum's
         /// </summary>
-        private void ReadBillingProcesses()
+        private void ReadDataValidationProcesses()
         {
             try
             {
@@ -532,17 +532,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                         DataEntityDisplayName = "PackageName";
                         DataEntityCollection = new ObservableCollection<object>(new PackageModel(_eventAggregator).ReadPackages(true, true));
                         break;
-                    case DataValidationGroupName.Device:
-                        DataEntityDisplayName = "MakeDescription";
-                        //DataEntityCollection = new ObservableCollection<object>(new PackageModel(_eventAggregator).ReadPackages(true, true));
-                        break;
-                    case DataValidationGroupName.SimCard:
-                        DataEntityDisplayName = "CellNumber";
-                        DataEntityCollection = new ObservableCollection<object>(new SimCardModel(_eventAggregator).ReadSimCard(true, true));
-                        break;
                     case DataValidationGroupName.StatusClient:
                         DataEntityDisplayName = "StatusDescription";
                         DataEntityCollection = new ObservableCollection<object>(new StatusModel(_eventAggregator).ReadStatuses(StatusLink.Contract, true, true));
+                        break;
+                    case DataValidationGroupName.SimCard:
+                    case DataValidationGroupName.Device:
+                        ValidDataEntity = Brushes.Silver;
+                        SelectedDataEntity = 0;
                         break;
                 }
 
@@ -668,6 +665,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             if (SelectedValidationRule == null)
                 SelectedValidationRule = new DataValidationRule();
 
+            SelectedValidationRule.enValidationProcess = _dataValidationProcess.Value();
             SelectedValidationRule.enDataValidationEntity = _dataValidationGroup.Value();
             SelectedValidationRule.fkDataValidationPropertyID = SelectedDataProperty.pkDataValidationPropertyID;
             SelectedValidationRule.DataValidationValue = SelectedValidationValue.ToUpper();
@@ -680,6 +678,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 case DataValidationGroupName.CompanyClient:
                 case DataValidationGroupName.Company:
                     SelectedValidationRule.DataValidationEntityID = ((Company)SelectedDataEntity).pkCompanyID;
+                    break;
+                case DataValidationGroupName.Device:
+                case DataValidationGroupName.SimCard:
+                    SelectedValidationRule.DataValidationEntityID = 0;
                     break;
             }
 

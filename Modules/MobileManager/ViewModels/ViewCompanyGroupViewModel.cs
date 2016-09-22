@@ -161,6 +161,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private void InitialiseViewControls()
         {
             SelectedGroup = new CompanyGroup();
+            GroupState = true;
         }
 
         /// <summary>

@@ -461,6 +461,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             BillingWizardProgress++;
             BillingWizardDescription = string.Format("Billing step - {0} of {1}", BillingWizardProgress, BillingWizardPageCount);
+
+            // Publish this event to show the data validation control header
+            _eventAggregator.GetEvent<DataValiationHeaderEvent>().Publish(false);
         }
 
         /// <summary>

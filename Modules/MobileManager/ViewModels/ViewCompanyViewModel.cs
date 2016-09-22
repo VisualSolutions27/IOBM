@@ -266,6 +266,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                                           .ObservesProperty(() => SelectedGroup)
                                                                           .ObservesProperty(() => SelectedWBSNumber)
                                                                           .ObservesProperty(() => SelectedCostCode);
+            GroupCommand = new DelegateCommand(ExecuteShowCompanyGroupView, CanExecuteMaintenace).ObservesProperty(() => SelectedCompany);
             BillingLevelCommand = new DelegateCommand(ExecuteShowBillingLevelView, CanExecuteMaintenace).ObservesProperty(() => SelectedCompany);
 
             // Load the view data
@@ -392,7 +393,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedCompany.fkCompanyGroupID = SelectedGroup.pkCompanyGroupID;
             SelectedCompany.WBSNumber = SelectedWBSNumber.ToUpper();
             SelectedCompany.CostCode = SelectedCostCode.ToUpper();
-            SelectedCompany.ModifiedBy = SecurityHelper.LoggedInDomainName;
+            SelectedCompany.ModifiedBy = SecurityHelper.LoggedInUserFullName;
             SelectedCompany.ModifiedDate = DateTime.Now;
             SelectedCompany.IsActive = CompanyState;
 
@@ -414,7 +415,19 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns></returns>
         private bool CanExecuteMaintenace()
         {
-            return SelectedCompany.pkCompanyID > 0;
+            return SelectedCompany != null && SelectedCompany.pkCompanyID > 0;
+        }
+
+        /// <summary>
+        /// Execute when the company group view command button is clicked 
+        /// </summary>
+        private async void ExecuteShowCompanyGroupView()
+        {
+            int selectedGroupID = SelectedGroup.pkCompanyGroupID;
+            PopupWindow popupWindow = new PopupWindow(new ViewCompanyGroup(), "Company Group Maintenance", PopupWindow.PopupButtonType.Close);
+            popupWindow.ShowDialog();
+            await ReadCompanyGroupsAsync();
+            SelectedGroup = GroupCollection.Where(p => p.pkCompanyGroupID == selectedGroupID).FirstOrDefault();
         }
 
         /// <summary>
@@ -422,9 +435,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void ExecuteShowBillingLevelView()
         {
-            int companyGroupID = SelectedCompany.fkBillingLevelGroupID != null ? SelectedCompany.fkBillingLevelGroupID.Value : 0;
+            int companyGroupID = SelectedCompany != null && SelectedCompany.fkBillingLevelGroupID != null ? SelectedCompany.fkBillingLevelGroupID.Value : 0;
+            int companyID = SelectedCompany != null ? SelectedCompany.pkCompanyID : 0;
             ViewCompanyBillingLevel view = new ViewCompanyBillingLevel();
-            ViewCompanyBillingLevelViewModel viewModel = new ViewCompanyBillingLevelViewModel(_eventAggregator, companyGroupID);
+            ViewCompanyBillingLevelViewModel viewModel = new ViewCompanyBillingLevelViewModel(_eventAggregator, companyID ,companyGroupID);
             view.DataContext = viewModel;
             PopupWindow popupWindow = new PopupWindow(view, "Company Billing Level Maintenance", PopupWindow.PopupButtonType.Close);
             popupWindow.ShowDialog();

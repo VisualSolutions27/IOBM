@@ -1,4 +1,7 @@
-﻿using Gijima.IOBM.MobileManager.Common.Structs;
+﻿using Gijima.IOBM.Infrastructure.Helpers;
+using Gijima.IOBM.Infrastructure.Structs;
+using Gijima.IOBM.MobileManager.Common.Events;
+using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Security;
 using Gijima.IOBM.MobileManager.Views;
 using Prism.Events;
@@ -51,9 +54,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             TabCollection = new ObservableCollection<TabItem>();
             if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()))
             {
+                TabCollection.Add(new TabItem() { Header = "Data Validation" });
                 TabCollection.Add(new TabItem() { Header = "Data Update" });
                 TabCollection.Add(new TabItem() { Header = "Data Import" });
-                TabCollection.Add(new TabItem() { Header = "Data Validation" });
             }
         }
 
@@ -64,30 +67,28 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <param name="e"></param>
         private void SetTabContent(TabItem tabItem)
         {
-            //if (_selectedTabIndex != tabItem.TabIndex)
-            //{
-            //if (TabControlMainWindowMenu.SelectedItem != null)
-            //{
-            //_selectedTabItem = (TabItem)TabControlMainWindowMenu.SelectedItem;
-
             if (tabItem.Content == null)
             {
                 switch (tabItem.Header.ToString())
                 {
+                    case "Data Validation":
+                        SelectedTab.Content = new ViewDataValidation();
+                        break;
                     case "Data Update":
                         SelectedTab.Content = new ViewDataUpdate();
                         break;
-                    case "Data Validation":
-                        //SelectedTab.Content = new ViewBillingCF();
+                    case "Data Import":
+                        SelectedTab.Content = new ViewDataUpdate();
                         break;
                 }
 
             }
 
-            //}
-            //}
-
             _selectedTabIndex = tabItem.TabIndex;
+            MobileManagerEnvironment.SelectedToolsMenu = EnumHelper.GetEnumFromDescription<ToolsMenuOption>(tabItem.Header.ToString());
+
+            // Publish this event to show the data validation control header
+            _eventAggregator.GetEvent<DataValiationHeaderEvent>().Publish(true);
         }
     }
 }

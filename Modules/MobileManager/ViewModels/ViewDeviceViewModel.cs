@@ -26,7 +26,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
         private DataActivityLog _activityLogInfo = null;
-        private int _selectedContractID = 0;
+        private bool _autoSave = false;
 
         #region Commands
 
@@ -409,33 +409,23 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Load all the device linked to the selected contract from the database
         /// </summary>
-        /// <param name="sender">The selected contractID.</param>
-        private async void ReadContractDevicesAsync_Event(int sender)
+        /// <param name="sender">The selected client primary cell number.</param>
+        private void ReadContractDevices_Event(int sender)
         {
-            try
+            ReadContractDevicesAsync();
+        }
+        
+        /// <summary>
+        /// Save the device data
+        /// </summary>
+        /// <param name="sender">The selected client contract ID.</param>
+        private void SaveContractDevices_Event(int sender)
+        {
+            if (CanExecuteSave())
             {
-                _selectedContractID = sender;
-                await ReadContractSimCardsAsync();
-
-                if (_selectedContractID > 0)
-                {
-                    DeviceCollection = await Task.Run(() => new DevicesModel(_eventAggregator).ReadDevicesForContract(_selectedContractID));
-
-                    if (DeviceCollection != null && DeviceCollection.Count > 0)
-                    {
-                        SelectedDevice = DeviceCollection.Where(p => p.IsActive).FirstOrDefault();
-                        ReadDeviceMakeModelsAsync();
-                    }
-                }
-                else
-                {
-                    ExecuteCancel();
-                    DeviceCollection = null;
-                }
-            }
-            catch (Exception ex)
-            {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _autoSave = true;
+                ExecuteSave();
+                _autoSave = false;
             }
         }
 
@@ -462,9 +452,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             if (DeviceCollection != null && DeviceCollection.Count > 0)
             {
                 if (sender > 0 && DeviceCollection.Any(p => p.fkSimCardID != null && p.fkSimCardID.Value == sender))
-                    SelectedDevice = DeviceCollection.Where(p => p.fkSimCardID.Value == sender).FirstOrDefault();
-                //else
-                //    ExecuteCancel();
+                    SelectedDevice = DeviceCollection.Where(p => p.fkSimCardID != null && p.fkSimCardID.Value == sender).FirstOrDefault();
             }
         }
 
@@ -508,7 +496,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             DeviceStatusCommand = new DelegateCommand(ExecuteShowStatusView, CanExecuteMaintenace);
 
             // Subscribe to this event to read devices linked to selectede contract
-            _eventAggregator.GetEvent<ReadDevicesEvent>().Subscribe(ReadContractDevicesAsync_Event, true);
+            _eventAggregator.GetEvent<ReadDevicesEvent>().Subscribe(ReadContractDevices_Event, true);
+
+            // Subscribe to this event to save devices when the client save was executed
+            _eventAggregator.GetEvent<SaveDeviceEvent>().Subscribe(SaveContractDevices_Event, true);
 
             // Subscribe to this event to link the first active device to its Simcard
             _eventAggregator.GetEvent<ActionCompletedEvent>().Subscribe(ActionCompleted_Event, true);
@@ -540,6 +531,35 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedIMENumber = string.Empty;
             DeviceInsuranceYes = DeviceInsuranceNo = false;
             DeviceState = true;
+        }
+
+        /// <summary>
+        /// Load all the device linked to the selected contract from the database
+        /// </summary>
+        private async Task ReadContractDevicesAsync()
+        {
+            try
+            {
+                if (MobileManagerEnvironment.ClientContractID > 0)
+                {
+                     DeviceCollection = await Task.Run(() => new DevicesModel(_eventAggregator).ReadDevicesForContract(MobileManagerEnvironment.ClientContractID));
+
+                    if (DeviceCollection != null && DeviceCollection.Count > 0)
+                    {
+                        await ReadDeviceMakeModelsAsync();
+                        await ReadContractSimCardsAsync();
+                    }
+                }
+                else
+                {
+                    ExecuteCancel();
+                    DeviceCollection = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+            }
         }
 
         /// <summary>
@@ -595,7 +615,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Load all the device models from the database
         /// </summary>
-        private async void ReadDeviceMakeModelsAsync()
+        private async Task ReadDeviceMakeModelsAsync()
         {
             try
             {
@@ -633,13 +653,31 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             try
             {
-                if (_selectedContractID > 0)
-                    SimCardCollection = await Task.Run(() => new SimCardModel(_eventAggregator).ReadSimCardsForContract(_selectedContractID));
+                if (MobileManagerEnvironment.ClientContractID > 0)
+                    SimCardCollection = await Task.Run(() => new SimCardModel(_eventAggregator).ReadSimCardsForContract(MobileManagerEnvironment.ClientContractID));
 
                 SimCard defaultItem = new SimCard();
                 defaultItem.pkSimCardID = 0;
                 defaultItem.CellNumber = "-- Please Select --";
                 SimCardCollection.Add(defaultItem);
+
+                if (SimCardCollection.Count > 1)
+                {
+                    // Get the primary simcard
+                    SimCard primarySimcard = SimCardCollection.Where(p => p.CellNumber == MobileManagerEnvironment.ClientPrimaryCell).FirstOrDefault();
+
+                    if (DeviceCollection != null && DeviceCollection.Count > 0)
+                    {
+                        // Set the selected device the one linked to the primary simcard
+                        if (primarySimcard != null)
+                            SelectedDevice = DeviceCollection.Where(p => p.fkSimCardID == primarySimcard.pkSimCardID && p.IsActive).FirstOrDefault();
+
+                        // If device is not linked to a primary simcard
+                        // then select the first active device 
+                        if (SelectedDevice == null)
+                            SelectedDevice = DeviceCollection.Where(p => p.IsActive).FirstOrDefault();
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -710,38 +748,50 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Execute when the save command button is clicked 
         /// </summary>
-        private void ExecuteSave()
+        private async void ExecuteSave()
         {
             bool result = false;
 
             if (SelectedDevice == null)
                 SelectedDevice = new Device();
 
-            SelectedDevice.fkContractID = _selectedContractID;
+            SelectedDevice.fkContractID = MobileManagerEnvironment.ClientContractID;
             SelectedDevice.fkDeviceMakeID = SelectedDeviceMake.pkDeviceMakeID;
             SelectedDevice.fkDeviceModelID = SelectedDeviceModel.pkDeviceModelID;
             SelectedDevice.fkStatusID = SelectedStatus.pkStatusID;
+            SelectedDevice.fkSimCardID = SelectedSimCard != null && SelectedSimCard.pkSimCardID > 0 ? SelectedSimCard.pkSimCardID : (int?)null;
             SelectedDevice.IMENumber = SelectedIMENumber.ToUpper();
             SelectedDevice.SerialNumber = SelectedDevice.SerialNumber;
             SelectedDevice.ReceiveDate = SelectedReceivedDate;
             SelectedDevice.InsuranceCost = SelectedInsuranceCost;
             SelectedDevice.InsuranceValue = SelectedInsuranceValue;
-            SelectedDevice.ModifiedBy = SecurityHelper.LoggedInDomainName;
+            SelectedDevice.ModifiedBy = SecurityHelper.LoggedInUserFullName;
             SelectedDevice.ModifiedDate = DateTime.Now;
             SelectedDevice.IsActive = DeviceState;
-            if (SelectedSimCard != null && SelectedSimCard.pkSimCardID > 0)
-                SelectedDevice.fkSimCardID = SelectedSimCard.pkSimCardID;
 
+            // Ensure a device that gets re-allocated is in-active
+            // and un-linked from any simcards
+            if (SelectedStatus.StatusDescription == "REALLOCATED")
+            {
+                SelectedDevice.fkSimCardID = (Int32?)null;
+                SelectedDevice.IsActive = false;
+            }
+            
             if (SelectedDevice.pkDeviceID == 0)
                 result = _model.CreateDevice(SelectedDevice);
             else
                 result = _model.UpdateDevice(SelectedDevice);
 
             if (result)
-                ReadContractDevicesAsync_Event(_selectedContractID);
+            {
+                if (_autoSave)
+                    _eventAggregator.GetEvent<ActionCompletedEvent>().Publish(ActionCompleted.SaveContractDevices);
+                else
+                    await ReadContractDevicesAsync();
+            }
 
             // Publish the event to read the administartion activity logs
-            _activityLogInfo.EntityID = _selectedContractID;
+            _activityLogInfo.EntityID = MobileManagerEnvironment.ClientContractID;
             _eventAggregator.GetEvent<SetActivityLogProcessEvent>().Publish(_activityLogInfo);
         }
 
@@ -772,7 +822,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             PopupWindow popupWindow = new PopupWindow(new ViewDeviceModel(), "Device Model Maintenance", PopupWindow.PopupButtonType.Close);
             popupWindow.ShowDialog();
             await ReadDeviceMakesAsync();
-            ReadDeviceMakeModelsAsync();
+            await ReadDeviceMakeModelsAsync();
         }
 
         /// <summary>

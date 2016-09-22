@@ -15,8 +15,6 @@ using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Security;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Common.Events;
-using System.Windows;
-using Gijima.IOBM.Infrastructure.Helpers;
 
 namespace Gijima.IOBM.MobileManager.ViewModels
 {
@@ -28,6 +26,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
         private DataActivityLog _activityLogInfo = null;
+        private bool _deviceDataSaved = false;
+        private bool _simCardDataSaved = false;
 
         #region Commands
 
@@ -112,15 +112,19 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                         DeleteButtonToolTip = value.IsActive ? "in-active" : "active";
 
                         // The the global application properties
-                        MobileManagerEnvironment.SelectedClientID = value.pkClientID;
+                        MobileManagerEnvironment.ClientID = value.pkClientID;
                         MobileManagerEnvironment.ClientCompanyID = value.fkCompanyID;
-                        MobileManagerEnvironment.SelectedContractID = value.fkContractID;
+                        MobileManagerEnvironment.ClientContractID = value.fkContractID;
+                        MobileManagerEnvironment.ClientPrimaryCell = value.PrimaryCellNumber;
 
-                        // Publish these event to populate the devices, Simcards and accounts linked to the contract
+                        // Publish these event to populate the devices, Simcards, accounts
+                        // abd activity logs linked to the contract
                         if (value.Contract != null)
                         {
-                            _eventAggregator.GetEvent<ReadSimCardsEvent>().Publish(value.Contract.pkContractID);
-                            _eventAggregator.GetEvent<ReadDevicesEvent>().Publish(value.Contract.pkContractID);
+                            _activityLogInfo.EntityID = value.fkContractID;
+                            _eventAggregator.GetEvent<SetActivityLogProcessEvent>().Publish(_activityLogInfo);
+                            _eventAggregator.GetEvent<ReadSimCardsEvent>().Publish(value.fkContractID);
+                            _eventAggregator.GetEvent<ReadDevicesEvent>().Publish(value.fkContractID);
                             _eventAggregator.GetEvent<ReadInvoicesEvent>().Publish(value.pkClientID);
                         }
 
@@ -130,7 +134,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 }
                 catch (Exception ex)
                 {
-                    //_message = new ApplicationMessage("ViewCellularViewModel", ex, MessageBoxImage.Error  )
+                    _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                    .Publish(new ApplicationMessage("ViewCellularViewModel",
+                                                                    string.Format("Error! {0}, {1}.",
+                                                                    ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                    "SelectedClient",
+                                                                    ApplicationMessage.MessageTypes.SystemError));
                 }
             }
         }
@@ -190,7 +199,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 SetProperty(ref _saIDNumber, value);
                 if (value == true)
-                    ValidClientIDNumber = SelectedClientIDNumber.Length == 13 ? Brushes.Silver : Brushes.Red;
+                    ValidClientIDNumber = SelectedClientIDNumber == null || SelectedClientIDNumber.Length != 13 ? Brushes.Red : Brushes.Silver;
             }
         }
         private bool _saIDNumber = true;
@@ -425,8 +434,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set
             {
                 SetProperty(ref _selectedCompany, value);
-                SetCompanyDefaults();
-                ReadCompanyBillingLevelsAsync();
+                if (value != null && value.pkCompanyID > 0)
+                {
+                    SetCompanyDefaults();
+                    ReadCompanyBillingLevelsAsync();
+                }
             }
         }
         private Company _selectedCompany;
@@ -441,19 +453,19 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 SetProperty(ref _selectedBillingLevel, value);
 
-                if (SelectedPackageType != null && value != null && value.pkCompanyBillingLevelID > 0)
+                if ((SplitBilling && SelectedPackageType != null) || (value != null && value.pkCompanyBillingLevelID > 0))
                 {
                     if (((PackageType)Enum.Parse(typeof(PackageType), SelectedPackageType)) == PackageType.DATA)
                     {
                         AllowVoiceAllowance = false;
                         AllowWDPAllowance = true;
-                        SelectedWDPAllowance = value.Amount.ToString();
+                        SelectedWDPAllowance = value != null ? value.Amount.ToString() : "0";
                     }
                     else if (SplitBilling && ((PackageType)Enum.Parse(typeof(PackageType), SelectedPackageType)) == PackageType.VOICE)
                     {
                         AllowVoiceAllowance = true;
                         AllowWDPAllowance = false;
-                        SelectedVoiceAllowance = value.Amount.ToString();
+                        SelectedVoiceAllowance = value != null ? value.Amount.ToString() : "0";
                     }
                 }
                 else
@@ -1200,6 +1212,29 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             await ReadClientAsync(sender);
         }
 
+        /// <summary>
+        /// Call the process based on the sender's completed action.
+        /// </summary>
+        /// <param name="sender">The completed action.</param>
+        private void ActionCompleted_Event(ActionCompleted sender)
+        {
+            switch (sender)
+            {
+                case ActionCompleted.SaveContractDevices:
+                    _deviceDataSaved = true; 
+                    break;
+                case ActionCompleted.SaveContractSimCards:
+                    _simCardDataSaved = true;
+                    break;
+            }
+
+            if (_deviceDataSaved && _simCardDataSaved)
+            {
+                _deviceDataSaved = _simCardDataSaved = false;
+                ExecuteCancel();
+            }
+        }
+
         #endregion
 
         #region Methods
@@ -1265,6 +1300,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             // Subscribe to this event to read the client data based on the search results
             _eventAggregator.GetEvent<SearchResultEvent>().Subscribe(SearchResult_Event, true);
 
+            // Subscribe to this event to be notified when the device and simcard data was saved
+            _eventAggregator.GetEvent<ActionCompletedEvent>().Subscribe(ActionCompleted_Event, true);
+
             // Initialise the data activity log info entity
             _activityLogInfo = new DataActivityLog();
             _activityLogInfo.ActivityProcess = ActivityProcess.Administration.Value();
@@ -1299,9 +1337,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedCostType = SelectedPackageType = "NONE";
             DeleteButtonImage = "278.png";
             DeleteButtonToolTip = "active";
-            MobileManagerEnvironment.SelectedClientID = 0;
+            MobileManagerEnvironment.ClientID = 0;
             MobileManagerEnvironment.ClientCompanyID = 0;
-            MobileManagerEnvironment.SelectedContractID = 0;
+            MobileManagerEnvironment.ClientContractID = 0;
+            MobileManagerEnvironment.ClientPrimaryCell = string.Empty;
 
             // Publish the event to clear the device view
             _eventAggregator.GetEvent<ReadDevicesEvent>().Publish(0);
@@ -1325,17 +1364,15 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             try
             {
                 SelectedClient = await Task.Run(() => _model.ReadClient(clientID));
-
-                // Publish the event to read the administartion activity logs
-                if (SelectedClient.fkContractID > 0)
-                {
-                    _activityLogInfo.EntityID = SelectedClient.fkContractID;
-                    _eventAggregator.GetEvent<SetActivityLogProcessEvent>().Publish(_activityLogInfo);
-                }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewCellularViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadClientAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
        
@@ -1355,7 +1392,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 }
             }
             catch (Exception ex)
-            { }
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                .Publish(new ApplicationMessage("ViewCellularViewModel",
+                                                string.Format("Error! {0}, {1}.",
+                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                "SetCompanyDefaults",
+                                                ApplicationMessage.MessageTypes.SystemError));
+            }
         }
 
         /// <summary>
@@ -1367,6 +1411,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 if (SelectedPackage != null)
                 {
+                    SelectedPackageType = ((PackageType)SelectedPackage.enPackageType).ToString();
                     SelectedPackageCost = SelectedPackage.Cost.ToString();
                     SelectedPackageRandValue = SelectedPackage.RandValue.ToString();
                     SelectedPackageMBData = SelectedPackage.MBData.ToString();
@@ -1376,7 +1421,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 }
             }
             catch (Exception ex)
-            { }
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                .Publish(new ApplicationMessage("ViewCellularViewModel",
+                                                string.Format("Error! {0}, {1}.",
+                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                "SetPackageDefaults",
+                                                ApplicationMessage.MessageTypes.SystemError));
+            }
         }
 
         /// <summary>
@@ -1415,7 +1467,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 }
             }
             catch (Exception ex)
-            { }
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                .Publish(new ApplicationMessage("ViewCellularViewModel",
+                                                string.Format("Error! {0}, {1}.",
+                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                "SetClientBilling",
+                                                ApplicationMessage.MessageTypes.SystemError));
+            }
         }
 
         #region Lookup Data Loading
@@ -1431,7 +1490,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewCellularViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadCompaniesAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -1446,7 +1510,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewCellularViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadClientLocationsAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -1461,7 +1530,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewCellularViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadSuburbsAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -1476,7 +1550,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewCellularViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadStatusesAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -1491,7 +1570,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewCellularViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadPackagesAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -1515,6 +1599,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             try
             {
+                BillingLevelCollection = null;
+
                 if (SelectedCompany != null && SelectedCompany.pkCompanyID > 0 && SelectedCompany.fkBillingLevelGroupID != null)
                     BillingLevelCollection = await Task.Run(() => new CompanyBillingLevelModel(_eventAggregator).ReadCompanyBillingLevels(SelectedCompany.fkBillingLevelGroupID.Value));
 
@@ -1523,6 +1609,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     AllowBillingLevels = SplitBilling ? true : false;
                     SelectedBillingLevel = BillingLevelCollection != null && SelectedClientBilling != null ? 
                                            BillingLevelCollection.Where(p => p.pkCompanyBillingLevelID == SelectedClientBilling.fkCompanyBillingLevelID).FirstOrDefault() : null;
+
+                    // If company changed and the new company have billing levels then set the
+                    // seletced billing level to the default
+                    if (BillingLevelCollection != null && BillingLevelCollection.Count > 1 && SelectedBillingLevel == null)
+                        SelectedBillingLevel = BillingLevelCollection.Where(p => p.pkCompanyBillingLevelID == 0).FirstOrDefault();
                 }
                 else
                 {
@@ -1533,7 +1624,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewCellularViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadCompanyBillingLevelsAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
         
@@ -1650,85 +1746,102 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private void ExecuteSave()
         {
             bool result = false;
-            // Client Data
-            SelectedClient.PrimaryCellNumber = SelectedCellNumber.Trim();
-            SelectedClient.ClientName = SelectedClientName.ToUpper().Trim();
-            SelectedClient.IsSaIDNumber = SaIDNumber;
-            SelectedClient.IDNumber = SelectedClientIDNumber;
-            SelectedClient.fkCompanyID = SelectedCompany.pkCompanyID;
-            SelectedClient.fkClientLocationID = SelectedClientLocation.pkClientLocationID;
-            SelectedClient.WBSNumber = SelectedClientWBSNumber.ToUpper().Trim(); 
-            SelectedClient.CostCode = SelectedClientCostCode.ToUpper().Trim();
-            SelectedClient.IsPrivate = PrivateClient;
-            SelectedClient.IPAddress = SelectedClientIPAddress;
-            SelectedClient.AdminFee = Convert.ToDecimal(SelectedClientAdminFee);
-            SelectedClient.AddressLine1 = SelectedClientAddressLine.ToUpper().Trim();
-            SelectedClient.fkSuburbID = SelectedSuburb.pkSuburbID;
-            SelectedClient.ModifiedBy = SecurityHelper.LoggedInUserFullName;
-            SelectedClient.ModifiedDate = DateTime.Now;
-            SelectedClient.IsActive = SelectedClientState;
-            // Contract Data
-            if (SelectedClient.Contract == null)
-                SelectedClient.Contract = new Contract();
-            SelectedClient.Contract.fkStatusID = SelectedStatus.pkStatusID;
-            SelectedClient.Contract.fkPackageID = SelectedPackage.pkPackageID;
-            SelectedClient.Contract.AccountNumber = SelectedContractAccNumber.ToUpper().Trim();
-            SelectedClient.Contract.enCostType = ((CostType)Enum.Parse(typeof(CostType), SelectedCostType)).Value();
-            SelectedClient.Contract.ContractStartDate = SelectedContractStartDate > DateTime.MinValue ? SelectedContractStartDate : (DateTime?)null;
-            SelectedClient.Contract.ContractEndDate = SelectedContractEndDate > DateTime.MinValue ? SelectedContractEndDate : (DateTime?)null;
-            SelectedClient.Contract.ContractUpgradeDate = SelectedContract != null ? SelectedContract.ContractUpgradeDate : null;
-            SelectedClient.Contract.PaymentCancelDate = SelectedContract != null ? SelectedContract.PaymentCancelDate : null;
-            SelectedClient.Contract.ModifiedBy = SecurityHelper.LoggedInUserFullName;
-            SelectedClient.Contract.ModifiedDate = DateTime.Now;
-            SelectedClient.Contract.IsActive = SelectedClientState;
-            // Package Setup Data
-            if (SelectedClient.Contract.PackageSetup == null)
-                SelectedClient.Contract.PackageSetup = new PackageSetup();
-            SelectedClient.Contract.PackageSetup.Cost = !string.IsNullOrEmpty(SelectedPackageCost) ? Convert.ToDecimal(SelectedPackageCost) : 0;
-            SelectedClient.Contract.PackageSetup.TalkTimeMinutes = !string.IsNullOrEmpty(SelectedPackageTalkTime) ? Convert.ToInt32(SelectedPackageTalkTime) : 0;
-            SelectedClient.Contract.PackageSetup.SMSNumber = !string.IsNullOrEmpty(SelectedPackageSMSNumber) ? Convert.ToInt32(SelectedPackageSMSNumber) : 0;
-            SelectedClient.Contract.PackageSetup.MBData = !string.IsNullOrEmpty(SelectedPackageMBData) ? Convert.ToInt32(SelectedPackageMBData) : 0;
-            SelectedClient.Contract.PackageSetup.RandValue = !string.IsNullOrEmpty(SelectedPackageRandValue) ? Convert.ToDecimal(SelectedPackageRandValue) : 0;
-            SelectedClient.Contract.PackageSetup.SPULValue = !string.IsNullOrEmpty(SelectedPackageSPULValue) ? Convert.ToDecimal(SelectedPackageSPULValue) : 0;
-            SelectedClient.Contract.PackageSetup.ModifiedBy = SecurityHelper.LoggedInUserFullName;
-            SelectedClient.Contract.PackageSetup.ModifiedDate = DateTime.Now;
-            SelectedClient.Contract.PackageSetup.IsActive = SelectedClientState;
-            // Billing Data
-            if (SelectedClient.ClientBilling == null)
-                SelectedClient.ClientBilling = new ClientBilling();
-            SelectedClient.ClientBilling.IsSplitBilling = SplitBilling;
-            SelectedClient.ClientBilling.fkCompanyBillingLevelID = SelectedBillingLevel != null ? SelectedBillingLevel.pkCompanyBillingLevelID : (Int32?)null;
-            SelectedClient.ClientBilling.WDPAllowance = Convert.ToDecimal(SelectedWDPAllowance);
-            SelectedClient.ClientBilling.VoiceAllowance = Convert.ToDecimal(SelectedVoiceAllowance);
-            SelectedClient.ClientBilling.SPLimit = SelectedClientBilling.SPLimit;
-            SelectedClient.ClientBilling.AllowanceLimit = SelectedClientBilling.AllowanceLimit;
-            SelectedClient.ClientBilling.InternationalDailing = SelectedClientBilling.InternationalDailing;
-            SelectedClient.ClientBilling.PermanentIntDailing = SelectedPermanentDailing;
-            SelectedClient.ClientBilling.InternationalRoaming = SelectedIntRoaming;
-            SelectedClient.ClientBilling.PermanentIntRoaming = SelectedPermanentRoaming;
-            SelectedClient.ClientBilling.CountryVisiting = SelectedRoamingCountry != null ? SelectedRoamingCountry.ToUpper().Trim() : null;
-            SelectedClient.ClientBilling.RoamingFromDate = SelectedRoamingFromDate > DateTime.MinValue ? SelectedRoamingFromDate : (DateTime?)null;  
-            SelectedClient.ClientBilling.RoamingToDate = SelectedRoamingToDate > DateTime.MinValue ? SelectedRoamingToDate : (DateTime?)null;
-            SelectedClient.ClientBilling.StopBillingFromDate = SelectedClientBilling.StopBillingFromDate;
-            SelectedClient.ClientBilling.StopBillingToDate = SelectedClientBilling.StopBillingToDate;
-            SelectedClient.ClientBilling.ModifiedBy = SecurityHelper.LoggedInUserFullName;
-            SelectedClient.ClientBilling.ModifiedDate = DateTime.Now;
-            SelectedClient.ClientBilling.IsActive = SelectedClientState;
 
-            if (SelectedClient.pkClientID == 0)
-                result = _model.CreateClient(SelectedClient);
-            else
-                result = _model.UpdateClient(SelectedClient);
-
-            // Publish the event to read the administartion activity logs
-            if (SelectedContract != null)
+            try
             {
-                _activityLogInfo.EntityID = SelectedContract.pkContractID;
-                _eventAggregator.GetEvent<SetActivityLogProcessEvent>().Publish(_activityLogInfo);
-            }
+                // Client Data
+                SelectedClient.PrimaryCellNumber = SelectedCellNumber.Trim();
+                SelectedClient.ClientName = SelectedClientName.ToUpper().Trim();
+                SelectedClient.IsSaIDNumber = SaIDNumber;
+                SelectedClient.IDNumber = SelectedClientIDNumber;
+                SelectedClient.fkCompanyID = SelectedCompany.pkCompanyID;
+                SelectedClient.fkClientLocationID = SelectedClientLocation.pkClientLocationID;
+                SelectedClient.WBSNumber = SelectedClientWBSNumber.ToUpper().Trim();
+                SelectedClient.CostCode = SelectedClientCostCode.ToUpper().Trim();
+                SelectedClient.IsPrivate = PrivateClient;
+                SelectedClient.IPAddress = SelectedClientIPAddress;
+                SelectedClient.AdminFee = Convert.ToDecimal(SelectedClientAdminFee);
+                SelectedClient.AddressLine1 = SelectedClientAddressLine.ToUpper().Trim();
+                SelectedClient.fkSuburbID = SelectedSuburb.pkSuburbID;
+                SelectedClient.ModifiedBy = SecurityHelper.LoggedInUserFullName;
+                SelectedClient.ModifiedDate = DateTime.Now;
+                SelectedClient.IsActive = SelectedClientState;
+                // Contract Data
+                if (SelectedClient.Contract == null)
+                    SelectedClient.Contract = new Contract();
+                SelectedClient.Contract.fkStatusID = SelectedStatus.pkStatusID;
+                SelectedClient.Contract.fkPackageID = SelectedPackage.pkPackageID;
+                SelectedClient.Contract.AccountNumber = SelectedContractAccNumber.ToUpper().Trim();
+                SelectedClient.Contract.enCostType = ((CostType)Enum.Parse(typeof(CostType), SelectedCostType)).Value();
+                SelectedClient.Contract.ContractStartDate = SelectedContractStartDate > DateTime.MinValue ? SelectedContractStartDate : (DateTime?)null;
+                SelectedClient.Contract.ContractEndDate = SelectedContractEndDate > DateTime.MinValue ? SelectedContractEndDate : (DateTime?)null;
+                SelectedClient.Contract.ContractUpgradeDate = SelectedContract != null ? SelectedContract.ContractUpgradeDate : null;
+                SelectedClient.Contract.PaymentCancelDate = SelectedContract != null ? SelectedContract.PaymentCancelDate : null;
+                SelectedClient.Contract.ModifiedBy = SecurityHelper.LoggedInUserFullName;
+                SelectedClient.Contract.ModifiedDate = DateTime.Now;
+                SelectedClient.Contract.IsActive = SelectedClientState;
+                // Package Setup Data
+                if (SelectedClient.Contract.PackageSetup == null)
+                    SelectedClient.Contract.PackageSetup = new PackageSetup();
+                SelectedClient.Contract.PackageSetup.Cost = !string.IsNullOrEmpty(SelectedPackageCost) ? Convert.ToDecimal(SelectedPackageCost) : 0;
+                SelectedClient.Contract.PackageSetup.TalkTimeMinutes = !string.IsNullOrEmpty(SelectedPackageTalkTime) ? Convert.ToInt32(SelectedPackageTalkTime) : 0;
+                SelectedClient.Contract.PackageSetup.SMSNumber = !string.IsNullOrEmpty(SelectedPackageSMSNumber) ? Convert.ToInt32(SelectedPackageSMSNumber) : 0;
+                SelectedClient.Contract.PackageSetup.MBData = !string.IsNullOrEmpty(SelectedPackageMBData) ? Convert.ToInt32(SelectedPackageMBData) : 0;
+                SelectedClient.Contract.PackageSetup.RandValue = !string.IsNullOrEmpty(SelectedPackageRandValue) ? Convert.ToDecimal(SelectedPackageRandValue) : 0;
+                SelectedClient.Contract.PackageSetup.SPULValue = !string.IsNullOrEmpty(SelectedPackageSPULValue) ? Convert.ToDecimal(SelectedPackageSPULValue) : 0;
+                SelectedClient.Contract.PackageSetup.ModifiedBy = SecurityHelper.LoggedInUserFullName;
+                SelectedClient.Contract.PackageSetup.ModifiedDate = DateTime.Now;
+                SelectedClient.Contract.PackageSetup.IsActive = SelectedClientState;
+                // Billing Data
+                if (SelectedClient.ClientBilling == null)
+                    SelectedClient.ClientBilling = new ClientBilling();
+                SelectedClient.ClientBilling.IsSplitBilling = SplitBilling;
+                SelectedClient.ClientBilling.fkCompanyBillingLevelID = SelectedBillingLevel != null ? SelectedBillingLevel.pkCompanyBillingLevelID : (Int32?)null;
+                SelectedClient.ClientBilling.WDPAllowance = Convert.ToDecimal(SelectedWDPAllowance);
+                SelectedClient.ClientBilling.VoiceAllowance = Convert.ToDecimal(SelectedVoiceAllowance);
+                SelectedClient.ClientBilling.SPLimit = SelectedClientBilling.SPLimit;
+                SelectedClient.ClientBilling.AllowanceLimit = SelectedClientBilling.AllowanceLimit;
+                SelectedClient.ClientBilling.InternationalDailing = SelectedClientBilling.InternationalDailing;
+                SelectedClient.ClientBilling.PermanentIntDailing = SelectedPermanentDailing;
+                SelectedClient.ClientBilling.InternationalRoaming = SelectedIntRoaming;
+                SelectedClient.ClientBilling.PermanentIntRoaming = SelectedPermanentRoaming;
+                SelectedClient.ClientBilling.CountryVisiting = SelectedRoamingCountry != null ? SelectedRoamingCountry.ToUpper().Trim() : null;
+                SelectedClient.ClientBilling.RoamingFromDate = SelectedRoamingFromDate > DateTime.MinValue ? SelectedRoamingFromDate : (DateTime?)null;
+                SelectedClient.ClientBilling.RoamingToDate = SelectedRoamingToDate > DateTime.MinValue ? SelectedRoamingToDate : (DateTime?)null;
+                SelectedClient.ClientBilling.StopBillingFromDate = SelectedClientBilling.StopBillingFromDate;
+                SelectedClient.ClientBilling.StopBillingToDate = SelectedClientBilling.StopBillingToDate;
+                SelectedClient.ClientBilling.ModifiedBy = SecurityHelper.LoggedInUserFullName;
+                SelectedClient.ClientBilling.ModifiedDate = DateTime.Now;
+                SelectedClient.ClientBilling.IsActive = SelectedClientState;
 
-            if (result)
-                ExecuteCancel();
+                if (SelectedClient.pkClientID == 0)
+                    result = _model.CreateClient(SelectedClient);
+                else
+                    result = _model.UpdateClient(SelectedClient);
+
+                // Auto save the device and sim card data
+                if (result)
+                {
+                    _eventAggregator.GetEvent<SaveDeviceEvent>().Publish(SelectedContract.pkContractID);
+                    _eventAggregator.GetEvent<SaveSimCardEvent>().Publish(SelectedContract.pkContractID);
+                }
+
+                // Publish the event to read the administartion activity logs
+                if (SelectedContract != null)
+                {
+                    _activityLogInfo.EntityID = SelectedContract.pkContractID;
+                    _eventAggregator.GetEvent<SetActivityLogProcessEvent>().Publish(_activityLogInfo);
+                }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                .Publish(new ApplicationMessage("ViewCellularViewModel",
+                                                string.Format("Error! {0}, {1}.",
+                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                "ExecuteSave",
+                                                ApplicationMessage.MessageTypes.SystemError));
+            }
         }
 
         /// <summary>
@@ -1745,9 +1858,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private async void ExecuteShowCompanyView()
         {
+            int selectedCompanyID = SelectedCompany.pkCompanyID;
             PopupWindow popupWindow = new PopupWindow(new ViewCompany(), "Company Maintenance", PopupWindow.PopupButtonType.Close);
             popupWindow.ShowDialog();
             await ReadCompaniesAsync();
+            SelectedCompany = CompanyCollection.Where(p => p.pkCompanyID == selectedCompanyID).FirstOrDefault();
         }
 
         /// <summary>
@@ -1755,9 +1870,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private async void ExecuteShowStatusView()
         {
+            int selectedStatusID = SelectedStatus.pkStatusID;
             PopupWindow popupWindow = new PopupWindow(new ViewStatus(), "Status Maintenance", PopupWindow.PopupButtonType.Close);
             popupWindow.ShowDialog();
             await ReadStatusesAsync();
+            SelectedStatus = StatusCollection.Where(p => p.pkStatusID == selectedStatusID).FirstOrDefault();
         }
 
         /// <summary>
@@ -1765,9 +1882,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private async void ExecuteShowClientSiteView()
         {
+            int selectedSiteID = SelectedClientLocation.pkClientLocationID;
             PopupWindow popupWindow = new PopupWindow(new ViewClientSite(), "Client Location Maintenance", PopupWindow.PopupButtonType.Close);
             popupWindow.ShowDialog();
             await ReadClientLocationsAsync();
+            SelectedClientLocation = ClientLocationCollection.Where(p => p.pkClientLocationID == selectedSiteID).FirstOrDefault();
         }
 
         /// <summary>
@@ -1775,9 +1894,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private async void ExecuteShowPackageView()
         {
+            int selectedPackageID = SelectedPackage.pkPackageID;
             PopupWindow popupWindow = new PopupWindow(new ViewPackage(), "Package Maintenance", PopupWindow.PopupButtonType.Close);
             popupWindow.ShowDialog();
             await ReadPackagesAsync();
+            SelectedPackage = PackageCollection.Where(p => p.pkPackageID == selectedPackageID).FirstOrDefault();
         }
 
         /// <summary>
@@ -1785,9 +1906,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private async void ExecuteShowSuburbView()
         {
+            int selectedSuburbID = SelectedSuburb.pkSuburbID;
             PopupWindow popupWindow = new PopupWindow(new ViewSuburb(), "Suburb Maintenance", PopupWindow.PopupButtonType.Close);
             popupWindow.ShowDialog();
             await ReadSuburbsAsync();
+            SelectedSuburb = SuburbCollection.Where(p => p.pkSuburbID == selectedSuburbID).FirstOrDefault();
         }
 
         #endregion

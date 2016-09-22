@@ -524,8 +524,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <param name="sender">The client ID.</param>
         private async void ReadClientInvoices_Event(int sender)
         {
-            if (MobileManagerEnvironment.SelectedClientID == 0)
-                MobileManagerEnvironment.SelectedClientID = sender;
+            if (MobileManagerEnvironment.ClientID == 0)
+                MobileManagerEnvironment.ClientID = sender;
 
             await ReadClientInvoicesAsync();
         }
@@ -620,12 +620,17 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 if (SelectedServiceGroup && SelectedServiceFilter != null && SelectedServiceFilter.pkServiceID > 0)
                     serviceFilter = SelectedServiceFilter.pkServiceID;
 
-                SelectedClientID = MobileManagerEnvironment.SelectedClientID;
-                InvoiceCollection = await Task.Run(() => _model.ReadInvoicesForClient(MobileManagerEnvironment.SelectedClientID, accPeriodFilter, serviceFilter));
+                SelectedClientID = MobileManagerEnvironment.ClientID;
+                InvoiceCollection = await Task.Run(() => _model.ReadInvoicesForClient(MobileManagerEnvironment.ClientID, accPeriodFilter, serviceFilter));
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewAccountViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadClientInvoicesAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -641,7 +646,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewAccountViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadClientInvoiceItemsAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -658,7 +668,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewAccountViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadServiceProvidersAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -677,7 +692,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewAccountViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadServicesAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -708,7 +728,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewAccountViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadAccountPeriodsAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -776,29 +801,41 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private async void ExecuteSave()
         {
-            bool result = false;
-            int invoiceID = SelectedInvoice.pkInvoiceID;
-
-            SelectedInvoice.fkClientID = MobileManagerEnvironment.SelectedClientID;
-            SelectedInvoice.fkServiceID = SelectedService.pkServiceID;
-            SelectedInvoice.PrivateDue = SelectedPrivateDue;
-            SelectedInvoice.CompanyDue = _selectedCompanyDue;
-            SelectedInvoice.InvoiceDate = SelectedInvoiceDate;
-            SelectedInvoice.InvoicePeriod = string.Format("{0}/{1}", SelectedInvoiceDate.Year.ToString(), SelectedInvoiceDate.Month.ToString().PadLeft(2, '0'));
-            SelectedInvoice.ModifiedBy = SecurityHelper.LoggedInUserFullName;
-            SelectedInvoice.ModifiedDate = DateTime.Now;
-
-            if (SelectedInvoice.pkInvoiceID == 0)
-                result = await Task.Run(() => _model.CreateInvoice(SelectedInvoice, InvoiceItemsCollection, SelectedService.ServicePreFix));
-            else
-                result = await Task.Run(() => _model.UpdateInvoice(SelectedInvoice, InvoiceItemsCollection));
-            
-            if (result)
+            try
             {
-                await ReadClientInvoicesAsync();
-                SelectedInvoice = InvoiceCollection.Where(p => p.pkInvoiceID == invoiceID).FirstOrDefault();
+                bool result = false;
+                int invoiceID = SelectedInvoice.pkInvoiceID;
+
+                SelectedInvoice.fkClientID = MobileManagerEnvironment.ClientID;
+                SelectedInvoice.fkServiceID = SelectedService.pkServiceID;
+                SelectedInvoice.PrivateDue = SelectedPrivateDue;
+                SelectedInvoice.CompanyDue = _selectedCompanyDue;
+                SelectedInvoice.InvoiceDate = SelectedInvoiceDate;
+                SelectedInvoice.InvoicePeriod = string.Format("{0}/{1}", SelectedInvoiceDate.Year.ToString(), SelectedInvoiceDate.Month.ToString().PadLeft(2, '0'));
+                SelectedInvoice.ModifiedBy = SecurityHelper.LoggedInUserFullName;
+                SelectedInvoice.ModifiedDate = DateTime.Now;
+
+                if (SelectedInvoice.pkInvoiceID == 0)
+                    result = await Task.Run(() => _model.CreateInvoice(SelectedInvoice, InvoiceItemsCollection, SelectedService.ServicePreFix));
+                else
+                    result = await Task.Run(() => _model.UpdateInvoice(SelectedInvoice, InvoiceItemsCollection));
+
+                if (result)
+                {
+                    await ReadClientInvoicesAsync();
+                    SelectedInvoice = InvoiceCollection.Where(p => p.pkInvoiceID == invoiceID).FirstOrDefault();
+                }
             }
-        }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewAccountViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ExecuteSave",
+                                                                ApplicationMessage.MessageTypes.SystemError));
+            }
+}
 
         /// <summary>
         /// Validate the invoice item cancel process can be executed
@@ -830,7 +867,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
             if (result)
                 result = SelectedInvoice != null && SelectedInvoiceItem != null &&
-                         (SelectedInvoice.pkInvoiceID > 0 ? SelectedInvoice.IsPeriodClosed != null && !SelectedInvoice.IsPeriodClosed.Value : true);
+                            (SelectedInvoice.pkInvoiceID > 0 ? SelectedInvoice.IsPeriodClosed != null && !SelectedInvoice.IsPeriodClosed.Value : true);
 
             return result;
         }
@@ -840,13 +877,25 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void ExecuteItemDelete()
         {
-            if (InvoiceItemsCollection.Contains(SelectedInvoiceItem))
-                InvoiceItemsCollection.Remove(SelectedInvoiceItem);
+            try
+            { 
+                if (InvoiceItemsCollection.Contains(SelectedInvoiceItem))
+                    InvoiceItemsCollection.Remove(SelectedInvoiceItem);
 
-            SelectedPrivateDue = InvoiceItemsCollection.Where(p => p.IsPrivate).ToList().Sum(p => p.ItemAmount);
-            SelectedCompanyDue = InvoiceItemsCollection.Where(p => !p.IsPrivate).ToList().Sum(p => p.ItemAmount);
+                SelectedPrivateDue = InvoiceItemsCollection.Where(p => p.IsPrivate).ToList().Sum(p => p.ItemAmount);
+                SelectedCompanyDue = InvoiceItemsCollection.Where(p => !p.IsPrivate).ToList().Sum(p => p.ItemAmount);
 
-            ExecuteItemCancel();
+                ExecuteItemCancel();
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewAccountViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ExecuteItemDelete",
+                                                                ApplicationMessage.MessageTypes.SystemError));
+            }
         }
 
         /// <summary>
@@ -873,44 +922,56 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void ExecuteItemAdd()
         {
-            int invoiceItemID = 0;
+            try
+            { 
+                int invoiceItemID = 0;
 
-            if (SelectedInvoiceItem == null)
-                SelectedInvoiceItem = new InvoiceDetail();
+                if (SelectedInvoiceItem == null)
+                    SelectedInvoiceItem = new InvoiceDetail();
 
-            if (InvoiceItemsCollection == null)
-                InvoiceItemsCollection = new ObservableCollection<InvoiceDetail>();
+                if (InvoiceItemsCollection == null)
+                    InvoiceItemsCollection = new ObservableCollection<InvoiceDetail>();
 
-            if (SelectedInvoiceItem.ServiceProvider == null)
-                SelectedInvoiceItem.ServiceProvider = new ServiceProvider();
+                if (SelectedInvoiceItem.ServiceProvider == null)
+                    SelectedInvoiceItem.ServiceProvider = new ServiceProvider();
 
-            // When an existing item was changed first remove it before adding
-            if (!_isNewInvoiceItem && SelectedInvoiceItem != null)
+                // When an existing item was changed first remove it before adding
+                if (!_isNewInvoiceItem && SelectedInvoiceItem != null)
+                {
+                    invoiceItemID = SelectedInvoiceItem.pkInvoiceItemID;
+                    InvoiceItemsCollection.Remove(SelectedInvoiceItem);
+                    SelectedInvoiceItem = new InvoiceDetail();
+                    SelectedInvoiceItem.pkInvoiceItemID = invoiceItemID;
+                }          
+
+                SelectedInvoiceItem.fkInvoiceID = 0;
+                SelectedInvoiceItem.fkServiceProviderID = SelectedSupplier.pkServiceProviderID;
+                SelectedInvoiceItem.IsPrivate = SelectedPrivateBilling;
+                SelectedInvoiceItem.ItemDescription = SelectedItemDescription.ToUpper();
+                SelectedInvoiceItem.ReferenceNumber = SelectedItemReference.ToUpper();
+                SelectedInvoiceItem.ItemAmount = Convert.ToDecimal(SelectedItemAmount);
+                SelectedInvoiceItem.ModifiedBy = SecurityHelper.LoggedInUserFullName;
+                SelectedInvoiceItem.ModifiedDate = DateTime.Now;
+                SelectedInvoiceItem.ServiceProvider = SelectedSupplier;
+
+                InvoiceItemsCollection.Add(SelectedInvoiceItem);
+                InvoiceItemsCollection = new ObservableCollection<InvoiceDetail>(InvoiceItemsCollection);
+
+                // Calculate the private and company due amounts
+                SelectedPrivateDue = InvoiceItemsCollection.Where(p => p.IsPrivate).ToList().Sum(p => p.ItemAmount);
+                SelectedCompanyDue = InvoiceItemsCollection.Where(p => !p.IsPrivate).ToList().Sum(p => p.ItemAmount);
+
+                ExecuteItemCancel();
+            }
+            catch (Exception ex)
             {
-                invoiceItemID = SelectedInvoiceItem.pkInvoiceItemID;
-                InvoiceItemsCollection.Remove(SelectedInvoiceItem);
-                SelectedInvoiceItem = new InvoiceDetail();
-                SelectedInvoiceItem.pkInvoiceItemID = invoiceItemID;
-            }          
-
-            SelectedInvoiceItem.fkInvoiceID = 0;
-            SelectedInvoiceItem.fkServiceProviderID = SelectedSupplier.pkServiceProviderID;
-            SelectedInvoiceItem.IsPrivate = SelectedPrivateBilling;
-            SelectedInvoiceItem.ItemDescription = SelectedItemDescription.ToUpper();
-            SelectedInvoiceItem.ReferenceNumber = SelectedItemReference.ToUpper();
-            SelectedInvoiceItem.ItemAmount = Convert.ToDecimal(SelectedItemAmount);
-            SelectedInvoiceItem.ModifiedBy = SecurityHelper.LoggedInUserFullName;
-            SelectedInvoiceItem.ModifiedDate = DateTime.Now;
-            SelectedInvoiceItem.ServiceProvider = SelectedSupplier;
-
-            InvoiceItemsCollection.Add(SelectedInvoiceItem);
-            InvoiceItemsCollection = new ObservableCollection<InvoiceDetail>(InvoiceItemsCollection);
-
-            // Calculate the private and company due amounts
-            SelectedPrivateDue = InvoiceItemsCollection.Where(p => p.IsPrivate).ToList().Sum(p => p.ItemAmount);
-            SelectedCompanyDue = InvoiceItemsCollection.Where(p => !p.IsPrivate).ToList().Sum(p => p.ItemAmount);
-
-            ExecuteItemCancel();
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewAccountViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ExecuteItemAdd",
+                                                                ApplicationMessage.MessageTypes.SystemError));
+            }
         }
 
         /// <summary>

@@ -30,9 +30,10 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// <summary>
         /// Create a new company billing level entity in the database
         /// </summary>
+        /// <param name="companyID">The companyID the billing level is linked to.</param>
         /// <param name="companyBillingLevel">The company billing level entity to add.</param>
         /// <returns>True if successfull</returns>
-        public bool CreateCompanyBillingLevel(CompanyBillingLevel companyBillingLevel)
+        public bool CreateCompanyBillingLevel(int companyID, CompanyBillingLevel companyBillingLevel)
         {
             try
             {
@@ -43,7 +44,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     {
                         db.CompanyBillingLevels.Add(companyBillingLevel);
                         db.SaveChanges();
-                        return true;
+
+                        return new CompanyModel(_eventAggregator).UpdateCompanyBillingLevelGroup(companyID, companyBillingLevel.fkCompanyGroupID);
                     }
                     else
                     {
@@ -97,15 +99,16 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// <summary>
         /// Update an existing company billing level entity in the database
         /// </summary>
+        /// <param name="companyID">The companyID the billing level is linked to.</param>
         /// <param name="companyBillingLevel">The company billing level entity to update.</param>
         /// <returns>True if successfull</returns>
-        public bool UpdateCompanyBillingLevel(CompanyBillingLevel companyBillingLevel)
+        public bool UpdateCompanyBillingLevel(int companyID, CompanyBillingLevel companyBillingLevel)
         {
             try
             {
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    CompanyBillingLevel existingBillingLevel = db.CompanyBillingLevels.Where(p => p.fkBillingLevelID == companyBillingLevel.fkBillingLevelID).FirstOrDefault();
+                    CompanyBillingLevel existingBillingLevel = db.CompanyBillingLevels.Where(p => p.pkCompanyBillingLevelID == companyBillingLevel.pkCompanyBillingLevelID).FirstOrDefault();
 
                     // Check to see if the existing billing level description already exist for another entity 
                     if (existingBillingLevel != null && existingBillingLevel.pkCompanyBillingLevelID != companyBillingLevel.pkCompanyBillingLevelID)
@@ -122,7 +125,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                         db.CompanyBillingLevels.Attach(companyBillingLevel);
                         db.Entry(companyBillingLevel).State = System.Data.Entity.EntityState.Modified;
                         db.SaveChanges();
-                        return true;
+
+                        return new CompanyModel(_eventAggregator).UpdateCompanyBillingLevelGroup(companyID, companyBillingLevel.fkCompanyGroupID);
                     }
                 }
             }

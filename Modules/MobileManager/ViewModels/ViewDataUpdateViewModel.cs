@@ -907,6 +907,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                                                                              updateValue,
                                                                                                              SelectedDestinationCompany,
                                                                                                              out errorMessage)); break;
+                        case DataBaseEntity.SimCard:
+                            result = await Task.Run(() => new SimCardModel(_eventAggregator).UpdateSimCard(searchEntity,
+                                                                                                           searchCriteria,
+                                                                                                           destinationColumn,
+                                                                                                           updateValue,
+                                                                                                           SelectedDestinationCompany,
+                                                                                                           out errorMessage)); break;
                     }
 
                     if (result)

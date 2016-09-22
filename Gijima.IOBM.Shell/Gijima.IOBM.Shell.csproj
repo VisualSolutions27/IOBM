@@ -32,7 +32,7 @@
     <ProductName>Mobile Manager</ProductName>
     <PublisherName>Gijima</PublisherName>
     <SuiteName>Integrated Operational Billing Manager</SuiteName>
-    <ApplicationRevision>17</ApplicationRevision>
+    <ApplicationRevision>20</ApplicationRevision>
     <ApplicationVersion>1.0.1.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -209,12 +209,12 @@
   <ItemGroup>
     <PublishFile Include="System.Windows.Controls.Ribbon">
       <Visible>False</Visible>
-      <PublishState>Include</PublishState>
-      <IncludeHash>True</IncludeHash>
       <Group>
       </Group>
       <TargetPath>
       </TargetPath>
+      <PublishState>Include</PublishState>
+      <IncludeHash>True</IncludeHash>
       <FileType>Assembly</FileType>
     </PublishFile>
   </ItemGroup>

@@ -1,4 +1,6 @@
-﻿using Gijima.IOBM.MobileManager.Common.Structs;
+﻿using Gijima.IOBM.Infrastructure.Helpers;
+using Gijima.IOBM.Infrastructure.Structs;
+using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Security;
 using Gijima.IOBM.MobileManager.Views;
 using Prism.Events;
@@ -51,8 +53,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             TabCollection = new ObservableCollection<TabItem>();
             if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()))
             {
-                TabCollection.Add(new TabItem() { Header = "Security" });
                 TabCollection.Add(new TabItem() { Header = "Data Validation" });
+                TabCollection.Add(new TabItem() { Header = "Security" });
                 TabCollection.Add(new TabItem() { Header = "System" });
             }
             TabCollection.Add(new TabItem() { Header = "Reference Data" });
@@ -65,21 +67,15 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <param name="e"></param>
         private void SetTabContent(TabItem tabItem)
         {
-            //if (_selectedTabIndex != tabItem.TabIndex)
-            //{
-            //if (TabControlMainWindowMenu.SelectedItem != null)
-            //{
-            //_selectedTabItem = (TabItem)TabControlMainWindowMenu.SelectedItem;
-
             if (tabItem.Content == null)
             {
                 switch (tabItem.Header.ToString())
                 {
-                    case "Security":
-                        SelectedTab.Content = new ViewSecurityCF(_eventAggregator);
-                        break;
                     case "Data Validation":
                         SelectedTab.Content = new ViewDataValidationCF();
+                        break;
+                    case "Security":
+                        SelectedTab.Content = new ViewSecurityCF(_eventAggregator);
                         break;
                     case "System":
                         //SelectedTab.Content = new ViewAccount(_eventAggregator);
@@ -91,10 +87,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
             }
 
-            //}
-            //}
-
             _selectedTabIndex = tabItem.TabIndex;
+            MobileManagerEnvironment.SelectedConfigMenu = EnumHelper.GetEnumFromDescription<ConfigMenuOption>(tabItem.Header.ToString());
         }
     }
 }

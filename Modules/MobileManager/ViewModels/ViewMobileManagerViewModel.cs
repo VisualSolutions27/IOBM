@@ -1,4 +1,5 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
+using Gijima.IOBM.Infrastructure.Helpers;
 using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Common.Events;
 using Gijima.IOBM.MobileManager.Common.Structs;
@@ -6,10 +7,8 @@ using Gijima.IOBM.MobileManager.Model.Data;
 using Gijima.IOBM.MobileManager.Model.Models;
 using Gijima.IOBM.MobileManager.Security;
 using Gijima.IOBM.MobileManager.Views;
-using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
-using Prism.Regions;
 using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
@@ -336,43 +335,36 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <param name="e"></param>
         private void SetTabContent(TabItem tabItem)
         {
-            //if (_selectedTabIndex != tabItem.TabIndex)
-            //{
-                //if (TabControlMainWindowMenu.SelectedItem != null)
-                //{
-                    //_selectedTabItem = (TabItem)TabControlMainWindowMenu.SelectedItem;
-
+            switch (tabItem.Header.ToString())
+            {
+                case "Administration":
                     if (tabItem.Content == null)
-                    {
-                        switch (tabItem.Header.ToString())
-                        {
-                            // Pre-Scan menu
-                            case "Administration":
-                                SelectedTab.Content = new ViewMobileAdmin();
-                                break;
-                            case "Accounts":
-                                SelectedTab.Content = new ViewAccount(_eventAggregator);
-                                break;
-                            case "Billing":
-                                SelectedTab.Content = new ViewBilling();
-                                break;
-                            case "Activity Log":
-                                SelectedTab.Content = new ViewAuditLog();
-                        break;
-                    case "System Tools":
+                        SelectedTab.Content = new ViewMobileAdmin();
+                    break;
+                case "Accounts":
+                    if (tabItem.Content == null)
+                        SelectedTab.Content = new ViewAccount(_eventAggregator);
+                    break;
+                case "Billing":
+                    if (tabItem.Content == null)
+                        SelectedTab.Content = new ViewBilling();
+                    break;
+                case "Activity Log":
+                    if (tabItem.Content == null)
+                        SelectedTab.Content = new ViewAuditLog();
+                    break;
+                case "System Tools":
+                    if (tabItem.Content == null)
                         SelectedTab.Content = new ViewSystemTools();
-                        break;
-                    case "Configuration":
-                                SelectedTab.Content = new ViewConfig();
-                                break;
-                        }
-
-                    }
-
-                //}
-            //}
+                    break;
+                case "Configuration":
+                    if (tabItem.Content == null)
+                        SelectedTab.Content = new ViewConfig();
+                    break;
+            }
 
             _selectedTabIndex = tabItem.TabIndex;
+            MobileManagerEnvironment.SelectedProcessMenu = EnumHelper.GetEnumFromDescription<ProcessMenuOption>(tabItem.Header.ToString());
         }
 
         /// <summary>

@@ -149,7 +149,7 @@
     <Compile Include="Views\Billing\ViewBilling.xaml.cs">
       <DependentUpon>ViewBilling.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\Billing\ViewDataValidation.xaml.cs">
+    <Compile Include="Views\SystemTools\ViewDataValidation.xaml.cs">
       <DependentUpon>ViewDataValidation.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\Billing\ViewSupplierDataImport.xaml.cs">
@@ -248,7 +248,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Views\Billing\ViewDataValidation.xaml">
+    <Page Include="Views\SystemTools\ViewDataValidation.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

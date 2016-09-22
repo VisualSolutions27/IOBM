@@ -34,7 +34,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="Data Update View" Margin="10,3,0,0"  Style="{StaticResource UXHeaderTextStyle}"></TextBlock>
+                <TextBlock Text="Data Update View" Margin="10,3,0,0" Style="{StaticResource UXHeaderTextStyle}"></TextBlock>
             </Grid>
         </Border>
         <GroupBox Grid.Row="1" Grid.Column="0" Header="Source Parametes" Margin="5" Style="{StaticResource UXGroupBoxStyle}">

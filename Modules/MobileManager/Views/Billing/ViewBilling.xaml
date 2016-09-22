@@ -35,7 +35,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Text="Billing View" Style="{StaticResource UXHeaderTextStyle}"></TextBlock>
+                <TextBlock Text="Billing View" Margin="10,3,0,0"  Style="{StaticResource UXHeaderTextStyle}"></TextBlock>
             </Grid>
         </Border>
         <Border Grid.Row="1" Grid.Column="0" Background="#FFF2E9C1" Margin="5,5,0,5" BorderBrush="Silver" BorderThickness="1,1,0,1">

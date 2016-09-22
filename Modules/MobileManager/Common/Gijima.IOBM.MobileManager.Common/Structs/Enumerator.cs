@@ -4,6 +4,62 @@ using System.ComponentModel;
 namespace Gijima.IOBM.MobileManager.Common.Structs
 {
     /// <summary>
+    /// The <see cref="ProcessMenuOption"/> enumeration lists of
+    /// application main menu options.
+    /// </summary>
+    public enum ProcessMenuOption
+    {
+        [Description("Dashboard")]
+        Dashboard,
+        [Description("Administration")]
+        Administration,
+        [Description("Accounts")]
+        Accounts,
+        [Description("Billing")]
+        Billing,
+        [Description("Activity Log")]
+        ActivityLog,
+        [Description("Advanced Search")]
+        AdvancedSearch,
+        [Description("Reports")]
+        Reports,
+        [Description("System Tools")]
+        SystemTools,
+        [Description("Configuration")]
+        Configuration,
+    }
+
+    /// <summary>
+    /// The <see cref="ToolsMenuOption"/> enumeration lists of
+    /// application system tools menu options.
+    /// </summary>
+    public enum ToolsMenuOption
+    {
+        [Description("Data Update")]
+        DataUpdate,
+        [Description("Data Import")]
+        DataImport,
+        [Description("Data Validation")]
+        DataValidation,
+    }
+
+    /// <summary>
+    /// The <see cref="ProcessMenuOption"/> enumeration lists of
+    /// application configuration options.
+    /// </summary>
+    public enum ConfigMenuOption
+    {
+        [Description("Data Validation")]
+        DataValidation,
+        [Description("Security")]
+        Security,
+        [Description("System")]
+        System,
+        [Description("Reference Data")]
+        ReferenceData,
+    }
+
+    /// <summary>
     /// The <see cref="SecurityRole"/> enumeration lists of
     /// application security roles.
     /// </summary>
@@ -21,7 +77,10 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     /// </summary>
     public enum ActionCompleted
     {
-        ReadContractSimCards
+        ReadContractDevices,
+        ReadContractSimCards,
+        SaveContractDevices,
+        SaveContractSimCards
     }
 
     /// <summary>
@@ -56,7 +115,6 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         AccountNumber,
         Other
     }
-
 
     /// <summary>
     /// The <see cref="BillingProcess"/> enumeration a list of 
@@ -311,12 +369,10 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         RandValue = 31,
         [Description("Package SPUL Value")]
         SPULValue = 32,
-        [Description("Sim Card Number")]
+        [Description("Card Number")]
         CardNumber = 33,
-        [Description("Sim Card PUK Number")]
+        [Description("PUK Number")]
         PUKNumber = 34,
-        [Description("Sim Card Cell Number")]
-        CellNumber = 35,
     }
 
     #endregion
@@ -372,7 +428,11 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         [Description("Package Rand Value")]
         RandValue = 20,
         [Description("Package SPUL Value")]
-        SPULValue = 21
+        SPULValue = 21,
+        [Description("Sim Number")]
+        CardNumber = 22,
+        [Description("PUK Number")]
+        PUKNumber = 23
     }
 
     /// <summary>
@@ -394,7 +454,9 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         [Description("Contract Data")]
         Contract = 5,
         [Description("Package Data")]
-        Package = 6
+        Package = 6,
+        [Description("Sim Data")]
+        SimCard = 7
     }
 
     #endregion
