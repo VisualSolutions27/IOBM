@@ -78,7 +78,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                         SelectedTab.Content = new ViewDataUpdate();
                         break;
                     case "Data Import":
-                        SelectedTab.Content = new ViewDataUpdate();
+                        SelectedTab.Content = new ViewDataImport();
                         break;
                 }
 

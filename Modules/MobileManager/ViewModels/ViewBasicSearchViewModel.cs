@@ -1,4 +1,5 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
+using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Common.Events;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
@@ -156,16 +157,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 ObservableCollection<Client> results = ClientResults = null;
 
-                if (SearchCriteria.Length == 8)
+                if (SearchCriteria.Trim().Length == 8)
                     results = await Task.Run(() => _model.SearchForClient(SearchCriteria.ToUpper().Trim(), SearchEntity.EmployeeNumber, false));
 
-                if ((results == null || results.Count == 0) && SearchCriteria.Length == 10)
+                if ((results == null || results.Count == 0) && SearchCriteria.Trim().Length == 10)
                     results = await Task.Run(() => _model.SearchForClient(SearchCriteria.ToUpper().Trim(), SearchEntity.PrimaryCellNumber, false));
 
-                if ((results == null || results.Count == 0) && SearchCriteria.Length == 13)
+                if ((results == null || results.Count == 0) && SearchCriteria.Trim().Length == 13)
                     results = await Task.Run(() => _model.SearchForClient(SearchCriteria.ToUpper().Trim(), SearchEntity.IDNumber, false));
 
-                if ((results == null || results.Count == 0) && SearchCriteria.Contains("@"))
+                if ((results == null || results.Count == 0) && SearchCriteria.Trim().Contains("@"))
                     results = await Task.Run(() => _model.SearchForClient(SearchCriteria.ToUpper().Trim(), SearchEntity.Email, false));
 
                 if (results == null || results.Count == 0)
@@ -183,7 +184,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewBasicSearchViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ExecuteSearch",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 

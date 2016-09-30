@@ -81,7 +81,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 using (var db = MobileManagerEntities.GetContext())
                 {
                     companies = ((DbQuery<Company>)(from company in db.Companies
-                                                    select company)).OrderBy(p => p.CompanyName).ToList();
+                                                    select company)).Include("CompanyGroup")
+                                                                    .OrderBy(p => p.CompanyName).ToList();
 
                     if (activeOnly)
                         companies = companies.Where(p => p.IsActive);
@@ -111,7 +112,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 using (var db = MobileManagerEntities.GetContext())
                 {
                     return ((DbQuery<Company>)(from company in db.Companies
-                                               select company)).Include("CompanyBillingLevels")
+                                               select company)).Include("CompanyGroup")
+                                                               .Include("CompanyBillingLevels")
                                                                .Include("CompanyBillingLevels.BillingLevel").FirstOrDefault();
                 }
             }
@@ -283,37 +285,6 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             {
                 _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 errorMessage = string.Format("Error: {0} {1}.", ex.Message, ex.InnerException.Message);
-                return false;
-            }
-        }
-
-        /// <summary>
-        /// Update an existing company's billing level group ID
-        /// </summary>
-        /// <param name="companyID">The company entity to update.</param>
-        /// <param name="billingLevelGroupID">The billing level group ID.</param>
-        /// <returns>True if successfull</returns>
-        public bool UpdateCompanyBillingLevelGroup(int companyID, int billingLevelGroupID)
-        {
-            try
-            {
-                using (var db = MobileManagerEntities.GetContext())
-                {
-                    Company existingCompany = db.Companies.Where(p => p.pkCompanyID == companyID).FirstOrDefault();
-
-                    if (existingCompany != null)
-                    {
-                        existingCompany.fkBillingLevelGroupID = billingLevelGroupID;
-                        db.SaveChanges();
-                        return true;
-                    }
-
-                    return false;
-                }
-            }
-            catch (Exception ex)
-            {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 return false;
             }
         }

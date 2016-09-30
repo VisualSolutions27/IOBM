@@ -16,7 +16,9 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
-            <RowDefinition Height="20" />
+            <RowDefinition Height="5" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="25" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
@@ -34,21 +36,28 @@
                 ToolTip="Cancel the current operation." Command="{Binding CancelCommand}">
                 <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/stop_32.ico"  />
             </Button>
-            <Button x:Name="ButtonAdd" TabIndex="5" Style="{StaticResource UXImageButtonStyle}" Margin="2,0,0,0"
+            <Button x:Name="ButtonBillingLevel" TabIndex="5" Style="{StaticResource UXImageButtonStyle}" Margin="2,0,0,0"
+                ToolTip="Add, edit or delete a company billing level." Command="{Binding BillingLevelCommand}">
+                <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/t (222).ico"  />
+            </Button>
+            <Button x:Name="ButtonAdd" TabIndex="6" Style="{StaticResource UXImageButtonStyle}" Margin="2,0,0,0"
                 ToolTip="Add a new company group." Command="{Binding AddCommand}">
                 <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/508.png"  />
             </Button>
-            <Button x:Name="ButtonSave" TabIndex="6" Style="{StaticResource UXImageButtonStyle}" Margin="2,0,0,0"
+            <Button x:Name="ButtonSave" TabIndex="7" Style="{StaticResource UXImageButtonStyle}" Margin="2,0,0,0"
                 ToolTip="Save the company group data." Command="{Binding SaveCommand}">
                 <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/save_32.ico"  />
             </Button>
         </StackPanel>
-        <StackPanel Grid.Row="1" Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right">
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Billing levels:" Style="{StaticResource UXLabelTextStyle}" VerticalAlignment="Top"></TextBlock>
+        <ListBox x:Name="ListBoxBillingLevels" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" TabIndex="8"
+            ItemsSource="{Binding CompanyBillingLevelCollection, UpdateSourceTrigger=PropertyChanged}" MinHeight="38" MaxHeight="50"/>
+        <StackPanel Grid.Row="3" Grid.Column="3" Orientation="Horizontal" HorizontalAlignment="Right">
             <TextBlock Text="Active" Style="{StaticResource UXLabelTextStyle}" VerticalAlignment="Bottom" Margin="0,0,5,0"></TextBlock>
             <CheckBox x:Name="CkeckBoxIsActive" TabIndex="2" VerticalAlignment="Bottom" IsChecked="{Binding GroupState, UpdateSourceTrigger=PropertyChanged}"/>
         </StackPanel>
-        <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Text="Available Company Groups" Style="{StaticResource UXLabelTextStyle}" VerticalAlignment="Bottom"></TextBlock>
-        <DataGrid x:Name="DataGridCompanyGroups" Grid.Row="2" Grid.ColumnSpan="4" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserSortColumns="True" 
+        <TextBlock Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Text="Available Company Groups" Style="{StaticResource UXLabelTextStyle}" VerticalAlignment="Bottom"></TextBlock>
+        <DataGrid x:Name="DataGridCompanyGroups" Grid.Row="4" Grid.ColumnSpan="4" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserSortColumns="True" 
             IsReadOnly="True" TabIndex="3" Style="{StaticResource DataGridStyle}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}" 
             ItemsSource="{Binding GroupCollection}" SelectedItem="{Binding SelectedGroup}">
             <DataGrid.Columns>

@@ -6,7 +6,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"    
              xmlns:prism="http://prismlibrary.com/"
-             prism:ViewModelLocator.AutoWireViewModel="False"
+             prism:ViewModelLocator.AutoWireViewModel="True"
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="1000">
     
@@ -81,12 +81,14 @@
                     <ColumnDefinition Width="50" />
                     <ColumnDefinition Width="2*" />
                 </Grid.ColumnDefinitions>
-                <WPF:DualListBoxUX x:Name="DualSelectListBoxRoles" Grid.Row="2" AvailableItemsHeader="Available Roles" SelectedItemsHeader="Selected Roles" TabIndexStart="5"
+                <ContentControl Grid.Row="2" Grid.Column="0" Content="{Binding DualSelectListBoxRoles}"/>
+                <ContentControl Grid.Row="2" Grid.Column="2" Content="{Binding DualSelectListBoxCompanies}"/>
+                <!--<WPF:DualListBoxUX x:Name="DualSelectListBoxRoles" Grid.Row="2" AvailableItemsHeader="Available Roles" SelectedItemsHeader="Selected Roles" TabIndexStart="5"
                      DisplayMemberPath="RoleName" SelectedValuePath="pkRoleId">
                 </WPF:DualListBoxUX>
                 <WPF:DualListBoxUX x:Name="DualSelectListBoxCompanies" Grid.Row="2" Grid.Column="2" AvailableItemsHeader="Available Companies" SelectedItemsHeader="Selected Companies" TabIndexStart="6"
                     DisplayMemberPath="CompanyName" SelectedValuePath="pkCompanyId">
-                </WPF:DualListBoxUX>
+                </WPF:DualListBoxUX>-->
             </Grid>
             <TextBlock x:Name="TextBlockCurrentUsers" Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="6" Text="Application Users" VerticalAlignment="Bottom"/>
             <DataGrid x:Name="DataGridAppUsers" Grid.Row="4" Grid.ColumnSpan="6" AutoGenerateColumns="False" CanUserReorderColumns="False" CanUserSortColumns="True" MinHeight="52"

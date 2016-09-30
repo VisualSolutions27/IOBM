@@ -62,12 +62,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                             break;
                         default:
                             clients = ((DbQuery<Client>)(from client in db.Clients
-                                                         join device in db.Devices
-                                                         on client.fkContractID equals device.fkContractID
-                                                         join simCard in db.SimCards
-                                                         on client.fkContractID equals simCard.fkContractID
                                                          join contract in db.Contracts
                                                          on client.fkContractID equals contract.pkContractID
+                                                         from device in db.Devices.Where(p => p.fkContractID == client.fkContractID)
+                                                                                  .DefaultIfEmpty()
+                                                         from simCard in db.SimCards.Where(p => p.fkContractID == client.fkContractID)
+                                                                                    .DefaultIfEmpty()
                                                          where client.ClientName.Contains(searchCriteria) ||
                                                                client.CostCode.Contains(searchCriteria) ||
                                                                contract.AccountNumber.Contains(searchCriteria) ||

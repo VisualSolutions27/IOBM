@@ -3,11 +3,11 @@
 namespace Gijima.IOBM.MobileManager.Views
 {
     /// <summary>
-    /// Interaction logic for ViewSecurityCF.xaml
+    /// Interaction logic for ViewDataImport.xaml
     /// </summary>
-    public partial class ViewSecurityCF : UserControl
+    public partial class ViewDataImport : UserControl
     {
-        public ViewSecurityCF()
+        public ViewDataImport()
         {
             InitializeComponent();
         }

@@ -159,7 +159,7 @@ namespace Gijima.IOBM.MobileManager.Security
         /// <returns>True if user has company</returns>
         public bool IsUserInCompany(int companyID)
         {
-            return UserCompanies.Any(p => p.fkCompanyID == companyID);
+            return UserCompanies != null && UserCompanies.Any(p => p.fkCompanyID == companyID);
         }
 
         #endregion

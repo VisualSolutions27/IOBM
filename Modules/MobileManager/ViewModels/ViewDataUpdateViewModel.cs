@@ -26,11 +26,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
     {
         #region Properties & Attributes
 
-        private UpdateRuleDataModel _model = null;
+        private DataUpdateRuleModel _model = null;
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
-        private IEnumerable<UpdateRuleData> _importRules = null;
-        private UpdateRuleData _importRule = null;
+        private IEnumerable<DataUpdateRule> _importRules = null;
+        private DataUpdateRule _importRule = null;
         private MSOfficeHelper _officeHelper = null;
 
         #region Commands
@@ -503,7 +503,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private async void InitialiseDataUpdateView()
         {
-            _model = new UpdateRuleDataModel(_eventAggregator);
+            _model = new DataUpdateRuleModel(_eventAggregator);
             InitialiseViewControls();
 
             // Initialise the view commands
@@ -517,7 +517,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                                          .ObservesProperty(() => SelectedDestinationCompany);
             // Load the view data
             ReadDataDestinationColumns();
-            await ReadUpdateRuleDataAsync();
+            await ReadDataUpdateRulesAsync();
             await ReadCompanyGroupsAsync();
         }
 
@@ -552,11 +552,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// Read all the active update rule data from the database
         /// </summary>
-        private async Task ReadUpdateRuleDataAsync()
+        private async Task ReadDataUpdateRulesAsync()
         {
             try
             {
-                _importRules = await Task.Run(() => _model.ReadUpdateRuleData(true));
+                _importRules = await Task.Run(() => _model.ReadDataUpdateRules(true));
             }
             catch (Exception ex)
             {
@@ -632,13 +632,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     int destinationColumnID = EnumHelper.GetEnumFromDescription<DataUpdateColumn>(SelectedDestinationColumn).Value();
 
                     // Filter the update destination data based on the update source
-                    IEnumerable<UpdateRuleData> destinations = _importRules.Where(p => p.enDataUpdateColumn == destinationColumnID).ToList();
+                    IEnumerable<DataUpdateRule> destinations = _importRules.Where(p => p.enDataUpdateColumn == destinationColumnID).ToList();
 
                     // Add the default enum description
                     DestinationEntityCollection.Add(EnumHelper.GetDescriptionFromEnum(DataUpdateEntity.None));
 
                     // Add all the update destination enum decriptions to the collection
-                    foreach (UpdateRuleData rule in destinations)
+                    foreach (DataUpdateRule rule in destinations)
                     {
                         DestinationEntityCollection.Add(EnumHelper.GetDescriptionFromEnum((DataUpdateEntity)rule.enDataUpdateEntity));
                     }

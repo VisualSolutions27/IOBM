@@ -1,4 +1,5 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
+using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
 using Prism.Events;
 using System;
@@ -39,24 +40,31 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             {
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    if (!db.CompanyBillingLevels.Any(p => p.fkCompanyGroupID == companyBillingLevel.fkCompanyGroupID &&
-                                                          p.fkBillingLevelID == companyBillingLevel.fkBillingLevelID))
+                    if (db.CompanyBillingLevels.Any(p => p.fkCompanyGroupID == companyBillingLevel.fkCompanyGroupID &&
+                                                         p.fkBillingLevelID == companyBillingLevel.fkBillingLevelID))
                     {
-                        db.CompanyBillingLevels.Add(companyBillingLevel);
-                        db.SaveChanges();
-
-                        return new CompanyModel(_eventAggregator).UpdateCompanyBillingLevelGroup(companyID, companyBillingLevel.fkCompanyGroupID);
-                    }
-                    else
-                    {
-                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The {0} company billing level already exist.", companyBillingLevel.BillingLevel.LevelDescription));
+                        _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                        .Publish(new ApplicationMessage("CompanyBillingLevelModel",
+                                                                        string.Format("The {0} company billing level already exist.", companyBillingLevel.BillingLevel.LevelDescription),
+                                                                        "CreateCompanyBillingLevel",
+                                                                        ApplicationMessage.MessageTypes.SystemError));
                         return false;
                     }
+
+                    db.CompanyBillingLevels.Add(companyBillingLevel);
+                    db.SaveChanges();
+
+                    return true;
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("CompanyBillingLevelModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "CreateCompanyBillingLevel",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }
@@ -91,7 +99,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("CompanyBillingLevelModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadCompanyBillingLevels",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return null;
             }
         }
@@ -113,26 +126,32 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     // Check to see if the existing billing level description already exist for another entity 
                     if (existingBillingLevel != null && existingBillingLevel.pkCompanyBillingLevelID != companyBillingLevel.pkCompanyBillingLevelID)
                     {
-                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The {0} company billing level already already exist.", companyBillingLevel.BillingLevel.LevelDescription));
+                        _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                        .Publish(new ApplicationMessage("CompanyBillingLevelModel",
+                                                                        string.Format("The {0} company billing level already exist.", companyBillingLevel.BillingLevel.LevelDescription),
+                                                                        "UpdateCompanyBillingLevel",
+                                                                        ApplicationMessage.MessageTypes.SystemError));
                         return false;
                     }
-                    else
-                    {
-                        // Prevent primary key confilcts when using attach property
-                        if (existingBillingLevel != null)
-                            db.Entry(existingBillingLevel).State = System.Data.Entity.EntityState.Detached;
 
-                        db.CompanyBillingLevels.Attach(companyBillingLevel);
-                        db.Entry(companyBillingLevel).State = System.Data.Entity.EntityState.Modified;
-                        db.SaveChanges();
+                    existingBillingLevel.fkCompanyGroupID = companyBillingLevel.fkCompanyGroupID;
+                    existingBillingLevel.fkBillingLevelID = companyBillingLevel.fkBillingLevelID;
+                    existingBillingLevel.Amount = companyBillingLevel.Amount;
+                    existingBillingLevel.ModifiedBy = Security.SecurityHelper.LoggedInFullName;
+                    existingBillingLevel.ModifiedDate = DateTime.Now;
+                    db.SaveChanges();
 
-                        return new CompanyModel(_eventAggregator).UpdateCompanyBillingLevelGroup(companyID, companyBillingLevel.fkCompanyGroupID);
-                    }
+                    return true;
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("CompanyBillingLevelModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "UpdateCompanyBillingLevel",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }
@@ -161,7 +180,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("CompanyBillingLevelModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "DeleteCompanyBillingLevel",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }

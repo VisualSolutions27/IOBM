@@ -512,5 +512,9 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         {
             return Convert.ToInt16(type);
         }
+        public static short Value(this DataBaseEntity type)
+        {
+            return Convert.ToInt16(type);
+        }
     }
 }

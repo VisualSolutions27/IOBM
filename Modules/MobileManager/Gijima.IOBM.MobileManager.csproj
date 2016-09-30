@@ -50,6 +50,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\Gijima.Controls.WPF\bin\Debug\EntityFramework.dll</HintPath>
     </Reference>
+    <Reference Include="Gijima.Controls.WPF">
+      <HintPath>..\..\Gijima.Controls.WPF\bin\Debug\Gijima.Controls.WPF.dll</HintPath>
+    </Reference>
     <Reference Include="Gijima.IOBM.MobileManager.Security">
       <HintPath>..\..\..\Gijima\IOBM\Modules\MobileManager\Common\Gijima.IOBM.MobileManager.Security\bin\Debug\Gijima.IOBM.MobileManager.Security.dll</HintPath>
     </Reference>
@@ -110,9 +113,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="DualListBoxUX.xaml.cs">
-      <DependentUpon>DualListBoxUX.xaml</DependentUpon>
-    </Compile>
     <Compile Include="MobileManagerController.cs" />
     <Compile Include="MobileManagerModule.cs" />
     <Compile Include="ViewModels\ViewAccountViewModel.cs" />
@@ -124,6 +124,7 @@
     <Compile Include="ViewModels\ViewClientSiteViewModel.cs" />
     <Compile Include="ViewModels\ViewCompanyBillingLevelViewModel.cs" />
     <Compile Include="ViewModels\ViewCompanyGroupViewModel.cs" />
+    <Compile Include="ViewModels\ViewDataImportViewModel.cs" />
     <Compile Include="ViewModels\ViewDataUpdateViewModel.cs" />
     <Compile Include="ViewModels\ViewDataValidationCFViewModel.cs" />
     <Compile Include="ViewModels\ViewCompanyViewModel.cs" />
@@ -134,7 +135,7 @@
     <Compile Include="ViewModels\ViewMobileManagerViewModel.cs" />
     <Compile Include="ViewModels\ViewCellularViewModel.cs" />
     <Compile Include="ViewModels\ViewDeviceViewModel.cs" />
-    <Compile Include="PopupWindow.xaml.cs">
+    <Compile Include="Views\PopupWindow.xaml.cs">
       <DependentUpon>PopupWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="ViewModels\ViewPackageViewModel.cs" />
@@ -148,6 +149,9 @@
     <Compile Include="ViewModels\ViewSystemToolsViewModel.cs" />
     <Compile Include="Views\Billing\ViewBilling.xaml.cs">
       <DependentUpon>ViewBilling.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SystemTools\ViewDataImport.xaml.cs">
+      <DependentUpon>ViewDataImport.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SystemTools\ViewDataValidation.xaml.cs">
       <DependentUpon>ViewDataValidation.xaml</DependentUpon>
@@ -236,15 +240,15 @@
     <Compile Include="Views\Maintenance\ViewSuburb.xaml.cs">
       <DependentUpon>ViewSuburb.xaml</DependentUpon>
     </Compile>
-    <Page Include="DualListBoxUX.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="PopupWindow.xaml">
+    <Page Include="Views\PopupWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\Billing\ViewBilling.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SystemTools\ViewDataImport.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -433,10 +437,6 @@
     <Resource Include="Assets\Images\search_32.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Gijima.Controls.WPF\Gijima.Controls.WPF.csproj">
-      <Project>{b0a5bfe3-ec00-490c-a6a7-8691c9d5af1b}</Project>
-      <Name>Gijima.Controls.WPF</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\Gijima.DataImport.MSOffice\Gijima.DataImport.MSOffice.csproj">
       <Project>{757a257e-1e48-431b-b0c9-f5f0a93a2b07}</Project>
       <Name>Gijima.DataImport.MSOffice</Name>

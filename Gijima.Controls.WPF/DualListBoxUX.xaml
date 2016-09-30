@@ -24,8 +24,8 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
-        <TextBlock x:Name="TextBlockAvailableItemsHeader" Grid.Row="0" Grid.Column="0" Text="Available Items" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-        <TextBlock x:Name="TextBlockSelectedItemsHeader" Grid.Row="0" Grid.Column="3" Text="Selected Items" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+        <TextBlock x:Name="TextBlockAvailableItemsHeader" Grid.Row="0" Grid.Column="0" Text="{Binding AvailableItemsHeader}" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+        <TextBlock x:Name="TextBlockSelectedItemsHeader" Grid.Row="0" Grid.Column="3" Text="{Binding SelectedItemsHeader}" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
         <ListBox x:Name="ListBoxAvailableItems" Grid.Row="1" Grid.Column="0" AllowDrop="True" SelectionMode="Single"
             PreviewMouseLeftButtonDown="ListBoxSource_PreviewMouseLeftButtonDown" Drop="ListBoxDestination_Drop" DragLeave="ListBoxSource_DragLeave">
         </ListBox>

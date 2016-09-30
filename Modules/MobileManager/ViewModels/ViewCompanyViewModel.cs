@@ -30,7 +30,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         public DelegateCommand AddCommand { get; set; }
         public DelegateCommand SaveCommand { get; set; }
         public DelegateCommand GroupCommand { get; set; }
-        public DelegateCommand BillingLevelCommand { get; set; }
 
         #endregion
 
@@ -46,18 +45,19 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 if (value != null)
                 {
+                    SetProperty(ref _selectedCompany, value);
+
                     SelectedCompanyName = value.CompanyName;
-                    SelectedGroup = GroupCollection != null ? GroupCollection.First(p => p.pkCompanyGroupID == value.fkCompanyGroupID) : null;
+                    SelectedGroup = GroupCollection != null && value.fkCompanyGroupID != null ? GroupCollection.First(p => p.pkCompanyGroupID == value.fkCompanyGroupID) : null;
                     SelectedWBSNumber = value.WBSNumber;
                     SelectedCostCode = value.CostCode;
                     SelectedIPAddress = value.IPAddress;
                     CompanyState = value.IsActive;
-                    SetProperty(ref _selectedCompany, value);
                     ReadCompanyBillingLevelsAsync();
                 }
             }
         }
-        private Company _selectedCompany = new Company();
+        private Company _selectedCompany;
 
         /// <summary>
         /// The entered company IP Adrress
@@ -267,7 +267,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                                           .ObservesProperty(() => SelectedWBSNumber)
                                                                           .ObservesProperty(() => SelectedCostCode);
             GroupCommand = new DelegateCommand(ExecuteShowCompanyGroupView, CanExecuteMaintenace).ObservesProperty(() => SelectedCompany);
-            BillingLevelCommand = new DelegateCommand(ExecuteShowBillingLevelView, CanExecuteMaintenace).ObservesProperty(() => SelectedCompany);
 
             // Load the view data
             await ReadCompanyGroupsAsync();
@@ -290,6 +289,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             try
             {
                 CompanyCollection = await Task.Run(() => _model.ReadCompanies(false, true));
+
+                if (SelectedCompany != null)
+                    SelectedCompany = CompanyCollection.Where(p => p.pkCompanyID == SelectedCompany.pkCompanyID).FirstOrDefault();
             }
             catch (Exception ex)
             {
@@ -324,9 +326,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 List<ListBoxItem> billingLevelItems = new List<ListBoxItem>();
                 ListBoxItem billingLevelItem = null;
 
-                if (SelectedCompany.fkBillingLevelGroupID != null)
+                if (SelectedCompany.fkCompanyGroupID != null)
                 {
-                    ObservableCollection<CompanyBillingLevel> collection = await Task.Run(() => new CompanyBillingLevelModel(_eventAggregator).ReadCompanyBillingLevels(SelectedCompany.fkBillingLevelGroupID.Value, true));
+                    ObservableCollection<CompanyBillingLevel> collection = await Task.Run(() => new CompanyBillingLevelModel(_eventAggregator).ReadCompanyBillingLevels(SelectedCompany.fkCompanyGroupID.Value, true));
 
                     foreach (CompanyBillingLevel billingLevel in collection)
                     {
@@ -435,14 +437,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void ExecuteShowBillingLevelView()
         {
-            int companyGroupID = SelectedCompany != null && SelectedCompany.fkBillingLevelGroupID != null ? SelectedCompany.fkBillingLevelGroupID.Value : 0;
+            int companyGroupID = SelectedCompany != null && SelectedCompany.fkCompanyGroupID != null ? SelectedCompany.fkCompanyGroupID.Value : 0;
             int companyID = SelectedCompany != null ? SelectedCompany.pkCompanyID : 0;
             ViewCompanyBillingLevel view = new ViewCompanyBillingLevel();
-            ViewCompanyBillingLevelViewModel viewModel = new ViewCompanyBillingLevelViewModel(_eventAggregator, companyID ,companyGroupID);
+            ViewCompanyBillingLevelViewModel viewModel = new ViewCompanyBillingLevelViewModel(_eventAggregator, companyGroupID);
             view.DataContext = viewModel;
             PopupWindow popupWindow = new PopupWindow(view, "Company Billing Level Maintenance", PopupWindow.PopupButtonType.Close);
             popupWindow.ShowDialog();
-            Task.Run(() => ReadCompanyBillingLevelsAsync());
+            Task.Run(() => ReadCompaniesAsync());
         }
 
         #endregion

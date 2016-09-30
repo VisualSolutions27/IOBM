@@ -142,8 +142,7 @@
             <PropertyRef Name="pkCompanyID" />
           </Key>
           <Property Name="pkCompanyID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="fkCompanyGroupID" Type="int" Nullable="false" />
-          <Property Name="fkBillingLevelGroupID" Type="int" />
+          <Property Name="fkCompanyGroupID" Type="int" />
           <Property Name="CompanyName" Type="varchar" MaxLength="50" />
           <Property Name="WBSNumber" Type="varchar" MaxLength="25" />
           <Property Name="CostCode" Type="varchar" MaxLength="30" />
@@ -191,6 +190,30 @@
           <Property Name="PaymentCancelDate" Type="datetime" />
           <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
           <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DataImportRule">
+          <Key>
+            <PropertyRef Name="pkDataImportRuleID" />
+          </Key>
+          <Property Name="pkDataImportRuleID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="enDataBaseEntity" Type="smallint" Nullable="false" />
+          <Property Name="SearchProperties" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="DataProperties" Type="varchar" MaxLength="1000" Nullable="false" />
+          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="DateModified" Type="datetime" Nullable="false" />
+        </EntityType>
+        <EntityType Name="DataUpdateRule">
+          <Key>
+            <PropertyRef Name="pkDataUpdateRuleID" />
+          </Key>
+          <Property Name="pkDataUpdateRuleID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="enDataUpdateColumn" Type="smallint" Nullable="false" />
+          <Property Name="enDataUpdateEntity" Type="smallint" Nullable="false" />
+          <Property Name="enDataBaseEntity" Type="smallint" Nullable="false" />
+          <Property Name="SearchEntities" Type="varchar" MaxLength="250" />
+          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
+          <Property Name="DateModified" Type="datetime" Nullable="false" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
         </EntityType>
         <EntityType Name="DataValidationException">
@@ -420,19 +443,6 @@
           <Property Name="ModifiedDate" Type="datetime" Nullable="false" />
           <Property Name="IsActive" Type="bit" Nullable="false" />
         </EntityType>
-        <EntityType Name="UpdateRuleData">
-          <Key>
-            <PropertyRef Name="pkUpdateRuleDataID" />
-          </Key>
-          <Property Name="pkUpdateRuleDataID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
-          <Property Name="enDataUpdateColumn" Type="smallint" Nullable="false" />
-          <Property Name="enDataUpdateEntity" Type="smallint" Nullable="false" />
-          <Property Name="enDataBaseEntity" Type="smallint" Nullable="false" />
-          <Property Name="SearchEntities" Type="varchar" MaxLength="250" />
-          <Property Name="ModifiedBy" Type="varchar" MaxLength="50" Nullable="false" />
-          <Property Name="DateModified" Type="datetime" Nullable="false" />
-          <Property Name="IsActive" Type="bit" Nullable="false" />
-        </EntityType>
         <EntityType Name="User">
           <Key>
             <PropertyRef Name="pkUserID" />
@@ -555,20 +565,8 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_Company_BillingLevelGroup">
-          <End Role="CompanyGroup" Type="Self.CompanyGroup" Multiplicity="0..1" />
-          <End Role="Company" Type="Self.Company" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="CompanyGroup">
-              <PropertyRef Name="pkCompanyGroupID" />
-            </Principal>
-            <Dependent Role="Company">
-              <PropertyRef Name="fkBillingLevelGroupID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_Company_CompanyGroup">
-          <End Role="CompanyGroup" Type="Self.CompanyGroup" Multiplicity="1" />
+          <End Role="CompanyGroup" Type="Self.CompanyGroup" Multiplicity="0..1" />
           <End Role="Company" Type="Self.Company" Multiplicity="*" />
           <ReferentialConstraint>
             <Principal Role="CompanyGroup">
@@ -908,6 +906,8 @@
           <EntitySet Name="CompanyBillingLevel" EntityType="Self.CompanyBillingLevel" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="CompanyGroup" EntityType="Self.CompanyGroup" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Contract" EntityType="Self.Contract" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DataImportRule" EntityType="Self.DataImportRule" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="DataUpdateRule" EntityType="Self.DataUpdateRule" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DataValidationException" EntityType="Self.DataValidationException" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DataValidationProperty" EntityType="Self.DataValidationProperty" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="DataValidationRule" EntityType="Self.DataValidationRule" Schema="dbo" store:Type="Tables" />
@@ -925,7 +925,6 @@
           <EntitySet Name="SimCard" EntityType="Self.SimCard" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Status" EntityType="Self.Status" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="Suburb" EntityType="Self.Suburb" Schema="dbo" store:Type="Tables" />
-          <EntitySet Name="UpdateRuleData" EntityType="Self.UpdateRuleData" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="User" EntityType="Self.User" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UserInCompany" EntityType="Self.UserInCompany" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="UserInRole" EntityType="Self.UserInRole" Schema="dbo" store:Type="Tables" />
@@ -960,10 +959,6 @@
           <AssociationSet Name="FK_ClientBilling_CompanyBillingLevel" Association="Self.FK_ClientBilling_CompanyBillingLevel">
             <End Role="CompanyBillingLevel" EntitySet="CompanyBillingLevel" />
             <End Role="ClientBilling" EntitySet="ClientBilling" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Company_BillingLevelGroup" Association="Self.FK_Company_BillingLevelGroup">
-            <End Role="CompanyGroup" EntitySet="CompanyGroup" />
-            <End Role="Company" EntitySet="Company" />
           </AssociationSet>
           <AssociationSet Name="FK_Company_CompanyGroup" Association="Self.FK_Company_CompanyGroup">
             <End Role="CompanyGroup" EntitySet="CompanyGroup" />
@@ -1406,18 +1401,8 @@
           <Property Name="UserFullName" Type="String" MaxLength="100" FixedLength="false" Unicode="false" />
           <Property Name="LastActivityDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="UserInCompanies" Relationship="Self.FK_UserInCompany_User" FromRole="User" ToRole="UserInCompany" />
           <NavigationProperty Name="UserInRoles" Relationship="Self.FK_UserInRole_User" FromRole="User" ToRole="UserInRole" />
-        </EntityType>
-        <EntityType Name="UserInCompany">
-          <Key>
-            <PropertyRef Name="pkUserInCompanyID" />
-          </Key>
-          <Property Name="pkUserInCompanyID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="fkUserID" Type="Int32" Nullable="false" />
-          <Property Name="fkCompanyID" Type="Int32" Nullable="false" />
-          <NavigationProperty Name="User" Relationship="Self.FK_UserInCompany_User" FromRole="UserInCompany" ToRole="User" />
-          <NavigationProperty Name="Company" Relationship="MobileManagerModel.FK_UserInCompany_UserInCompany" FromRole="UserInCompany" ToRole="Company" />
+          <NavigationProperty Name="UserInCompanies" Relationship="MobileManagerModel.FK_UserInCompany_User" FromRole="User" ToRole="UserInCompany" />
         </EntityType>
         <EntityType Name="UserInRole">
           <Key>
@@ -1609,18 +1594,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <Association Name="FK_UserInCompany_User">
-          <End Role="User" Type="Self.User" Multiplicity="1" />
-          <End Role="UserInCompany" Type="Self.UserInCompany" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="User">
-              <PropertyRef Name="pkUserID" />
-            </Principal>
-            <Dependent Role="UserInCompany">
-              <PropertyRef Name="fkUserID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
         <Association Name="FK_UserInRole_User">
           <End Role="User" Type="Self.User" Multiplicity="1" />
           <End Role="UserInRole" Type="Self.UserInRole" Multiplicity="*" />
@@ -1657,7 +1630,6 @@
           <EntitySet Name="Status" EntityType="Self.Status" />
           <EntitySet Name="Suburbs" EntityType="Self.Suburb" />
           <EntitySet Name="Users" EntityType="Self.User" />
-          <EntitySet Name="UserInCompanies" EntityType="Self.UserInCompany" />
           <EntitySet Name="UserInRoles" EntityType="Self.UserInRole" />
           <AssociationSet Name="FK_BillingProcessHistory_BillingProcess" Association="Self.FK_BillingProcessHistory_BillingProcess">
             <End Role="BillingProcess" EntitySet="BillingProcesses" />
@@ -1719,10 +1691,6 @@
             <End Role="Role" EntitySet="Roles" />
             <End Role="UserInRole" EntitySet="UserInRoles" />
           </AssociationSet>
-          <AssociationSet Name="FK_UserInCompany_User" Association="Self.FK_UserInCompany_User">
-            <End Role="User" EntitySet="Users" />
-            <End Role="UserInCompany" EntitySet="UserInCompanies" />
-          </AssociationSet>
           <AssociationSet Name="FK_UserInRole_User" Association="Self.FK_UserInRole_User">
             <End Role="User" EntitySet="Users" />
             <End Role="UserInRole" EntitySet="UserInRoles" />
@@ -1760,7 +1728,6 @@
             <End Role="Status" EntitySet="Status" />
             <End Role="SimCard" EntitySet="SimCards" />
           </AssociationSet>
-          <EntitySet Name="UpdateRuleDatas" EntityType="MobileManagerModel.UpdateRuleData" />
           <EntitySet Name="AppSettings" EntityType="MobileManagerModel.AppSetting" />
           <EntitySet Name="Clients" EntityType="MobileManagerModel.Client" />
           <EntitySet Name="ClientBillings" EntityType="MobileManagerModel.ClientBilling" />
@@ -1784,24 +1751,7 @@
             <End Role="Client" EntitySet="Clients" />
             <End Role="Invoice" EntitySet="Invoices" />
           </AssociationSet>
-          <EntitySet Name="Companies" EntityType="MobileManagerModel.Company" />
           <EntitySet Name="CompanyGroups" EntityType="MobileManagerModel.CompanyGroup" />
-          <AssociationSet Name="FK_Client_Company" Association="MobileManagerModel.FK_Client_Company">
-            <End Role="Company" EntitySet="Companies" />
-            <End Role="Client" EntitySet="Clients" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Company_BillingLevelGroup" Association="MobileManagerModel.FK_Company_BillingLevelGroup">
-            <End Role="CompanyGroup" EntitySet="CompanyGroups" />
-            <End Role="Company" EntitySet="Companies" />
-          </AssociationSet>
-          <AssociationSet Name="FK_Company_CompanyGroup" Association="MobileManagerModel.FK_Company_CompanyGroup">
-            <End Role="CompanyGroup" EntitySet="CompanyGroups" />
-            <End Role="Company" EntitySet="Companies" />
-          </AssociationSet>
-          <AssociationSet Name="FK_UserInCompany_UserInCompany" Association="MobileManagerModel.FK_UserInCompany_UserInCompany">
-            <End Role="Company" EntitySet="Companies" />
-            <End Role="UserInCompany" EntitySet="UserInCompanies" />
-          </AssociationSet>
           <EntitySet Name="CompanyBillingLevels" EntityType="MobileManagerModel.CompanyBillingLevel" />
           <AssociationSet Name="FK_CompanyBillingLevel_BillingLevel" Association="MobileManagerModel.FK_CompanyBillingLevel_BillingLevel">
             <End Role="BillingLevel" EntitySet="BillingLevels" />
@@ -1815,6 +1765,26 @@
             <End Role="CompanyGroup" EntitySet="CompanyGroups" />
             <End Role="CompanyBillingLevel" EntitySet="CompanyBillingLevels" />
           </AssociationSet>
+          <EntitySet Name="DataUpdateRules" EntityType="MobileManagerModel.DataUpdateRule" />
+          <EntitySet Name="UserInCompanies" EntityType="MobileManagerModel.UserInCompany" />
+          <AssociationSet Name="FK_UserInCompany_User" Association="MobileManagerModel.FK_UserInCompany_User">
+            <End Role="User" EntitySet="Users" />
+            <End Role="UserInCompany" EntitySet="UserInCompanies" />
+          </AssociationSet>
+          <EntitySet Name="Companies" EntityType="MobileManagerModel.Company" />
+          <AssociationSet Name="FK_Client_Company" Association="MobileManagerModel.FK_Client_Company">
+            <End Role="Company" EntitySet="Companies" />
+            <End Role="Client" EntitySet="Clients" />
+          </AssociationSet>
+          <AssociationSet Name="FK_Company_CompanyGroup" Association="MobileManagerModel.FK_Company_CompanyGroup">
+            <End Role="CompanyGroup" EntitySet="CompanyGroups" />
+            <End Role="Company" EntitySet="Companies" />
+          </AssociationSet>
+          <AssociationSet Name="FK_UserInCompany_UserInCompany" Association="MobileManagerModel.FK_UserInCompany_UserInCompany">
+            <End Role="Company" EntitySet="Companies" />
+            <End Role="UserInCompany" EntitySet="UserInCompanies" />
+          </AssociationSet>
+          <EntitySet Name="DataImportRules" EntityType="MobileManagerModel.DataImportRule" />
           </EntityContainer>
         <ComplexType Name="sp_report_Invoice_Result">
           <Property Type="String" Name="ClientName" Nullable="false" MaxLength="100" />
@@ -1961,19 +1931,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="UpdateRuleData">
-          <Key>
-            <PropertyRef Name="pkUpdateRuleDataID" />
-          </Key>
-          <Property Name="pkUpdateRuleDataID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="enDataUpdateColumn" Type="Int16" Nullable="false" />
-          <Property Name="enDataUpdateEntity" Type="Int16" Nullable="false" />
-          <Property Name="enDataBaseEntity" Type="Int16" Nullable="false" />
-          <Property Name="SearchEntities" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="DateModified" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-        </EntityType>
         <EntityType Name="AppSetting">
           <Key>
             <PropertyRef Name="pkAppSettingID" />
@@ -2106,26 +2063,6 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
-        <EntityType Name="Company">
-          <Key>
-            <PropertyRef Name="pkCompanyID" />
-          </Key>
-          <Property Name="pkCompanyID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
-          <Property Name="fkCompanyGroupID" Type="Int32" Nullable="false" />
-          <Property Name="fkBillingLevelGroupID" Type="Int32" />
-          <Property Name="CompanyName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="WBSNumber" Type="String" MaxLength="25" FixedLength="false" Unicode="false" />
-          <Property Name="CostCode" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
-          <Property Name="AdminFee" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
-          <Property Name="IPAddress" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
-          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
-          <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="Clients" Relationship="MobileManagerModel.FK_Client_Company" FromRole="Company" ToRole="Client" />
-          <NavigationProperty Name="CompanyGroup" Relationship="MobileManagerModel.FK_Company_BillingLevelGroup" FromRole="Company" ToRole="CompanyGroup" />
-          <NavigationProperty Name="CompanyGroup1" Relationship="MobileManagerModel.FK_Company_CompanyGroup" FromRole="Company" ToRole="CompanyGroup" />
-          <NavigationProperty Name="UserInCompanies" Relationship="MobileManagerModel.FK_UserInCompany_UserInCompany" FromRole="Company" ToRole="UserInCompany" />
-        </EntityType>
         <EntityType Name="CompanyGroup">
           <Key>
             <PropertyRef Name="pkCompanyGroupID" />
@@ -2135,58 +2072,9 @@
           <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
           <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="IsActive" Type="Boolean" Nullable="false" />
-          <NavigationProperty Name="Companies" Relationship="MobileManagerModel.FK_Company_BillingLevelGroup" FromRole="CompanyGroup" ToRole="Company" />
-          <NavigationProperty Name="Companies1" Relationship="MobileManagerModel.FK_Company_CompanyGroup" FromRole="CompanyGroup" ToRole="Company" />
           <NavigationProperty Name="CompanyBillingLevels" Relationship="MobileManagerModel.FK_CompanyBillingLevel_CompanyGroup" FromRole="CompanyGroup" ToRole="CompanyBillingLevel" />
-        </EntityType>
-        <Association Name="FK_Client_Company">
-          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="1" />
-          <End Type="MobileManagerModel.Client" Role="Client" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Company">
-              <PropertyRef Name="pkCompanyID" />
-            </Principal>
-            <Dependent Role="Client">
-              <PropertyRef Name="fkCompanyID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Company_BillingLevelGroup">
-          <End Type="MobileManagerModel.CompanyGroup" Role="CompanyGroup" Multiplicity="0..1" />
-          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="CompanyGroup">
-              <PropertyRef Name="pkCompanyGroupID" />
-            </Principal>
-            <Dependent Role="Company">
-              <PropertyRef Name="fkBillingLevelGroupID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_Company_CompanyGroup">
-          <End Type="MobileManagerModel.CompanyGroup" Role="CompanyGroup" Multiplicity="1" />
-          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="CompanyGroup">
-              <PropertyRef Name="pkCompanyGroupID" />
-            </Principal>
-            <Dependent Role="Company">
-              <PropertyRef Name="fkCompanyGroupID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
-        <Association Name="FK_UserInCompany_UserInCompany">
-          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="1" />
-          <End Type="MobileManagerModel.UserInCompany" Role="UserInCompany" Multiplicity="*" />
-          <ReferentialConstraint>
-            <Principal Role="Company">
-              <PropertyRef Name="pkCompanyID" />
-            </Principal>
-            <Dependent Role="UserInCompany">
-              <PropertyRef Name="fkCompanyID" />
-            </Dependent>
-          </ReferentialConstraint>
-        </Association>
+          <NavigationProperty Name="Companies" Relationship="MobileManagerModel.FK_Company_CompanyGroup" FromRole="CompanyGroup" ToRole="Company" />
+          </EntityType>
         <EntityType Name="CompanyBillingLevel">
           <Key>
             <PropertyRef Name="pkCompanyBillingLevelID" />
@@ -2237,6 +2125,106 @@
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="DataUpdateRule">
+          <Key>
+            <PropertyRef Name="pkDataUpdateRuleID" />
+          </Key>
+          <Property Name="pkDataUpdateRuleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="enDataUpdateColumn" Type="Int16" Nullable="false" />
+          <Property Name="enDataUpdateEntity" Type="Int16" Nullable="false" />
+          <Property Name="enDataBaseEntity" Type="Int16" Nullable="false" />
+          <Property Name="SearchEntities" Type="String" MaxLength="250" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DateModified" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+        </EntityType>
+        <EntityType Name="UserInCompany">
+          <Key>
+            <PropertyRef Name="pkUserInCompanyID" />
+          </Key>
+          <Property Name="pkUserInCompanyID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="fkUserID" Type="Int32" Nullable="false" />
+          <Property Name="fkCompanyID" Type="Int32" Nullable="false" />
+          <NavigationProperty Name="User" Relationship="MobileManagerModel.FK_UserInCompany_User" FromRole="UserInCompany" ToRole="User" />
+          <NavigationProperty Name="Company" Relationship="MobileManagerModel.FK_UserInCompany_UserInCompany" FromRole="UserInCompany" ToRole="Company" />
+        </EntityType>
+        <Association Name="FK_UserInCompany_User">
+          <End Type="MobileManagerModel.User" Role="User" Multiplicity="1" />
+          <End Type="MobileManagerModel.UserInCompany" Role="UserInCompany" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="User">
+              <PropertyRef Name="pkUserID" />
+            </Principal>
+            <Dependent Role="UserInCompany">
+              <PropertyRef Name="fkUserID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="Company">
+          <Key>
+            <PropertyRef Name="pkCompanyID" />
+          </Key>
+          <Property Name="pkCompanyID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="fkCompanyGroupID" Type="Int32" />
+          <Property Name="CompanyName" Type="String" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="WBSNumber" Type="String" MaxLength="25" FixedLength="false" Unicode="false" />
+          <Property Name="CostCode" Type="String" MaxLength="30" FixedLength="false" Unicode="false" />
+          <Property Name="AdminFee" Type="Decimal" Nullable="false" Precision="18" Scale="2" />
+          <Property Name="IPAddress" Type="String" MaxLength="15" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedDate" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <NavigationProperty Name="Clients" Relationship="MobileManagerModel.FK_Client_Company" FromRole="Company" ToRole="Client" />
+          <NavigationProperty Name="CompanyGroup" Relationship="MobileManagerModel.FK_Company_CompanyGroup" FromRole="Company" ToRole="CompanyGroup" />
+          <NavigationProperty Name="UserInCompanies" Relationship="MobileManagerModel.FK_UserInCompany_UserInCompany" FromRole="Company" ToRole="UserInCompany" />
+        </EntityType>
+        <Association Name="FK_Client_Company">
+          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="1" />
+          <End Type="MobileManagerModel.Client" Role="Client" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="pkCompanyID" />
+            </Principal>
+            <Dependent Role="Client">
+              <PropertyRef Name="fkCompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_Company_CompanyGroup">
+          <End Type="MobileManagerModel.CompanyGroup" Role="CompanyGroup" Multiplicity="0..1" />
+          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="CompanyGroup">
+              <PropertyRef Name="pkCompanyGroupID" />
+            </Principal>
+            <Dependent Role="Company">
+              <PropertyRef Name="fkCompanyGroupID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK_UserInCompany_UserInCompany">
+          <End Type="MobileManagerModel.Company" Role="Company" Multiplicity="1" />
+          <End Type="MobileManagerModel.UserInCompany" Role="UserInCompany" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Company">
+              <PropertyRef Name="pkCompanyID" />
+            </Principal>
+            <Dependent Role="UserInCompany">
+              <PropertyRef Name="fkCompanyID" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityType Name="DataImportRule">
+          <Key>
+            <PropertyRef Name="pkDataImportRuleID" />
+          </Key>
+          <Property Name="pkDataImportRuleID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="enDataBaseEntity" Type="Int16" Nullable="false" />
+          <Property Name="SearchProperties" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DataProperties" Type="String" Nullable="false" MaxLength="1000" FixedLength="false" Unicode="false" />
+          <Property Name="ModifiedBy" Type="String" Nullable="false" MaxLength="50" FixedLength="false" Unicode="false" />
+          <Property Name="DateModified" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -2555,15 +2543,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="UserInCompanies">
-            <EntityTypeMapping TypeName="MobileManagerModel.UserInCompany">
-              <MappingFragment StoreEntitySet="UserInCompany">
-                <ScalarProperty Name="pkUserInCompanyID" ColumnName="pkUserInCompanyID" />
-                <ScalarProperty Name="fkUserID" ColumnName="fkUserID" />
-                <ScalarProperty Name="fkCompanyID" ColumnName="fkCompanyID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="UserInRoles">
             <EntityTypeMapping TypeName="MobileManagerModel.UserInRole">
               <MappingFragment StoreEntitySet="UserInRole">
@@ -2629,20 +2608,6 @@
                 <ScalarProperty Name="fkStatusID" ColumnName="fkStatusID" />
                 <ScalarProperty Name="fkContractID" ColumnName="fkContractID" />
                 <ScalarProperty Name="pkSimCardID" ColumnName="pkSimCardID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
-          <EntitySetMapping Name="UpdateRuleDatas">
-            <EntityTypeMapping TypeName="MobileManagerModel.UpdateRuleData">
-              <MappingFragment StoreEntitySet="UpdateRuleData">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="DateModified" ColumnName="DateModified" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="SearchEntities" ColumnName="SearchEntities" />
-                <ScalarProperty Name="enDataBaseEntity" ColumnName="enDataBaseEntity" />
-                <ScalarProperty Name="enDataUpdateEntity" ColumnName="enDataUpdateEntity" />
-                <ScalarProperty Name="enDataUpdateColumn" ColumnName="enDataUpdateColumn" />
-                <ScalarProperty Name="pkUpdateRuleDataID" ColumnName="pkUpdateRuleDataID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
@@ -2713,23 +2678,6 @@
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="Companies">
-            <EntityTypeMapping TypeName="MobileManagerModel.Company">
-              <MappingFragment StoreEntitySet="Company">
-                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
-                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
-                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
-                <ScalarProperty Name="IPAddress" ColumnName="IPAddress" />
-                <ScalarProperty Name="AdminFee" ColumnName="AdminFee" />
-                <ScalarProperty Name="CostCode" ColumnName="CostCode" />
-                <ScalarProperty Name="WBSNumber" ColumnName="WBSNumber" />
-                <ScalarProperty Name="CompanyName" ColumnName="CompanyName" />
-                <ScalarProperty Name="fkBillingLevelGroupID" ColumnName="fkBillingLevelGroupID" />
-                <ScalarProperty Name="fkCompanyGroupID" ColumnName="fkCompanyGroupID" />
-                <ScalarProperty Name="pkCompanyID" ColumnName="pkCompanyID" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="CompanyGroups">
             <EntityTypeMapping TypeName="MobileManagerModel.CompanyGroup">
               <MappingFragment StoreEntitySet="CompanyGroup">
@@ -2750,6 +2698,57 @@
                 <ScalarProperty Name="fkBillingLevelID" ColumnName="fkBillingLevelID" />
                 <ScalarProperty Name="fkCompanyGroupID" ColumnName="fkCompanyGroupID" />
                 <ScalarProperty Name="pkCompanyBillingLevelID" ColumnName="pkCompanyBillingLevelID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DataUpdateRules">
+            <EntityTypeMapping TypeName="MobileManagerModel.DataUpdateRule">
+              <MappingFragment StoreEntitySet="DataUpdateRule">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="DateModified" ColumnName="DateModified" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="SearchEntities" ColumnName="SearchEntities" />
+                <ScalarProperty Name="enDataBaseEntity" ColumnName="enDataBaseEntity" />
+                <ScalarProperty Name="enDataUpdateEntity" ColumnName="enDataUpdateEntity" />
+                <ScalarProperty Name="enDataUpdateColumn" ColumnName="enDataUpdateColumn" />
+                <ScalarProperty Name="pkDataUpdateRuleID" ColumnName="pkDataUpdateRuleID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="UserInCompanies">
+            <EntityTypeMapping TypeName="MobileManagerModel.UserInCompany">
+              <MappingFragment StoreEntitySet="UserInCompany">
+                <ScalarProperty Name="fkCompanyID" ColumnName="fkCompanyID" />
+                <ScalarProperty Name="fkUserID" ColumnName="fkUserID" />
+                <ScalarProperty Name="pkUserInCompanyID" ColumnName="pkUserInCompanyID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Companies">
+            <EntityTypeMapping TypeName="MobileManagerModel.Company">
+              <MappingFragment StoreEntitySet="Company">
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="ModifiedDate" ColumnName="ModifiedDate" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="IPAddress" ColumnName="IPAddress" />
+                <ScalarProperty Name="AdminFee" ColumnName="AdminFee" />
+                <ScalarProperty Name="CostCode" ColumnName="CostCode" />
+                <ScalarProperty Name="WBSNumber" ColumnName="WBSNumber" />
+                <ScalarProperty Name="CompanyName" ColumnName="CompanyName" />
+                <ScalarProperty Name="fkCompanyGroupID" ColumnName="fkCompanyGroupID" />
+                <ScalarProperty Name="pkCompanyID" ColumnName="pkCompanyID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="DataImportRules">
+            <EntityTypeMapping TypeName="MobileManagerModel.DataImportRule">
+              <MappingFragment StoreEntitySet="DataImportRule">
+                <ScalarProperty Name="DateModified" ColumnName="DateModified" />
+                <ScalarProperty Name="ModifiedBy" ColumnName="ModifiedBy" />
+                <ScalarProperty Name="DataProperties" ColumnName="DataProperties" />
+                <ScalarProperty Name="SearchProperties" ColumnName="SearchProperties" />
+                <ScalarProperty Name="enDataBaseEntity" ColumnName="enDataBaseEntity" />
+                <ScalarProperty Name="pkDataImportRuleID" ColumnName="pkDataImportRuleID" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

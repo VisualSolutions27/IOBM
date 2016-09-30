@@ -1,5 +1,6 @@
 ﻿using Gijima.Controls.WPF;
 using Gijima.IOBM.Infrastructure.Events;
+using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Common.Events;
 using Gijima.IOBM.MobileManager.Model.Data;
 using Gijima.IOBM.MobileManager.Model.Models;
@@ -10,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Media;
 
@@ -34,6 +36,26 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         #region Properties
 
         /// <summary>
+        /// The dual select listbox for user roles
+        /// </summary>
+        public DualListBoxUX DualSelectListBoxRoles
+        {
+            get { return _dualSelectListBoxRoles; }
+            set { SetProperty(ref _dualSelectListBoxRoles, value); }
+        }
+        private DualListBoxUX _dualSelectListBoxRoles;
+
+        /// <summary>
+        /// The dual select listbox for user companies
+        /// </summary>
+        public DualListBoxUX DualSelectListBoxCompanies
+        {
+            get { return _dualSelectListBoxCompanies; }
+            set { SetProperty(ref _dualSelectListBoxCompanies, value); }
+        }
+        private DualListBoxUX _dualSelectListBoxCompanies;
+
+        /// <summary>
         /// Holds the selected (current) user entity
         /// </summary>
         public User SelectedUser
@@ -41,12 +63,15 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             get { return _selectedUser; }
             set
             {
+                SetProperty(ref _selectedUser, value);
+
                 if (value != null)
                 {
                     SelectedUserName = value.UserName;
                     SelectedUserFullName = value.UserFullName;
                     UserState = value.IsActive;
-                    SetProperty(ref _selectedUser, value);
+                    ReadUserRolesAsync();
+                    ReadUserCompaniesAsync();
                 }
             }
         }
@@ -131,12 +156,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// The collection of available companies from the database
         /// </summary>
-        public ObservableCollection<Company> AvailableCompanyCollection
+        public List<Company> AvailableCompanyCollection
         {
             get { return _availableCompanyCollection; }
             set { SetProperty(ref _availableCompanyCollection, value); }
         }
-        private ObservableCollection<Company> _availableCompanyCollection = null;
+        private List<Company> _availableCompanyCollection = null;
 
         #endregion
 
@@ -200,6 +225,21 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
         #endregion
 
+        #region Event Handlers
+
+        /// <summary>
+        /// This event gets raised when a domain user is selected on the domain user search UI
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ADUserSearch_UserSelected(object sender, UserSearchEventArgs e)
+        {
+            SelectedUserName = e.ADUser.Username;
+            SelectedUserFullName = string.Format("{0} {1}", e.ADUser.Firstname, e.ADUser.Surname);
+        }
+
+        #endregion
+
         #region Methods
 
         /// <summary>
@@ -217,6 +257,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private async void InitialiseUserView()
         {
             _model = new SecurityModel(_eventAggregator);
+            InitialiseViewControls();
 
             // Initialise the view commands
             CancelCommand = new DelegateCommand(ExecuteCancel, CanExecuteCancel).ObservesProperty(() => SelectedUserName);
@@ -235,7 +276,29 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void InitialiseViewControls()
         {
-            SelectedUser = new User();
+            if (DualSelectListBoxRoles == null)
+            {
+                DualSelectListBoxRoles = new DualListBoxUX();
+                DualSelectListBoxRoles.AvailableItemsHeader = "Available Roles";
+                DualSelectListBoxRoles.SelectedItemsHeader = "Selected Roles";
+                DualSelectListBoxRoles.DisplayMemberPath = "RoleName";
+                DualSelectListBoxRoles.SelectedValuePath = "pkRoleId";
+                DualSelectListBoxRoles.TabIndexStart = 3;
+            }
+            if (DualSelectListBoxCompanies == null)
+            {
+                DualSelectListBoxCompanies = new DualListBoxUX();
+                DualSelectListBoxCompanies.AvailableItemsHeader = "Available Companies";
+                DualSelectListBoxCompanies.SelectedItemsHeader = "Selected Companies";
+                DualSelectListBoxCompanies.DisplayMemberPath = "CompanyName";
+                DualSelectListBoxCompanies.SelectedValuePath = "pkCompanyId";
+                DualSelectListBoxCompanies.TabIndexStart = 7;
+            }
+            DualSelectListBoxRoles.AvailableItems = AvailableRoleCollection;
+            DualSelectListBoxRoles.SelectedItems = null;
+            DualSelectListBoxCompanies.AvailableItems = AvailableCompanyCollection;
+            DualSelectListBoxCompanies.SelectedItems = null;
+            SelectedUserFullName = SelectedUserName = string.Empty;
         }
 
         /// <summary>
@@ -249,7 +312,80 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewSecurityCFViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadUsersAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
+            }
+        }
+
+        /// <summary>
+        /// Load all the roles linked to the selected user from the database
+        /// </summary>
+        private async void ReadUserRolesAsync()
+        {
+            try
+            {
+                IEnumerable<Role> userRoles = await Task.Run(() => _model.ReadApplicationUserRoles(SelectedUser.pkUserID));
+                List<Role> unselectedRoles = new List<Role>();
+
+                // Filter the selected roles from the available roles
+                if (userRoles != null)
+                {
+                    foreach (Role role in AvailableRoleCollection)
+                    {
+                        if (userRoles.Where(p => p.pkRoleID == role.pkRoleID).FirstOrDefault() == null)
+                            unselectedRoles.Add(role);
+                    }
+                }
+
+                DualSelectListBoxRoles.SelectedItems = userRoles;
+                DualSelectListBoxRoles.AvailableItems = userRoles == null || userRoles.Count() == 0 ? AvailableRoleCollection : unselectedRoles;
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewSecurityCFViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadUserRolesAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
+            }
+        }
+
+        /// <summary>
+        /// Load all the companies linked to the selected user from the database
+        /// </summary>
+        private async void ReadUserCompaniesAsync()
+        {
+            try
+            {
+                IEnumerable<Company> userCompanies = await Task.Run(() => _model.ReadApplicationUserCompanies(SelectedUser.pkUserID));
+                List<Company> unselectedCompanies = new List<Company>();
+
+                // Filter the selected companies from the available companies
+                if (userCompanies != null)
+                {
+                    foreach (Company company in AvailableCompanyCollection)
+                    {
+                        if (userCompanies.Where(p => p.pkCompanyID == company.pkCompanyID).FirstOrDefault() == null)
+                            unselectedCompanies.Add(company);
+                    }
+                }
+
+                DualSelectListBoxCompanies.SelectedItems = userCompanies;
+                DualSelectListBoxCompanies.AvailableItems = userCompanies == null || userCompanies.Count() == 0 ? AvailableCompanyCollection : unselectedCompanies;
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewSecurityCFViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadUserCompaniesAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -263,10 +399,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             try
             {
                 AvailableRoleCollection = await Task.Run(() => _model.ReadApplicationRoles());
+                DualSelectListBoxRoles.AvailableItems = AvailableRoleCollection;
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewSecurityCFViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadRolesAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -277,11 +419,17 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             try
             {
-                AvailableCompanyCollection = await Task.Run(() => new CompanyModel(_eventAggregator).ReadCompanies(true, true));
+                AvailableCompanyCollection = await Task.Run(() => new CompanyModel(_eventAggregator).ReadCompanies(true, true).ToList());
+                DualSelectListBoxCompanies.AvailableItems = AvailableCompanyCollection;
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewSecurityCFViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadCompaniesAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -320,25 +468,66 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private async void ExecuteSave()
         {
-            bool result = false;
-
-            SelectedUser.UserName = SelectedUserName.ToUpper();
-            SelectedUser.UserFullName = SelectedUserFullName.ToUpper();
-            SelectedUser.LastActivityDate = DateTime.Now;
-            SelectedUser.IsActive = UserState;
-
-            if (SelectedUser.pkUserID == 0)
-                result = _model.CreateApplicationUser(SelectedUser);
-            else
-                result = _model.UpdateApplicationUser(SelectedUser);
-
-            if (result)
+            try
             {
-                InitialiseViewControls();
-                await ReadUsersAsync();
+                bool result = false;
 
-                // Publish this event to sync the application user with the system user
-                _eventAggregator.GetEvent<MobileManagerSecurityEvent>().Publish(SelectedUser);
+                SelectedUser.UserName = SelectedUserName.ToUpper();
+                SelectedUser.UserFullName = SelectedUserFullName.ToUpper();
+                SelectedUser.LastActivityDate = DateTime.Now;
+                SelectedUser.IsActive = UserState;
+                SelectedUser.UserInRoles = new List<UserInRole>();
+                SelectedUser.UserInCompanies = new List<UserInCompany>();
+                UserInRole userRole = null;
+                UserInCompany userCompany = null;
+
+                // Add all the seleted roles to the selected user entity
+                foreach (Role role in DualSelectListBoxRoles.SelectedItems)
+                {
+                    userRole = new UserInRole();
+                    userRole.fkRoleID = role.pkRoleID;
+                    userRole.fkUserID = SelectedUser.pkUserID;
+                    SelectedUser.UserInRoles.Add(userRole);
+                }
+
+                // Add all the seleted companies to the selected user entity
+                foreach (Company company in DualSelectListBoxCompanies.SelectedItems)
+                {
+                    userCompany = new UserInCompany();
+                    userCompany.fkCompanyID = company.pkCompanyID;
+                    userCompany.fkUserID = SelectedUser.pkUserID;
+                    SelectedUser.UserInCompanies.Add(userCompany);
+                }
+
+                if (SelectedUser.pkUserID == 0)
+                    result = _model.CreateApplicationUser(SelectedUser);
+                else
+                    result = _model.UpdateApplicationUser(SelectedUser);
+
+                if (result)
+                {
+                    // Create a IOBM user for the new Mobile Manager user and publish the 
+                    // event to sync the application user with the system user
+                    IOBM.Model.Data.User iobmUser = new IOBM.Model.Data.User();
+                    iobmUser.UserName = SelectedUser.UserName;
+                    iobmUser.UserFullName = SelectedUser.UserFullName;
+                    iobmUser.LastActivityDate = DateTime.Now;
+                    iobmUser.IsActive = UserState;
+                    _eventAggregator.GetEvent<MobileManagerSecurityEvent>().Publish(iobmUser);
+
+                    // Reload the application users
+                    InitialiseViewControls();
+                    await ReadUsersAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewSecurityCFViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ExecuteSave",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -347,10 +536,24 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private async void ExecuteAdd()
         {
-            _adUserSearch = new ADUserSearchUX();
-            PopupWindow popupWindow = new PopupWindow(_adUserSearch, "User Search", PopupWindow.PopupButtonType.Close);
-            popupWindow.ShowDialog();
-            await ReadUsersAsync();
+            try
+            {
+                _adUserSearch = new ADUserSearchUX();
+                _adUserSearch.onADUserSelected += ADUserSearch_UserSelected;
+                UserState = true;
+                PopupWindow popupWindow = new PopupWindow(_adUserSearch, "User Search", PopupWindow.PopupButtonType.Close);
+                popupWindow.ShowDialog();
+                await ReadUsersAsync();
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewSecurityCFViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ExecuteAdd",
+                                                                ApplicationMessage.MessageTypes.SystemError));
+            }
         }
 
         #endregion

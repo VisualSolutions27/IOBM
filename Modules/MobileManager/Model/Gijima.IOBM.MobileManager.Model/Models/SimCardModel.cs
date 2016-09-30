@@ -4,11 +4,14 @@ using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Common.Helpers;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
+using Gijima.IOBM.MobileManager.Model.Helpers;
+using Gijima.IOBM.Security;
 using Prism.Events;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Transactions;
@@ -321,6 +324,173 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             {
                 _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
                 errorMessage = string.Format("Error: {0} {1}.", ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty);
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Import sim card entity into the database
+        /// </summary>
+        /// <param name="searchEntity">The simcard data to search on.</param>
+        /// <param name="searchCriteria">The simcard search criteria to search for.</param>
+        /// <param name="mappedProperties">The simcard properties (columns) to import.</param>
+        /// <param name="errorMessage">OUT The error message.</param>
+        /// <returns>True if successfull</returns>
+        public bool ImportSimCard(SearchEntity searchEntity, string searchCriteria, IEnumerable<string> mappedProperties, DataRow importValues, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+            string[] importProperties = null;
+            string sourceProperty = string.Empty;
+            object sourceValue = null;
+            Client existingClient = null;
+            SimCard existingSimCard = null;
+            SimCard simCardToImport = null;
+            Type propertyType = null;
+            bool result = false;
+
+            try
+            {
+                using (var db = MobileManagerEntities.GetContext())
+                {
+                    existingClient = db.Clients.Where(p => p.PrimaryCellNumber == searchCriteria).FirstOrDefault();
+
+                    if (existingClient == null)
+                    {
+                        _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                        .Publish(new ApplicationMessage("SimCardModel",
+                                                 string.Format("No client found for simcard {0}.", searchCriteria),
+                                                 "ImportSimCard",
+                                                 ApplicationMessage.MessageTypes.SystemError));
+                        return false;
+                    }
+
+                    existingSimCard = db.SimCards.Where(p => p.CellNumber == searchCriteria).FirstOrDefault();
+                }
+
+                using (var db = MobileManagerEntities.GetContext())
+                {
+                    // If simcard exist the update else
+                    // add a new simcard
+                    if (existingSimCard == null)
+                        simCardToImport = new SimCard();
+                    else
+                        simCardToImport = db.SimCards.Where(p => p.pkSimCardID == existingSimCard.pkSimCardID).FirstOrDefault();
+
+                    using (TransactionScope tc = TransactionHelper.CreateTransactionScope())
+                    {
+                        // Get the sql table structure of the entity
+                        PropertyDescriptor[] properties = EDMHelper.GetEntityStructure<SimCard>();
+
+                        foreach (PropertyDescriptor property in properties)
+                        {
+                            // Get the source property and source value 
+                            // mapped the simcard entity property
+                            foreach (string mappedProperty in mappedProperties)
+                            {
+                                if (mappedProperty.Contains(property.Name))
+                                {
+                                    importProperties = mappedProperty.Split('=');
+                                    sourceProperty = importProperties[0].Trim();
+                                    sourceValue = importValues[sourceProperty];
+                                    break;
+                                }
+                            }
+
+                            // Set the source value to the primary key
+                            if (property.Name == "pkSimCardID")
+                                sourceValue = simCardToImport.pkSimCardID;
+
+                            // Set the source value to the client contract id
+                            if (property.Name == "fkContractID")
+                                sourceValue = existingClient.fkContractID;
+
+                            // Validate the source status and get
+                            // the value for the fkStatusID
+                            if (property.Name == "fkStatusID")
+                            {
+                                Status status = db.Status.Where(p => p.StatusDescription.ToUpper() == sourceValue.ToString().ToUpper()).FirstOrDefault();
+
+                                if (status == null)
+                                {
+                                    _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                                    .Publish(new ApplicationMessage("SimCardModel",
+                                                             string.Format("Invalid status {0}.", sourceValue.ToString()),
+                                                             "ImportSimCard",
+                                                             ApplicationMessage.MessageTypes.SystemError));
+                                    return false;
+                                }
+
+                                sourceValue = status.pkStatusID;
+                            }
+
+                            // Set the default values
+                            if (property.Name == "ModifiedBy")
+                                sourceValue = SecurityHelper.LoggedInFullName;
+                            if (property.Name == "ModifiedDate")
+                                sourceValue = DateTime.Now;
+                            if (property.Name == "IsActive")
+                                sourceValue = true;
+
+                            // Get the property type for nullable and non-nullable properties
+                            if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                                propertyType = property.PropertyType.GetGenericArguments()[0];
+                            else
+                                propertyType = property.PropertyType;
+
+                            // Set the property value based on the data type
+                            if (propertyType == typeof(DateTime))
+                            {
+                                property.SetValue(simCardToImport, Convert.ToDateTime(sourceValue));
+                            }
+                            else if (propertyType == typeof(int))
+                            {
+                                property.SetValue(simCardToImport, Convert.ToInt32(sourceValue));
+                            }
+                            else if (propertyType == typeof(bool))
+                            {
+                                property.SetValue(simCardToImport, Convert.ToBoolean(sourceValue));
+                            }
+                            else if (propertyType == typeof(string))
+                            {
+                                property.SetValue(simCardToImport, sourceValue);
+                            }
+                            else
+                            {
+                                errorMessage = string.Format("Data type {0) not found for {1}.", property.PropertyType, sourceProperty);
+                                return false;
+                            }
+                        }
+
+                        // If new simcard add it else
+                        // update and add activity log
+                        if (simCardToImport.pkSimCardID == 0)
+                        {
+                            db.SimCards.Add(simCardToImport);
+                            result = true;
+                        }
+                        else
+                        {
+                            // Add the data activity log
+                            result = _activityLogger.CreateDataChangeAudits<SimCard>(_dataActivityHelper.GetDataChangeActivities<SimCard>(existingSimCard, simCardToImport, simCardToImport.fkContractID.Value, db));
+                        }
+
+                        db.SaveChanges();
+
+                        // Commit changes
+                        tc.Complete();
+                    }
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("SimCardModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ImportSimCard",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }

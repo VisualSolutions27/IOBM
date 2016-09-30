@@ -91,6 +91,10 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="PresentationUI, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
+    <Reference Include="Prism, Version=6.1.0.0, Culture=neutral, PublicKeyToken=91a96d2a154366d8, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\Assemblies\Prism\Prism.dll</HintPath>
+    </Reference>
     <Reference Include="ReachFramework" />
     <Reference Include="System" />
     <Reference Include="System.configuration" />

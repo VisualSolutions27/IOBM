@@ -166,7 +166,7 @@ namespace Gijima.Controls.WPF
             // "LDAP://192.168.1.9/OU=AG,DC=astjhb,DC=local"
             DirectoryEntry dirEntry = new DirectoryEntry(connectionString);
             dirEntry.Username = @"gijima\10012434";
-            dirEntry.Password = "P@ssw0rd0916";
+            dirEntry.Password = "P@ssw0rd1016";
 
             dirEntry.AuthenticationType = AuthenticationTypes.ServerBind;
 

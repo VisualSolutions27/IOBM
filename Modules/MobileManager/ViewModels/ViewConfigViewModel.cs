@@ -75,7 +75,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                         SelectedTab.Content = new ViewDataValidationCF();
                         break;
                     case "Security":
-                        SelectedTab.Content = new ViewSecurityCF(_eventAggregator);
+                        SelectedTab.Content = new ViewSecurityCF();
                         break;
                     case "System":
                         //SelectedTab.Content = new ViewAccount(_eventAggregator);

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Prism.Mvvm;
+using System;
 using System.Collections;
 using System.Windows;
 using System.Windows.Controls;
@@ -11,15 +12,73 @@ namespace Gijima.Controls.WPF
     /// Interaction logic for DualListBoxUX.xaml
     /// </summary>
     public partial class DualListBoxUX : UserControl
-	{
-		#region Declarations
+    {
+		#region Properties and Attributes
 
 		private object _data = null;
 		private ListBox _dragSource = null;
 
-        #region Public Properties
+        /// <summary>
+        /// Set the availiable items listbox header
+        /// </summary>
+        public string AvailableItemsHeader
+        {
+            get { return (string)GetValue(AvailableItemsHeaderProperty); }
+            set { SetValue(AvailableItemsHeaderProperty, value); }
+        }
+        public static readonly DependencyProperty AvailableItemsHeaderProperty = DependencyProperty.Register("AvailableItemsHeader",
+                                                                                 typeof(string), 
+                                                                                 typeof(DualListBoxUX), 
+                                                                                 new UIPropertyMetadata("Available Items"));
 
-        //public static readonly DependencyProperty AvailableItemsSource = DependencyProperty.Register("AvailableItems", typeof(ItemCollection), typeof(DualListBoxUX));
+        /// <summary>
+        /// Set the selected items listbox header
+        /// </summary>
+        public string SelectedItemsHeader
+        {
+            get { return (string)GetValue(SelectedItemsHeaderProperty); }
+            set { SetValue(SelectedItemsHeaderProperty, value); }
+        }
+        public static readonly DependencyProperty SelectedItemsHeaderProperty = DependencyProperty.Register("SelectedItemsHeader",
+                                                                                typeof(string),
+                                                                                typeof(DualListBoxUX),
+                                                                                new UIPropertyMetadata("Selected Items"));
+
+        /// <summary>
+        /// Set the Selected display member path of the source and destination controls
+        /// </summary>
+        public string DisplayMemberPath
+        {
+            get { return (string)GetValue(DisplayMemberPathProperty); }
+            set
+            {
+                SetValue(DisplayMemberPathProperty, value);
+                ListBoxAvailableItems.DisplayMemberPath = value;
+                ListBoxSelectedItems.DisplayMemberPath = value;
+            }
+        }
+        public static readonly DependencyProperty DisplayMemberPathProperty = DependencyProperty.Register("DisplayMemberPath",
+                                                                              typeof(string),
+                                                                              typeof(DualListBoxUX),
+                                                                              new UIPropertyMetadata(string.Empty));
+
+        /// <summary>
+        /// Set the Selected Value Path of the source and destination controls
+        /// </summary>
+        public string SelectedValuePath
+        {
+            get { return (string)GetValue(SelectedValuePathProperty); }
+            set
+            {
+                SetValue(SelectedValuePathProperty, value);
+                ListBoxAvailableItems.SelectedValuePath = value;
+                ListBoxSelectedItems.SelectedValuePath = value;
+            }
+        }
+        public static readonly DependencyProperty SelectedValuePathProperty = DependencyProperty.Register("SelectedValuePath",
+                                                                              typeof(string),
+                                                                              typeof(DualListBoxUX),
+                                                                              new UIPropertyMetadata(string.Empty));
 
         /// <summary>
         /// Get or set the available items data source
@@ -29,8 +88,8 @@ namespace Gijima.Controls.WPF
             get { return ListBoxAvailableItems.Items; }
             set
             {
+                SetValue(AvailableItemsProperty, value);
                 ListBoxAvailableItems.Items.Clear();
-
                 if (value != null)
                 {
                     foreach (object item in value)
@@ -40,83 +99,54 @@ namespace Gijima.Controls.WPF
                 }
             }
         }
+        public static readonly DependencyProperty AvailableItemsProperty = DependencyProperty.Register("AvailableItems",
+                                                                           typeof(IEnumerable),
+                                                                           typeof(DualListBoxUX),
+                                                                           new UIPropertyMetadata(null));
 
         /// <summary>
-        /// Get or set the available items data source
+        /// Get or set the selected items data source
         /// </summary>
         public IEnumerable SelectedItems
+        {
+            get { return ListBoxSelectedItems.Items; }
+            set
+            {
+                SetValue(SelectedItemsProperty, value);
+                ListBoxSelectedItems.Items.Clear();
+                if (value != null)
+                {
+                    foreach (object item in value)
+                    {
+                        ListBoxSelectedItems.Items.Add(item);
+                    }
+                }
+            }
+        }
+        public static readonly DependencyProperty SelectedItemsProperty = DependencyProperty.Register("SelectedItems",
+                                                                          typeof(IEnumerable),
+                                                                          typeof(DualListBoxUX),
+                                                                          new UIPropertyMetadata(null));
+
+        /// <summary>
+        /// Set the controls tab order
+        /// </summary>
+        public int TabIndexStart
 		{
-			get { return ListBoxSelectedItems.Items; }
-			set
-			{
-				ListBoxSelectedItems.Items.Clear();
-
-				if (value != null)
-				{
-					foreach (object item in value)
-					{
-						ListBoxSelectedItems.Items.Add(item);
-					}
-				}
-			}
-		}
-
-		/// <summary>
-		/// Get or set the available items data source
-		/// </summary>
-		public string DisplayMemberPath
-		{
-			get { return ListBoxAvailableItems.DisplayMemberPath; }
-			set
-			{
-				ListBoxAvailableItems.DisplayMemberPath = value;
-				ListBoxSelectedItems.DisplayMemberPath = value;
-			}
-		}
-
-		/// <summary>
-		/// Set the Selected Value Path of the source and destination controls
-		/// </summary>
-		public string SelectedValuePath
-		{
-			set
-			{
-				ListBoxAvailableItems.SelectedValuePath = value;
-				ListBoxSelectedItems.SelectedValuePath = value;
-			}
-		}
-
-		/// <summary>
-		/// Set the availiable items listbox header
-		/// </summary>
-		public string AvailableItemsHeader
-		{
-			set { TextBlockAvailableItemsHeader.Text = value; }
-		}
-
-		/// <summary>
-		/// Set the selected items listbox header
-		/// </summary>
-		public string SelectedItemsHeader
-		{
-			set { TextBlockSelectedItemsHeader.Text = value; }
-		}
-
-		/// <summary>
-		/// Set the controls tab order
-		/// </summary>
-		public int TabIndexStart
-		{
-			set
-			{ 
-				ListBoxAvailableItems.TabIndex = value;
-				ButtonAdd.TabIndex = ++value;
-				ButtonRemove.TabIndex = ++value;
-				ListBoxSelectedItems.TabIndex = ++value;
-			}
-		}
-
-		#endregion
+            get { return (int)GetValue(TabIndexStartProperty); }
+            set
+            {
+                SetValue(TabIndexStartProperty, value);
+                ListBoxAvailableItems.TabIndex = value;
+                ButtonAdd.TabIndex = ++value;
+                ButtonRemove.TabIndex = ++value;
+                ListBoxSelectedItems.TabIndex = ++value;
+            }
+        }
+        public static readonly DependencyProperty TabIndexStartProperty = DependencyProperty.Register("TabIndexStart",
+                                                                          typeof(int),
+                                                                          typeof(DualListBoxUX),
+                                                                          new UIPropertyMetadata(0));
 
 		#region Public Events
 

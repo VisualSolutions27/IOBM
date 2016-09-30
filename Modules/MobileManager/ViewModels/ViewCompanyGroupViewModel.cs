@@ -2,13 +2,16 @@
 using Gijima.IOBM.MobileManager.Model.Data;
 using Gijima.IOBM.MobileManager.Model.Models;
 using Gijima.IOBM.MobileManager.Security;
+using Gijima.IOBM.MobileManager.Views;
 using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace Gijima.IOBM.MobileManager.ViewModels
@@ -25,6 +28,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         public DelegateCommand CancelCommand { get; set; }
         public DelegateCommand AddCommand { get; set; }
         public DelegateCommand SaveCommand { get; set; }
+        public DelegateCommand BillingLevelCommand { get; set; }
 
         #endregion
 
@@ -43,6 +47,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     GroupName = value.GroupName;
                     GroupState = value.IsActive;
                     SetProperty(ref _selectedGroup, value);
+                    ReadCompanyBillingLevelsAsync();
                 }
             }
         }
@@ -67,6 +72,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set { SetProperty(ref _groupCollection, value); }
         }
         private ObservableCollection<CompanyGroup> _groupCollection = null;
+
+        /// <summary>
+        /// The collection of company billing level from the database
+        /// </summary>
+        public List<ListBoxItem> CompanyBillingLevelCollection
+        {
+            get { return _companyBillingLevelCollection; }
+            set { SetProperty(ref _companyBillingLevelCollection, value); }
+        }
+        private List<ListBoxItem> _companyBillingLevelCollection = null;
 
         #region Required Fields
 
@@ -150,6 +165,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             CancelCommand = new DelegateCommand(ExecuteCancel, CanExecute).ObservesProperty(() => GroupName);
             AddCommand = new DelegateCommand(ExecuteAdd);
             SaveCommand = new DelegateCommand(ExecuteSave, CanExecute).ObservesProperty(() => GroupName);
+            BillingLevelCommand = new DelegateCommand(ExecuteShowBillingLevelView, CanExecuteMaintenace).ObservesProperty(() => SelectedGroup);
 
             // Load the view data
             await ReadCompanyGroupsAsync();
@@ -172,6 +188,32 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             try
             {
                 GroupCollection = await Task.Run(() => _model.ReadCompanyGroups(false, true));
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+            }
+        }
+
+        /// <summary>
+        /// Load all the company's billing levels from the database
+        /// </summary>
+        private async void ReadCompanyBillingLevelsAsync()
+        {
+            try
+            {
+                List<ListBoxItem> billingLevelItems = new List<ListBoxItem>();
+                ListBoxItem billingLevelItem = null;
+                ObservableCollection<CompanyBillingLevel> collection = await Task.Run(() => new CompanyBillingLevelModel(_eventAggregator).ReadCompanyBillingLevels(SelectedGroup.pkCompanyGroupID, true));
+
+                foreach (CompanyBillingLevel billingLevel in collection)
+                {
+                    billingLevelItem = new ListBoxItem();
+                    billingLevelItem.Content = string.Format("{0} - R{1}", billingLevel.BillingLevel.LevelDescription, billingLevel.Amount);
+                    billingLevelItems.Add(billingLevelItem);
+                }
+
+                CompanyBillingLevelCollection = billingLevelItems;
             }
             catch (Exception ex)
             {
@@ -230,6 +272,28 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 InitialiseViewControls();
                 await ReadCompanyGroupsAsync();
             }
+        }
+
+        /// <summary>
+        /// Set view command buttons enabled/disabled state
+        /// </summary>
+        /// <returns></returns>
+        private bool CanExecuteMaintenace()
+        {
+            return SelectedGroup != null && SelectedGroup.pkCompanyGroupID > 0;
+        }
+
+        /// <summary>
+        /// Execute when the cancel command button is clicked 
+        /// </summary>
+        private void ExecuteShowBillingLevelView()
+        {
+            ViewCompanyBillingLevel view = new ViewCompanyBillingLevel();
+            ViewCompanyBillingLevelViewModel viewModel = new ViewCompanyBillingLevelViewModel(_eventAggregator, SelectedGroup.pkCompanyGroupID);
+            view.DataContext = viewModel;
+            PopupWindow popupWindow = new PopupWindow(view, "Company Billing Level Maintenance", PopupWindow.PopupButtonType.Close);
+            popupWindow.ShowDialog();
+            ReadCompanyBillingLevelsAsync();
         }
 
         #endregion

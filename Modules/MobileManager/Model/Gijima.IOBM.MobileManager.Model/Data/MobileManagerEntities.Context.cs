@@ -50,17 +50,18 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public virtual DbSet<Status> Status { get; set; }
         public virtual DbSet<Suburb> Suburbs { get; set; }
         public virtual DbSet<User> Users { get; set; }
-        public virtual DbSet<UserInCompany> UserInCompanies { get; set; }
         public virtual DbSet<UserInRole> UserInRoles { get; set; }
         public virtual DbSet<Device> Devices { get; set; }
         public virtual DbSet<SimCard> SimCards { get; set; }
-        public virtual DbSet<UpdateRuleData> UpdateRuleDatas { get; set; }
         public virtual DbSet<AppSetting> AppSettings { get; set; }
         public virtual DbSet<Client> Clients { get; set; }
         public virtual DbSet<ClientBilling> ClientBillings { get; set; }
-        public virtual DbSet<Company> Companies { get; set; }
         public virtual DbSet<CompanyGroup> CompanyGroups { get; set; }
         public virtual DbSet<CompanyBillingLevel> CompanyBillingLevels { get; set; }
+        public virtual DbSet<DataUpdateRule> DataUpdateRules { get; set; }
+        public virtual DbSet<UserInCompany> UserInCompanies { get; set; }
+        public virtual DbSet<Company> Companies { get; set; }
+        public virtual DbSet<DataImportRule> DataImportRules { get; set; }
     
         public virtual ObjectResult<sp_report_Invoice_Result> sp_report_Invoice(Nullable<int> invoiceID)
         {

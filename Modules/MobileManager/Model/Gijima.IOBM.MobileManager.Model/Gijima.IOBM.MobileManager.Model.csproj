@@ -103,6 +103,12 @@
     <Compile Include="Data\Contract.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="Data\DataImportRule.cs">
+      <DependentUpon>MobileManagerEntities.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Data\DataUpdateRule.cs">
+      <DependentUpon>MobileManagerEntities.tt</DependentUpon>
+    </Compile>
     <Compile Include="Data\DataValidationException.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
@@ -176,9 +182,6 @@
     <Compile Include="Data\Suburb.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
-    <Compile Include="Data\UpdateRuleData.cs">
-      <DependentUpon>MobileManagerEntities.tt</DependentUpon>
-    </Compile>
     <Compile Include="Data\User.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
@@ -188,6 +191,7 @@
     <Compile Include="Data\UserInRole.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="Helpers\EDMHelper.cs" />
     <Compile Include="Models\AppSettingModel.cs" />
     <Compile Include="Models\AuditLogModel.cs" />
     <Compile Include="Models\BillingLevelModel.cs" />
@@ -200,11 +204,12 @@
     <Compile Include="Models\CompanyGroupModel.cs" />
     <Compile Include="Models\CompanyModel.cs" />
     <Compile Include="Models\ContractModel.cs" />
+    <Compile Include="Models\DataImportRuleModel.cs" />
     <Compile Include="Models\DevicesMakeModel.cs" />
     <Compile Include="Models\DevicesModel.cs" />
     <Compile Include="Models\DevicesModelModel.cs" />
     <Compile Include="Models\PackageSetupModel.cs" />
-    <Compile Include="Models\UpdateRuleDataModel.cs" />
+    <Compile Include="Models\DataUpdateRuleModel.cs" />
     <Compile Include="Models\InvoiceModel.cs" />
     <Compile Include="Models\PackageModel.cs" />
     <Compile Include="Models\ProvinceModel.cs" />

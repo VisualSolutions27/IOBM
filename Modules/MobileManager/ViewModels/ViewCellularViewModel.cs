@@ -453,24 +453,27 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 SetProperty(ref _selectedBillingLevel, value);
 
-                if ((SplitBilling && SelectedPackageType != null) || (value != null && value.pkCompanyBillingLevelID > 0))
+                if (SelectedBillingLevel != null)
                 {
-                    if (((PackageType)Enum.Parse(typeof(PackageType), SelectedPackageType)) == PackageType.DATA)
+                    if ((SplitBilling && SelectedPackageType != null) || (value != null && value.pkCompanyBillingLevelID > 0))
                     {
-                        AllowVoiceAllowance = false;
-                        AllowWDPAllowance = true;
-                        SelectedWDPAllowance = value != null ? value.Amount.ToString() : "0";
+                        if (((PackageType)Enum.Parse(typeof(PackageType), SelectedPackageType)) == PackageType.DATA)
+                        {
+                            AllowVoiceAllowance = false;
+                            AllowWDPAllowance = true;
+                            SelectedWDPAllowance = value != null ? value.Amount.ToString() : "0";
+                        }
+                        else if (SplitBilling && ((PackageType)Enum.Parse(typeof(PackageType), SelectedPackageType)) == PackageType.VOICE)
+                        {
+                            AllowVoiceAllowance = true;
+                            AllowWDPAllowance = false;
+                            SelectedVoiceAllowance = value != null ? value.Amount.ToString() : "0";
+                        }
                     }
-                    else if (SplitBilling && ((PackageType)Enum.Parse(typeof(PackageType), SelectedPackageType)) == PackageType.VOICE)
+                    else
                     {
-                        AllowVoiceAllowance = true;
-                        AllowWDPAllowance = false;
-                        SelectedVoiceAllowance = value != null ? value.Amount.ToString() : "0";
+                        AllowVoiceAllowance = AllowWDPAllowance = false;
                     }
-                }
-                else
-                {
-                    AllowVoiceAllowance = AllowWDPAllowance = false;
                 }
             }
         }
@@ -716,7 +719,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private bool _noSplitBilling;
        
         /// <summary>
-        /// The enteredvoice allowance
+        /// The entered voice allowance
         /// </summary>
         public string SelectedVoiceAllowance
         {
@@ -1231,7 +1234,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             if (_deviceDataSaved && _simCardDataSaved)
             {
                 _deviceDataSaved = _simCardDataSaved = false;
-                ExecuteCancel();
+                InitialiseViewControls();
             }
         }
 
@@ -1363,6 +1366,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             try
             {
+                InitialiseViewControls();
                 SelectedClient = await Task.Run(() => _model.ReadClient(clientID));
             }
             catch (Exception ex)
@@ -1601,8 +1605,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 BillingLevelCollection = null;
 
-                if (SelectedCompany != null && SelectedCompany.pkCompanyID > 0 && SelectedCompany.fkBillingLevelGroupID != null)
-                    BillingLevelCollection = await Task.Run(() => new CompanyBillingLevelModel(_eventAggregator).ReadCompanyBillingLevels(SelectedCompany.fkBillingLevelGroupID.Value));
+                if (SelectedCompany != null && SelectedCompany.pkCompanyID > 0 && SelectedCompany.fkCompanyGroupID != null)
+                    BillingLevelCollection = await Task.Run(() => new CompanyBillingLevelModel(_eventAggregator).ReadCompanyBillingLevels(SelectedCompany.fkCompanyGroupID.Value));
 
                 if (BillingLevelCollection != null && BillingLevelCollection.Count > 1)
                 {
@@ -1826,7 +1830,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     _eventAggregator.GetEvent<SaveSimCardEvent>().Publish(SelectedContract.pkContractID);
                 }
 
-                // Publish the event to read the administartion activity logs
+                // Publish the event to read the administration activity logs
                 if (SelectedContract != null)
                 {
                     _activityLogInfo.EntityID = SelectedContract.pkContractID;

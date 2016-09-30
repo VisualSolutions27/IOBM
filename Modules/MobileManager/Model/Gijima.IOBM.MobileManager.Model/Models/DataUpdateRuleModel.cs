@@ -1,5 +1,4 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
-using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
 using Prism.Events;
 using System;
@@ -10,7 +9,7 @@ using System.Linq;
 
 namespace Gijima.IOBM.MobileManager.Model.Models
 {
-    public class UpdateRuleDataModel
+    public class DataUpdateRuleModel
     {
         #region Properties and Attributes
 
@@ -22,26 +21,26 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// Constructure
         /// </summary>
         /// <param name="eventAggreagator"></param>
-        public UpdateRuleDataModel(IEventAggregator eventAggreagator)
+        public DataUpdateRuleModel(IEventAggregator eventAggreagator)
         {
             _eventAggregator = eventAggreagator;
         }
 
         /// <summary>
-        /// Create a new import rule data entity in the database
+        /// Create a new data update rule entity in the database
         /// </summary>
-        /// <param name="updateRuleData">The import rule data entity to add.</param>
+        /// <param name="dataUpdateRule">The data update rule entity to add.</param>
         /// <returns>True if successfull</returns>
-        public bool CreateUpdateRule(UpdateRuleData updateRuleData)
+        public bool CreateDataUpdateRule(DataUpdateRule dataUpdateRule)
         {
             try
             {
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    if (!db.UpdateRuleDatas.Any(p => p.enDataUpdateColumn == updateRuleData.enDataUpdateColumn &&
-                                                     p.enDataUpdateEntity == updateRuleData.enDataUpdateEntity))
+                    if (!db.DataUpdateRules.Any(p => p.enDataUpdateColumn == dataUpdateRule.enDataUpdateColumn &&
+                                                     p.enDataUpdateEntity == dataUpdateRule.enDataUpdateEntity))
                     {
-                        db.UpdateRuleDatas.Add(updateRuleData);
+                        db.DataUpdateRules.Add(dataUpdateRule);
                         db.SaveChanges();
                         return true;
                     }
@@ -62,23 +61,23 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         }
 
         /// <summary>
-        /// Read all or active only data import rule data from the database
+        /// Read all or active only data update rule data from the database
         /// </summary>
         /// <param name="activeOnly">Flag to load all or active only entities.</param>
-        /// <returns>Collection of UpdateRuleData</returns>
-        public ObservableCollection<UpdateRuleData> ReadUpdateRuleData(bool activeOnly)
+        /// <returns>Collection of DataUpdateRules</returns>
+        public ObservableCollection<DataUpdateRule> ReadDataUpdateRules(bool activeOnly)
         {
             try
             {
-                IEnumerable<UpdateRuleData> updateRuleData = null;
+                IEnumerable<DataUpdateRule> updateRuleData = null;
 
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    updateRuleData = ((DbQuery<UpdateRuleData>)(from ruleData in db.UpdateRuleDatas
+                    updateRuleData = ((DbQuery<DataUpdateRule>)(from ruleData in db.DataUpdateRules
                                                                 where activeOnly ? ruleData.IsActive : true
                                                                 select ruleData)).ToList();
 
-                    return new ObservableCollection<UpdateRuleData>(updateRuleData);
+                    return new ObservableCollection<DataUpdateRule>(updateRuleData);
                 }
             }
             catch (Exception ex)
