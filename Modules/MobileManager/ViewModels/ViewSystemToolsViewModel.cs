@@ -52,7 +52,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
             // Add application functionality based on security roles
             TabCollection = new ObservableCollection<TabItem>();
-            if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()))
+            if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()) || 
+                _securityHelper.IsUserInRole(SecurityRole.DataManager.Value()))
             {
                 TabCollection.Add(new TabItem() { Header = "Data Validation" });
                 TabCollection.Add(new TabItem() { Header = "Data Update" });

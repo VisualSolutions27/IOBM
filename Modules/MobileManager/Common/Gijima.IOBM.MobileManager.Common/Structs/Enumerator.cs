@@ -66,9 +66,11 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     public enum SecurityRole
     {
         Administrator = 1,
-        Supervisor = 2,
+        DataManager = 2,
         User = 3,
-        ReadOnly = 4
+        AccountManager = 4,
+        BillingManager = 5,
+        ReadOnly = 6
     }
 
     /// <summary>
@@ -265,10 +267,10 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         None = 0,
         [Description("System Data")]
         System = 1,
-        [Description("Billing Data")]
-        Billing = 2,
-        [Description("External Data")]
-        External = 3
+        [Description("System Billing Data")]
+        SystemBilling = 2,
+        [Description("External Billing Data")]
+        ExternalBilling = 3
     }
 
     /// <summary>
@@ -294,7 +296,9 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         [Description("Simcard Data")]
         SimCard = 7,
         [Description("Status Client Data")]
-        StatusClient = 8
+        StatusClient = 8,
+        [Description("Service Provider Data")]
+        ServiceProvider = 9,
     }
 
     /// <summary>

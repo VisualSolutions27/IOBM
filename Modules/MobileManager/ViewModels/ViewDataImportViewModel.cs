@@ -19,6 +19,7 @@ using System.Threading;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.Controls.WPF;
 using Gijima.IOBM.Infrastructure.Helpers;
+using Gijima.IOBM.Infrastructure.Structs;
 
 namespace Gijima.IOBM.MobileManager.ViewModels
 {
@@ -499,21 +500,37 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void InitialiseViewControls()
         {
-            ImportUpdateDescription = string.Format("Importing - {0} of {1}", 0, 0);
-            SelectedImportFile = string.Empty;
-            ImportUpdateCount = 1;
-            ImportUpdateProgress = ImportUpdatesPassed = ImportUpdatesFailed = 0;
-            ValidDataFile = ValidImportData = ValidSelectedDestinationEntity = false;
+            ValidDataFile = ValidSelectedDestinationEntity = false;
 
             // Add the default items
             DataSheetCollection = new ObservableCollection<WorkSheetInfo>();
             WorkSheetInfo defaultInfo = new WorkSheetInfo();
             defaultInfo.SheetName = _defaultItem;
+            SelectedDataSheet = defaultInfo;
             DataSheetCollection.Add(defaultInfo);
+            DestinationEntityCollection = new ObservableCollection<string>();
+            DestinationEntityCollection.Add(_defaultItem);
+            InitialiseImportControls();
+        }
+
+        /// <summary>
+        /// Set default values to view properties
+        /// </summary>
+        private void InitialiseImportControls()
+        {
+            ImportUpdateDescription = string.Format("Importing - {0} of {1}", 0, 0);
+            ImportUpdateCount = 1;
+            ImportUpdateProgress = ImportUpdatesPassed = ImportUpdatesFailed = 0;
+            ValidImportData = false;
+            MappedPropertyCollection = ExceptionsCollection = null;
+            ImportedDataCollection = null;
+
+            // Add the default items
             SourceSearchCollection = new ObservableCollection<string>();
             SourceSearchCollection.Add(_defaultItem);
             SourceColumnCollection = new ObservableCollection<string>();
             SourceColumnCollection.Add(_defaultItem);
+            SelectedSourceSearch = SelectedSourceProperty = _defaultItem;
         }
 
         /// <summary>
@@ -523,6 +540,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             try
             {
+                InitialiseImportControls();
+
                 if (SelectedDataSheet != null && SelectedDataSheet.WorkBookName != null)
                 {
                     DataTable sheetData = null;
@@ -563,8 +582,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     ExceptionsCollection = new ObservableCollection<string>();
 
                 ++ImportUpdatesFailed;
-                ExceptionsCollection.Add(string.Format("Error! Importing data sheet {0} - {1} {2}.", SelectedDataSheet.SheetName, ex.Message,
-                                                                                                     ex.InnerException != null ? ex.InnerException.Message : string.Empty));
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataImportViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ImportWorkSheetDataAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -600,10 +623,17 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 {
                     DestinationEntityCollection.Add(EnumHelper.GetDescriptionFromEnum((DataBaseEntity)rule.enDataBaseEntity));
                 }
+
+                SelectedDestinationEntity = _defaultItem;
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataImportViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadDataImportRulesAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -624,7 +654,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
                 SourceSearchCollection = new ObservableCollection<string>(sheetColumns);
                 SourceColumnCollection = new ObservableCollection<string>(sheetColumns);
-                SelectedSourceSearch = SelectedSourceProperty = _defaultItem;
+                Application.Current.Dispatcher.Invoke(() => { SelectedSourceSearch = SelectedSourceProperty = _defaultItem; });
             }
         }
 
@@ -694,7 +724,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 }
             }
             catch (Exception ex)
-            { }
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                .Publish(new ApplicationMessage("ViewDataImportViewModel",
+                                                string.Format("Error! {0}, {1}.",
+                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                "ExecuteOpenFileCommand",
+                                                ApplicationMessage.MessageTypes.SystemError));
+            }
         }
 
         /// <summary>
@@ -725,7 +762,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 CanStartImport();
             }
             catch (Exception ex)
-            { }
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataImportViewModel",
+                                         string.Format("Error! {0}, {1}.",
+                                         ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                         "ExecuteMap",
+                                         ApplicationMessage.MessageTypes.SystemError));
+            }
         }
 
         /// <summary>
@@ -752,7 +796,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 CanStartImport();
             }
             catch (Exception ex)
-            { }
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataImportViewModel",
+                                         string.Format("Error! {0}, {1}.",
+                                         ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                         "ExecuteUnMap",
+                                         ApplicationMessage.MessageTypes.SystemError));
+            }
         }
 
         /// <summary>
@@ -832,7 +883,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 }
             }
             catch (Exception ex)
-            { }
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataImportViewModel",
+                                         string.Format("Error! {0}, {1}.",
+                                         ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                         "ExecuteImport",
+                                         ApplicationMessage.MessageTypes.SystemError));
+            }
         }
 
         #endregion

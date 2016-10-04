@@ -560,7 +560,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataUpdateViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadDataUpdateRulesAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -612,8 +617,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     ExceptionsCollection = new ObservableCollection<string>();
 
                 ++ImportUpdatesFailed;
-                ExceptionsCollection.Add(string.Format("Error importing data sheet {0} - {1} {2}.", SelectedDataSheet.SheetName, ex.Message,
-                                                                                                    ex.InnerException != null ? ex.InnerException.Message : string.Empty));
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataUpdateViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ImportWorkSheetDataAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -649,7 +658,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataUpdateViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "FilterDestinationEntities",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -693,7 +707,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataUpdateViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "FilterDestinationSearchEntities",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -707,14 +726,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 DestinationCompanyLinked = false;
                 ValidDestinationCompany = Brushes.Red;
+                SearchEntity searchEntity = SearchEntity.Other;
 
                 if (DestinationCompanyCollection != null)
                     SelectedDestinationCompany = DestinationCompanyCollection.Where(p => p.pkCompanyGroupID == 0).FirstOrDefault(); 
 
                 if (SelectedDestinationEntity != null)
                 {
-                    // Convert enum description back to the enum
-                    SearchEntity searchEntity = ((SearchEntity)Enum.Parse(typeof(SearchEntity), SelectedSearchEntity));
+                    if (SelectedSearchEntity != null && SelectedSearchEntity != "-- Please Select --")
+                        // Convert enum description back to the enum
+                        searchEntity = ((SearchEntity)Enum.Parse(typeof(SearchEntity), SelectedSearchEntity));
 
                     // Enable/Disable the company combobox if the seleted
                     // search entity is not not unique accros companies
@@ -731,7 +752,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataUpdateViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "EnableDisableCompanySelection",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -784,7 +810,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataUpdateViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadCompanyGroupsAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -823,7 +854,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 }
             }
             catch (Exception ex)
-            { }
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataUpdateViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ExecuteOpenFileCommand",
+                                                                ApplicationMessage.MessageTypes.SystemError));
+            }
         }
 
         /// <summary>
@@ -931,7 +969,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 }
             }
             catch (Exception ex)
-            { }
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataUpdateViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ExecuteUpdate",
+                                                                ApplicationMessage.MessageTypes.SystemError));
+            }
         }
 
         #endregion

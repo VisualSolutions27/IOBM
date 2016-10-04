@@ -1,8 +1,10 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
 using Gijima.IOBM.Infrastructure.Helpers;
+using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Common.Helpers;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
+using Gijima.IOBM.MobileManager.Model.Helpers;
 using Prism.Events;
 using System;
 using System.ComponentModel;
@@ -55,7 +57,6 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             Client existingClient = null;
             Contract clientContract = null;
             PackageSetup packageSetupCurrent = null;
-            Type propertyType = null;
             bool result = false;
 
             try
@@ -102,33 +103,25 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                             PackageSetup packageSetupToUpdate = db.PackageSetups.Where(p => p.pkPackageSetupID == clientContract.fkPackageSetupID).FirstOrDefault();
 
                             // Get the client table properties (Fields)
-                            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(PackageSetup));
+                            PropertyDescriptor[] entityProperties = EDMHelper.GetEntityStructure<PackageSetup>();
 
-                            foreach (PropertyDescriptor property in properties)
+                            foreach (PropertyDescriptor property in entityProperties)
                             {
                                 // Find the data column (property) to update
                                 if (property.Name == updateColumn)
                                 {
-                                    // Get the property type for nullable and non-nullable properties
+                                    // Convert the db type into the type of the property in our entity
                                     if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                                        propertyType = property.PropertyType.GetGenericArguments()[0];
+                                        updateValue = Convert.ChangeType(updateValue, property.PropertyType.GetGenericArguments()[0]);
+                                    else if (property.PropertyType == typeof(System.Guid))
+                                        updateValue = new Guid(updateValue.ToString());
+                                    else if (property.PropertyType == typeof(System.Byte[]))
+                                        updateValue = Convert.FromBase64String(updateValue.ToString());
                                     else
-                                        propertyType = property.PropertyType;
+                                        updateValue = Convert.ChangeType(updateValue, property.PropertyType);
 
-                                    // Update the property value based on the data type
-                                    if (propertyType == typeof(int))
-                                    {
-                                        property.SetValue(packageSetupToUpdate, Convert.ToInt32(updateValue));
-                                    }
-                                    else if (propertyType == typeof(decimal))
-                                    {
-                                        property.SetValue(packageSetupToUpdate, Convert.ToDecimal(updateValue));
-                                    }
-                                    else
-                                    {
-                                        errorMessage = string.Format("Data type {0) not found for {1}.", property.PropertyType, updateColumn);
-                                        return false;
-                                    }
+                                    // Set the value of the property with the value from the db
+                                    property.SetValue(packageSetupToUpdate, updateValue);
 
                                     // Add the data activity log
                                     result = _activityLogger.CreateDataChangeAudits<PackageSetup>(_dataActivityHelper.GetDataChangeActivities<PackageSetup>(packageSetupCurrent, packageSetupToUpdate, existingClient.fkContractID, db));
@@ -152,8 +145,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
-                errorMessage = string.Format("Error: {0} {1}.", ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("PackageSetupModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "UpdatePackageSetup",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }

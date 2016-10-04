@@ -739,6 +739,26 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private string _selectedWDPAllowance;
 
         /// <summary>
+        /// The entered SP allowance
+        /// </summary>
+        public string SelectedSPAllowance
+        {
+            get { return _selectedSPAllowance; }
+            set { SetProperty(ref _selectedSPAllowance, value); }
+        }
+        private string _selectedSPAllowance;
+
+        /// <summary>
+        /// The entered allowance limit
+        /// </summary>
+        public string SelectedAllowanceLimit
+        {
+            get { return _selectedAllowanceLimit; }
+            set { SetProperty(ref _selectedAllowanceLimit, value); }
+        }
+        private string _selectedAllowanceLimit;
+
+        /// <summary>
         /// Indicate if client use int dailing
         /// </summary>
         public bool SelectedIntDailing
@@ -1452,6 +1472,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     SelectedBillingLevel = BillingLevelCollection != null ? BillingLevelCollection.Where(p => p.pkCompanyBillingLevelID == clientBilling.fkCompanyBillingLevelID).FirstOrDefault() : null;
                     SelectedVoiceAllowance = clientBilling.VoiceAllowance.ToString();
                     SelectedWDPAllowance = clientBilling.WDPAllowance.ToString();
+                    SelectedSPAllowance = clientBilling.SPLimit.ToString();
+                    SelectedAllowanceLimit = clientBilling.AllowanceLimit.ToString();
                     SelectedIntRoaming = clientBilling.InternationalRoaming;
                     SelectedRoamingCountry = clientBilling.CountryVisiting;
                     SelectedRoamingFromDate = clientBilling.RoamingFromDate != null ? clientBilling.RoamingFromDate.Value : DateTime.MinValue.Date;
@@ -1468,6 +1490,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     SelectedRoamingCountry = string.Empty;
                     SelectedRoamingFromDate = DateTime.MinValue.Date;
                     SelectedRoamingToDate = DateTime.MinValue.Date;
+
+                    if (clientBilling != null)
+                    {
+                        SelectedSPAllowance = clientBilling.SPLimit.ToString();
+                        SelectedAllowanceLimit = clientBilling.AllowanceLimit.ToString();
+                    }
+                    else
+                    {
+                        SelectedSPAllowance =  SelectedAllowanceLimit = "0";
+                    }
                 }
             }
             catch (Exception ex)
@@ -1803,8 +1835,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 SelectedClient.ClientBilling.fkCompanyBillingLevelID = SelectedBillingLevel != null ? SelectedBillingLevel.pkCompanyBillingLevelID : (Int32?)null;
                 SelectedClient.ClientBilling.WDPAllowance = Convert.ToDecimal(SelectedWDPAllowance);
                 SelectedClient.ClientBilling.VoiceAllowance = Convert.ToDecimal(SelectedVoiceAllowance);
-                SelectedClient.ClientBilling.SPLimit = SelectedClientBilling.SPLimit;
-                SelectedClient.ClientBilling.AllowanceLimit = SelectedClientBilling.AllowanceLimit;
+                SelectedClient.ClientBilling.SPLimit = !string.IsNullOrEmpty(SelectedSPAllowance) ? Convert.ToDecimal(SelectedSPAllowance) : 0; 
+                SelectedClient.ClientBilling.AllowanceLimit = !string.IsNullOrEmpty(SelectedAllowanceLimit) ? Convert.ToDecimal(SelectedAllowanceLimit) : 0;
                 SelectedClient.ClientBilling.InternationalDailing = SelectedClientBilling.InternationalDailing;
                 SelectedClient.ClientBilling.PermanentIntDailing = SelectedPermanentDailing;
                 SelectedClient.ClientBilling.InternationalRoaming = SelectedIntRoaming;
@@ -1854,7 +1886,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns>True if can execute</returns>
         private bool CanExecuteMaintenace()
         {
-            return _securityHelper.IsUserInRole(SecurityRole.Administrator.Value()) || _securityHelper.IsUserInRole(SecurityRole.Supervisor.Value());
+            return _securityHelper.IsUserInRole(SecurityRole.Administrator.Value()) || _securityHelper.IsUserInRole(SecurityRole.DataManager.Value());
         }
 
         /// <summary>

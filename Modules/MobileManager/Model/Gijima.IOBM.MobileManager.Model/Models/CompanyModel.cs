@@ -1,7 +1,9 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
 using Gijima.IOBM.Infrastructure.Helpers;
+using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Common.Helpers;
 using Gijima.IOBM.MobileManager.Model.Data;
+using Gijima.IOBM.MobileManager.Model.Helpers;
 using Prism.Events;
 using System;
 using System.Collections.Generic;
@@ -54,14 +56,23 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     }
                     else
                     {
-                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The {0} company already exist.", company.CompanyName));
+                        _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                        .Publish(new ApplicationMessage("CompanyModel",
+                                                                        "This company already exist.",
+                                                                        "CreateCompany",
+                                                                        ApplicationMessage.MessageTypes.Information));
                         return false;
                     }
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("CompanyModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "CreateCompany",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }
@@ -95,7 +106,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("CompanyModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadCompanies",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return null;
             }
         }
@@ -112,14 +128,18 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 using (var db = MobileManagerEntities.GetContext())
                 {
                     return ((DbQuery<Company>)(from company in db.Companies
-                                               select company)).Include("CompanyGroup")
-                                                               .Include("CompanyBillingLevels")
-                                                               .Include("CompanyBillingLevels.BillingLevel").FirstOrDefault();
+                                               where company.CompanyName.ToUpper() == companyName.ToUpper()
+                                               select company)).Include("CompanyGroup").FirstOrDefault();
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("CompanyModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadCompany",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return null;
             }
         }
@@ -147,7 +167,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("CompanyModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadCompanyGroups",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return null;
             }
         }
@@ -168,7 +193,11 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     // Check to see if the company name already exist for another entity 
                     if (existingCompany != null && existingCompany.pkCompanyID != company.pkCompanyID)
                     {
-                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The {0} company already exist.", company.CompanyName));
+                        _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                        .Publish(new ApplicationMessage("CompanyModel",
+                                                                        "This company already exist.",
+                                                                        "UpdateCompany",
+                                                                        ApplicationMessage.MessageTypes.Information));
                         return false;
                     }
                     else
@@ -186,7 +215,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("CompanyModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "UpdateCompany",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }
@@ -205,7 +239,6 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             errorMessage = string.Empty;
             Company existingCompany = null;
             Company companyToUpdate = null;
-            Type propertyType = null;
             bool result = false;
 
             try
@@ -221,45 +254,25 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                             companyToUpdate = db.Companies.Where(p => p.pkCompanyID == existingCompany.pkCompanyID).FirstOrDefault();
 
                             // Get the company table properties (Fields)
-                            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(Client));
+                            PropertyDescriptor[] entityProperties = EDMHelper.GetEntityStructure<Company>();
 
-                            foreach (PropertyDescriptor property in properties)
+                            foreach (PropertyDescriptor property in entityProperties)
                             {
                                 // Find the data column (property) to update
                                 if (property.Name == updateColumn)
                                 {
-                                    // Get the property type for nullable and non-nullable properties
+                                    // Convert the db type into the type of the property in our entity
                                     if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                                        propertyType = property.PropertyType.GetGenericArguments()[0];
+                                        updateValue = Convert.ChangeType(updateValue, property.PropertyType.GetGenericArguments()[0]);
+                                    else if (property.PropertyType == typeof(System.Guid))
+                                        updateValue = new Guid(updateValue.ToString());
+                                    else if (property.PropertyType == typeof(System.Byte[]))
+                                        updateValue = Convert.FromBase64String(updateValue.ToString());
                                     else
-                                        propertyType = property.PropertyType;
+                                        updateValue = Convert.ChangeType(updateValue, property.PropertyType);
 
-                                    // Update the property value based on the data type
-                                    if (propertyType == typeof(DateTime))
-                                    {
-                                        property.SetValue(companyToUpdate, Convert.ToDateTime(updateValue));
-                                    }
-                                    else if (propertyType == typeof(int))
-                                    {
-                                        property.SetValue(companyToUpdate, Convert.ToInt32(updateValue));
-                                    }
-                                    else if (propertyType == typeof(decimal))
-                                    {
-                                        property.SetValue(companyToUpdate, Convert.ToDecimal(updateValue));
-                                    }
-                                    else if (propertyType == typeof(bool))
-                                    {
-                                        property.SetValue(companyToUpdate, Convert.ToBoolean(updateValue));
-                                    }
-                                    else if (propertyType == typeof(string))
-                                    {
-                                        property.SetValue(companyToUpdate, updateValue);
-                                    }
-                                    else
-                                    {
-                                        errorMessage = string.Format("Data type {0) not found for {1}.", property.PropertyType, updateColumn);
-                                        return false;
-                                    }
+                                    // Set the value of the property with the value from the db
+                                    property.SetValue(companyToUpdate, updateValue);
 
                                     // Add the data activity log
                                     result = _activityLogger.CreateDataChangeAudits<Company>(_dataActivityHelper.GetDataChangeActivities<Company>(existingCompany, companyToUpdate, companyToUpdate.pkCompanyID, db));
@@ -283,8 +296,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
-                errorMessage = string.Format("Error: {0} {1}.", ex.Message, ex.InnerException.Message);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("CompanyModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "UpdateCompany",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }

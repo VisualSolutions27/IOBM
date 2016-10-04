@@ -1,4 +1,5 @@
-﻿using Gijima.IOBM.Infrastructure.Events;
+﻿using Gijima.DataImport.MSOffice;
+using Gijima.IOBM.Infrastructure.Events;
 using Gijima.IOBM.Infrastructure.Helpers;
 using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Common.Structs;
@@ -9,11 +10,15 @@ using Prism.Commands;
 using Prism.Events;
 using Prism.Mvvm;
 using System;
+using System.Windows;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Media;
+using System.Threading;
+using System.Collections.Generic;
 
 namespace Gijima.IOBM.MobileManager.ViewModels
 {
@@ -26,6 +31,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private SecurityHelper _securityHelper = null;
         private DataValidationProcess _dataValidationProcess = DataValidationProcess.System;
         private DataValidationGroupName _dataValidationGroup = DataValidationGroupName.None;
+        private MSOfficeHelper _officeHelper = null;
+        private string _defaultItem = "-- Please Select --";
 
         #region Commands
 
@@ -120,6 +127,76 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private string _dataEntityDisplayName = string.Empty;
 
         /// <summary>
+        /// The data import progessbar description
+        /// </summary>
+        public string ImportUpdateDescription
+        {
+            get { return _importUpdateDescription; }
+            set { SetProperty(ref _importUpdateDescription, value); }
+        }
+        private string _importUpdateDescription;
+
+        /// <summary>
+        /// The data import progessbar value
+        /// </summary>
+        public int ImportUpdateProgress
+        {
+            get { return _ImportUpdateProgress; }
+            set { SetProperty(ref _ImportUpdateProgress, value); }
+        }
+        private int _ImportUpdateProgress;
+
+        /// <summary>
+        /// The number of import data items
+        /// </summary>
+        public int ImportUpdateCount
+        {
+            get { return _importUpdateCount; }
+            set { SetProperty(ref _importUpdateCount, value); }
+        }
+        private int _importUpdateCount;
+
+        /// <summary>
+        /// The number of importd data that passed validation
+        /// </summary>
+        public int ImportUpdatesPassed
+        {
+            get { return _importUpdatesPassed; }
+            set { SetProperty(ref _importUpdatesPassed, value); }
+        }
+        private int _importUpdatesPassed;
+
+        /// <summary>
+        /// The number of importd data that failed
+        /// </summary>
+        public int ImportUpdatesFailed
+        {
+            get { return _importUpdatesFailed; }
+            set { SetProperty(ref _importUpdatesFailed, value); }
+        }
+        private int _importUpdatesFailed;
+
+        /// <summary>
+        /// The collection of imported excel data
+        /// </summary>
+        public DataTable ImportedDataCollection
+        {
+            get { return _importDataCollection; }
+            set { SetProperty(ref _importDataCollection, value); }
+        }
+        private DataTable _importDataCollection = null;
+
+        /// <summary>
+        /// The collection of data import exceptions
+        /// </summary>
+        public ObservableCollection<string> ExceptionsCollection
+        {
+            get { return _exceptionsCollection; }
+            set { SetProperty(ref _exceptionsCollection, value); }
+        }
+        private ObservableCollection<string> _exceptionsCollection = null;
+
+        /// <summary>
         /// The collection of validation rules from the database
         /// </summary>
         public ObservableCollection<DataValidationRule> ValidationRuleCollection
@@ -130,6 +207,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private ObservableCollection<DataValidationRule> _validationRuleCollection;
 
         #region View Lookup Data Collections
+
+        /// <summary>
+        /// The collection of data sheets from the selected Excel file
+        /// </summary>
+        public ObservableCollection<WorkSheetInfo> DataSheetCollection
+        {
+            get { return _dataSheetCollection; }
+            set { SetProperty(ref _dataSheetCollection, value); }
+        }
+        private ObservableCollection<WorkSheetInfo> _dataSheetCollection = null;
 
         /// <summary>
         /// The collection of data validation processes from
@@ -210,6 +297,30 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         #region Required Fields
 
         /// <summary>
+        /// The selected data import file
+        /// </summary>
+        public string SelectedImportFile
+        {
+            get { return _selectedImportFile; }
+            set { SetProperty(ref _selectedImportFile, value); }
+        }
+        private string _selectedImportFile = string.Empty;
+
+        /// <summary>
+        /// The selected data import sheet
+        /// </summary>
+        public WorkSheetInfo SelectedDataSheet
+        {
+            get { return _selectedImportSheet; }
+            set
+            {
+                SetProperty(ref _selectedImportSheet, value);
+                Task.Run(() => ImportWorkSheetDataAsync());
+            }
+        }
+        private WorkSheetInfo _selectedImportSheet;
+
+        /// <summary>
         /// The selected data validation process
         /// </summary>
         public string SelectedProcess
@@ -244,11 +355,17 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 if (value != null)
                 {
                     _dataValidationGroup = EnumHelper.GetEnumFromDescription<DataValidationGroupName>(value);
+                    DataValidationProcess selectedProcess = SelectedProcess != null ?
+                                        EnumHelper.GetEnumFromDescription<DataValidationProcess>(SelectedProcess) :
+                                        DataValidationProcess.None;
 
                     if (_dataValidationGroup != DataValidationGroupName.None)
                     {
                         Task.Run(() => ReadDataEntitiesAsync());
-                        Task.Run(() => ReadEnityPropertiesAsync());
+                        if (selectedProcess != DataValidationProcess.ExternalBilling)
+                            Task.Run(() => ReadEnityPropertiesAsync());
+                        else
+                            ReadDataSourceColumns();
                         Task.Run(() => ReadDataValidationRulesAsync());
                     }
                 }
@@ -303,6 +420,76 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         #endregion
 
         #region Input Validation
+
+        /// <summary>
+        /// Check if a valid data file was selected
+        /// </summary>
+        public bool ValidDataFile
+        {
+            get { return _validDataFile; }
+            set { SetProperty(ref _validDataFile, value); }
+        }
+        private bool _validDataFile = false;
+
+        /// <summary>
+        /// Check if the data import was valid
+        /// </summary>
+        public bool ValidImportData
+        {
+            get { return _validDataImport; }
+            set { SetProperty(ref _validDataImport, value); }
+        }
+        private bool _validDataImport = false;
+
+        /// <summary>
+        /// Check if a valid data file was selected
+        /// </summary>
+        public bool ValidSelectedDataSheet
+        {
+            get { return _validSelectedDataSheet; }
+            set { SetProperty(ref _validSelectedDataSheet, value); }
+        }
+        private bool _validSelectedDataSheet = false;
+
+        /// <summary>
+        /// Check if a valid data file was selected
+        /// </summary>
+        public bool ValidSelectedDestinationEntity
+        {
+            get { return _validSelectedDestinationEntity; }
+            set { SetProperty(ref _validSelectedDestinationEntity, value); }
+        }
+        private bool _validSelectedDestinationEntity = false;
+
+        /// <summary>
+        /// Check if the data can be imported
+        /// </summary>
+        public bool CanImport
+        {
+            get { return _canImport; }
+            set { SetProperty(ref _canImport, value); }
+        }
+        private bool _canImport = false;
+
+        /// <summary>
+        /// Set the required field border colour
+        /// </summary>
+        public Brush ValidImportFile
+        {
+            get { return _validImportFile; }
+            set { SetProperty(ref _validImportFile, value); }
+        }
+        private Brush _validImportFile = Brushes.Red;
+
+        /// <summary>
+        /// Set the required field border colour
+        /// </summary>
+        public Brush ValidDataSheet
+        {
+            get { return _validDataSheet; }
+            set { SetProperty(ref _validDataSheet, value); }
+        }
+        private Brush _validDataSheet = Brushes.Red;
 
         /// <summary>
         /// Set the required field border colour
@@ -367,10 +554,15 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 string result = string.Empty;
                 switch (columnName)
                 {
+                    case "SelectedImportFile":
+                        ValidImportFile = string.IsNullOrEmpty(SelectedImportFile) ? Brushes.Red : Brushes.Silver; break;
+                    case "SelectedDataSheet":
+                        ValidDataSheet = SelectedDataSheet == null || SelectedDataSheet.SheetName == _defaultItem ? Brushes.Red : Brushes.Silver;
+                        ValidSelectedDataSheet = SelectedDataSheet == null || SelectedDataSheet.SheetName == _defaultItem ? false : true; break;
                     case "SelectedEntityGroup":
-                        ValidEntityGroup = string.IsNullOrEmpty(SelectedEntityGroup) || SelectedEntityGroup == "-- Please Select --" ? Brushes.Red : Brushes.Silver; break;
+                        ValidEntityGroup = string.IsNullOrEmpty(SelectedEntityGroup) || SelectedEntityGroup == _defaultItem ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedDataEntity":
-                        if (SelectedEntityGroup != null && SelectedEntityGroup != "-- Please Select --")
+                        if (SelectedEntityGroup != null && SelectedEntityGroup != _defaultItem)
                             switch (EnumHelper.GetEnumFromDescription<DataValidationGroupName>(SelectedEntityGroup))
                             {
                                 case DataValidationGroupName.Client:
@@ -434,6 +626,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void InitialiseViewControls()
         {
+            DataSheetCollection = new ObservableCollection<WorkSheetInfo>();
+            WorkSheetInfo defaultInfo = new WorkSheetInfo();
+            defaultInfo.SheetName = _defaultItem;
+            SelectedDataSheet = defaultInfo;
+            DataSheetCollection.Add(defaultInfo);
             ValidationRuleCollection = null;
             SelectedDataEntity = null;
             SelectedDataProperty = null;
@@ -441,6 +638,20 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedValidationValue = string.Empty;
             DataEntityCollection = null;
             DataPropertyCollection = null;
+            InitialiseImportControls();
+        }
+
+        /// <summary>
+        /// Set default values to view properties
+        /// </summary>
+        private void InitialiseImportControls()
+        {
+            ImportUpdateDescription = string.Format("Importing - {0} of {1}", 0, 0);
+            ImportUpdateCount = 1;
+            ImportUpdateProgress = ImportUpdatesPassed = ImportUpdatesFailed = 0;
+            ValidImportData = false;
+            ExceptionsCollection = null;
+            ImportedDataCollection = null;
         }
 
         /// <summary>
@@ -459,7 +670,85 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
         }
 
+        /// <summary>
+        /// Import the data from the selected workbook sheet
+        /// </summary>
+        private void ImportWorkSheetDataAsync()
+        {
+            try
+            {
+                InitialiseImportControls();
+
+                if (SelectedDataSheet != null && SelectedDataSheet.WorkBookName != null)
+                {
+                    DataTable sheetData = null;
+                    ImportUpdateDescription = string.Format("Reading - {0} of {1}", 0, 0);
+                    ImportUpdateProgress = ImportUpdatesPassed = ImportUpdatesFailed = 0;
+                    ImportUpdateCount = SelectedDataSheet.RowCount;
+
+                    if (_officeHelper == null)
+                        _officeHelper = new MSOfficeHelper();
+
+                    // Update the worksheet data
+                    sheetData = _officeHelper.ReadSheetDataIntoDataTable(SelectedDataSheet.WorkBookName, SelectedDataSheet.SheetName);
+
+                    // This is to fake the progress bar for importing
+                    for (int i = 1; i <= SelectedDataSheet.RowCount; i++)
+                    {
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            ImportUpdateProgress = i;
+                            ImportUpdatesPassed = i;
+                            ImportUpdateDescription = string.Format("Importing - {0} of {1}", ImportUpdateProgress, SelectedDataSheet.RowCount);
+
+                            if (i % 2 == 0)
+                                Thread.Sleep(1);
+                        });
+                    }
+
+                    ImportedDataCollection = sheetData;
+                    ValidImportData = true;
+
+                    // Read the data columns of the selected worksheet
+                    ReadDataSourceColumns();
+                }
+            }
+            catch (Exception ex)
+            {
+                if (ExceptionsCollection == null)
+                    ExceptionsCollection = new ObservableCollection<string>();
+
+                ++ImportUpdatesFailed;
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataImportViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ImportWorkSheetDataAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
+            }
+        }
+
         #region Lookup Data Loading
+
+        /// <summary>
+        /// Populate the data source column combobox from the selected data sheet
+        /// </summary>
+        private void ReadDataSourceColumns()
+        {
+            if (SelectedDataSheet != null && SelectedDataSheet.ColumnNames != null)
+            {
+                List<string> sheetColumns = new List<string>();
+                sheetColumns.Add(_defaultItem);
+
+                foreach (string columnName in SelectedDataSheet.ColumnNames)
+                {
+                    sheetColumns.Add(columnName);
+                }
+
+                //DataPropertyCollection = new ObservableCollection<string>(sheetColumns);
+                //Application.Current.Dispatcher.Invoke(() => { SelectedSourceProperty = _defaultItem; });
+            }
+        }
 
         /// <summary>
         /// Load all the data validation processes from the  
@@ -480,7 +769,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataValidationCFViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadDataValidationProcesses",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -492,17 +786,29 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             try
             {
                 EntityGroupCollection = new ObservableCollection<string>();
+                DataValidationProcess selectedProcess = SelectedProcess != null ?
+                                                        EnumHelper.GetEnumFromDescription<DataValidationProcess>(SelectedProcess) :
+                                                        DataValidationProcess.None;
 
                 foreach (DataValidationGroupName source in Enum.GetValues(typeof(DataValidationGroupName)))
                 {
-                    EntityGroupCollection.Add(EnumHelper.GetDescriptionFromEnum(source));
+                    if (selectedProcess == DataValidationProcess.ExternalBilling &&
+                        (source == DataValidationGroupName.None || source == DataValidationGroupName.ServiceProvider))
+                        EntityGroupCollection.Add(EnumHelper.GetDescriptionFromEnum(source));
+                    else if (selectedProcess != DataValidationProcess.ExternalBilling && source != DataValidationGroupName.ServiceProvider)
+                        EntityGroupCollection.Add(EnumHelper.GetDescriptionFromEnum(source));
                 }
 
-                SelectedEntityGroup = EnumHelper.GetDescriptionFromEnum(DataValidationPropertyName.None);
+                SelectedEntityGroup = _defaultItem;
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataValidationCFViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadDataValidationGroups",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -541,13 +847,22 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                         ValidDataEntity = Brushes.Silver;
                         SelectedDataEntity = 0;
                         break;
+                    case DataValidationGroupName.ServiceProvider:
+                        DataEntityDisplayName = "ServiceProviderName";
+                        DataEntityCollection = new ObservableCollection<object>(new ServiceProviderModel(_eventAggregator).ReadServiceProviders(true, true));
+                        break;
                 }
 
                 SelectedDataEntity = null;
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataValidationCFViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadDataEntitiesAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -564,7 +879,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataValidationCFViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadEnityPropertiesAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -602,7 +922,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataValidationCFViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadDataTypeOperators",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -616,7 +941,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns></returns>
         private bool CanExecuteCancel()
         {
-            return SelectedEntityGroup != "-- Please Select --";
+            return SelectedEntityGroup != _defaultItem;
         }
 
         /// <summary>
@@ -624,7 +949,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void ExecuteCancel()
         {
-            SelectedEntityGroup = "-- Please Select --";
+            SelectedEntityGroup = _defaultItem;
         }
 
         /// <summary>

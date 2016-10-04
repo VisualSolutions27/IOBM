@@ -80,12 +80,6 @@ namespace Gijima.IOBM.MobileManager.Security
                             LoggedInUserRoleID = userRole.Role.pkRoleID;
                             break;
                         }
-                        else if (userRole.Role.RoleName.ToUpper() == SecurityRole.Supervisor.ToString().ToUpper())
-                        {
-                            LoggedInUserRoleName = userRole.Role.RoleName.ToUpper();
-                            LoggedInUserRoleID = userRole.Role.pkRoleID;
-                            break;
-                        }
                         else if (userRole.Role.RoleName.ToUpper() == SecurityRole.User.ToString().ToUpper())
                         {
                             LoggedInUserRoleName = userRole.Role.RoleName.ToUpper();

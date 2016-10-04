@@ -70,7 +70,7 @@
         <EntityTypeShape EntityType="MobileManagerModel.DataUpdateRule" Width="1.5" PointX="7.125" PointY="7.875" IsExpanded="false" />
         <EntityTypeShape EntityType="MobileManagerModel.UserInCompany" Width="1.5" PointX="9.5" PointY="0.75" IsExpanded="false" />
         <AssociationConnector Association="MobileManagerModel.FK_UserInCompany_User" />
-        <EntityTypeShape EntityType="MobileManagerModel.Company" Width="1.5" PointX="0.875" PointY="5.25" IsExpanded="false" />
+        <EntityTypeShape EntityType="MobileManagerModel.Company" Width="1.5" PointX="0.875" PointY="5.25" IsExpanded="true" />
         <AssociationConnector Association="MobileManagerModel.FK_Client_Company" />
         <AssociationConnector Association="MobileManagerModel.FK_Company_CompanyGroup" />
         <AssociationConnector Association="MobileManagerModel.FK_UserInCompany_UserInCompany" />

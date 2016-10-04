@@ -403,11 +403,11 @@
                 </TextBox>
                 <TextBlock Grid.Row="6" Grid.Column="0" Text="Provider limit:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
                 <TextBox x:Name="TextBoxSPAllowance" Grid.Row="6" Grid.Column="1" TabIndex="45" ToolTip="Enter the service provider limit." Style="{StaticResource UXTextBoxStyle}"
-                    IsEnabled="{Binding SplitBilling}" Text="{Binding SelectedClientBilling.SPLimit, UpdateSourceTrigger=PropertyChanged}">
+                    IsEnabled="{Binding SplitBilling}" Text="{Binding SelectedSPAllowance, UpdateSourceTrigger=PropertyChanged}">
                 </TextBox>
                 <TextBlock Grid.Row="6" Grid.Column="3" Text="Allwnc limit:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
                 <TextBox x:Name="TextBoxAllowanceLimit" Grid.Row="6" Grid.Column="4" TabIndex="46" ToolTip="Enter the value to monitor voice allowance against." Style="{StaticResource UXTextBoxStyle}"
-                    Text="{Binding SelectedClientBilling.AllowanceLimit, UpdateSourceTrigger=PropertyChanged}">
+                    Text="{Binding SelectedAllowanceLimit, UpdateSourceTrigger=PropertyChanged}">
                 </TextBox>
                 <TextBlock Grid.Row="8" Grid.Column="0" Text="International:" Margin="0,0,5,0" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
                 <StackPanel Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="4" Orientation="Horizontal" IsEnabled="{Binding SplitBilling}" >

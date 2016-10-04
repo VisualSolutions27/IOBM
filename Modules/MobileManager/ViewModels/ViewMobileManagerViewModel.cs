@@ -313,11 +313,18 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             // Add application functionality based on security roles
             TabCollection = new ObservableCollection<TabItem>();
             TabCollection.Add(new TabItem() { Header = "Administration" });
-            TabCollection.Add(new TabItem() { Header = "Accounts" });
-            TabCollection.Add(new TabItem() { Header = "Billing" });
+            if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()) ||
+                _securityHelper.IsUserInRole(SecurityRole.AccountManager.Value()))
+                TabCollection.Add(new TabItem() { Header = "Accounts" });
+            if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()) ||
+                _securityHelper.IsUserInRole(SecurityRole.BillingManager.Value()))
+                TabCollection.Add(new TabItem() { Header = "Billing" });
             TabCollection.Add(new TabItem() { Header = "Activity Log" });
-            TabCollection.Add(new TabItem() { Header = "System Tools" });
-            if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()) || _securityHelper.IsUserInRole(SecurityRole.Supervisor.Value()))
+            if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()) ||
+                _securityHelper.IsUserInRole(SecurityRole.DataManager.Value()))
+                TabCollection.Add(new TabItem() { Header = "System Tools" });
+            if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()) || 
+                _securityHelper.IsUserInRole(SecurityRole.DataManager.Value()))
                 TabCollection.Add(new TabItem() { Header = "Configuration" });
         }
 

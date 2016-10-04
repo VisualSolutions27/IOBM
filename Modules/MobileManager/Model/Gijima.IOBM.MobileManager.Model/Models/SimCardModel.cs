@@ -148,11 +148,11 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     simCards = ((DbQuery<SimCard>)(from simCard in db.SimCards
                                                    where simCard.fkContractID == contractID
                                                    select simCard)).Include("Devices")
-                                                                      .Include("Devices.DeviceMake")
-                                                                      .Include("Devices.DeviceModel")
-                                                                      .Include("Status")
-                                                                      .OrderByDescending(p => p.IsActive)
-                                                                      .ThenBy(p => p.Status.StatusDescription).ToList();
+                                                                   .Include("Devices.DeviceMake")
+                                                                   .Include("Devices.DeviceModel")
+                                                                   .Include("Status")
+                                                                   .OrderByDescending(p => p.IsActive)
+                                                                   .ThenBy(p => p.Status.StatusDescription).ToList();
 
                     if (activeOnly)
                         simCards = simCards.Where(p => p.IsActive);
@@ -245,7 +245,6 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             errorMessage = string.Empty;
             SimCard existingSimCard = null;
             SimCard SimCardToUpdate = null;
-            Type propertyType = null;
             bool result = false;
 
             try
@@ -264,41 +263,25 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                             SimCardToUpdate = db.SimCards.Where(p => p.pkSimCardID == existingSimCard.pkSimCardID).FirstOrDefault();
 
                             // Get the simcard table properties (Fields)
-                            PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(typeof(SimCard));
+                            PropertyDescriptor[] properties = EDMHelper.GetEntityStructure<SimCard>();
 
                             foreach (PropertyDescriptor property in properties)
                             {
                                 // Find the data column (property) to update
                                 if (property.Name == updateColumn)
                                 {
-                                    // Get the property type for nullable and non-nullable properties
+                                    // Convert the db type into the type of the property in our entity
                                     if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                                        propertyType = property.PropertyType.GetGenericArguments()[0];
+                                        updateValue = Convert.ChangeType(updateValue, property.PropertyType.GetGenericArguments()[0]);
+                                    else if (property.PropertyType == typeof(System.Guid))
+                                        updateValue = new Guid(updateValue.ToString());
+                                    else if (property.PropertyType == typeof(System.Byte[]))
+                                        updateValue = Convert.FromBase64String(updateValue.ToString());
                                     else
-                                        propertyType = property.PropertyType;
+                                        updateValue = Convert.ChangeType(updateValue, property.PropertyType);
 
-                                    // Update the property value based on the data type
-                                    if (propertyType == typeof(DateTime))
-                                    {
-                                        property.SetValue(SimCardToUpdate, Convert.ToDateTime(updateValue));
-                                    }
-                                    else if (propertyType == typeof(int))
-                                    {
-                                        property.SetValue(SimCardToUpdate, Convert.ToInt32(updateValue));
-                                    }
-                                    else if (propertyType == typeof(bool))
-                                    {
-                                        property.SetValue(SimCardToUpdate, Convert.ToBoolean(updateValue));
-                                    }
-                                    else if (propertyType == typeof(string))
-                                    {
-                                        property.SetValue(SimCardToUpdate, updateValue);
-                                    }
-                                    else
-                                    {
-                                        errorMessage = string.Format("Data type {0) not found for {1}.", property.PropertyType, updateColumn);
-                                        return false;
-                                    }
+                                    // Set the value of the property with the value from the db
+                                    property.SetValue(SimCardToUpdate, updateValue);
 
                                     // Add the data activity log
                                     result = _activityLogger.CreateDataChangeAudits<SimCard>(_dataActivityHelper.GetDataChangeActivities<SimCard>(existingSimCard, SimCardToUpdate, SimCardToUpdate.fkContractID.Value, db));
@@ -322,8 +305,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
-                errorMessage = string.Format("Error: {0} {1}.", ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("SimCardModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "UpdateSimCard",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }
@@ -345,7 +332,6 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             Client existingClient = null;
             SimCard existingSimCard = null;
             SimCard simCardToImport = null;
-            Type propertyType = null;
             bool result = false;
 
             try
@@ -431,34 +417,18 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                             if (property.Name == "IsActive")
                                 sourceValue = true;
 
-                            // Get the property type for nullable and non-nullable properties
+                            // Convert the db type into the type of the property in our entity
                             if (property.PropertyType.IsGenericType && property.PropertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
-                                propertyType = property.PropertyType.GetGenericArguments()[0];
+                                sourceValue = Convert.ChangeType(sourceValue, property.PropertyType.GetGenericArguments()[0]);
+                            else if (property.PropertyType == typeof(System.Guid))
+                                sourceValue = new Guid(sourceValue.ToString());
+                            else if (property.PropertyType == typeof(System.Byte[]))
+                                sourceValue = Convert.FromBase64String(sourceValue.ToString());
                             else
-                                propertyType = property.PropertyType;
+                                sourceValue = Convert.ChangeType(sourceValue, property.PropertyType);
 
-                            // Set the property value based on the data type
-                            if (propertyType == typeof(DateTime))
-                            {
-                                property.SetValue(simCardToImport, Convert.ToDateTime(sourceValue));
-                            }
-                            else if (propertyType == typeof(int))
-                            {
-                                property.SetValue(simCardToImport, Convert.ToInt32(sourceValue));
-                            }
-                            else if (propertyType == typeof(bool))
-                            {
-                                property.SetValue(simCardToImport, Convert.ToBoolean(sourceValue));
-                            }
-                            else if (propertyType == typeof(string))
-                            {
-                                property.SetValue(simCardToImport, sourceValue);
-                            }
-                            else
-                            {
-                                errorMessage = string.Format("Data type {0) not found for {1}.", property.PropertyType, sourceProperty);
-                                return false;
-                            }
+                            // Set the value of the property with the value from the db
+                            property.SetValue(simCardToImport, sourceValue);
                         }
 
                         // If new simcard add it else
