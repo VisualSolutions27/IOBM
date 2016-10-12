@@ -125,8 +125,8 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     public enum BillingExecutionState
     {
         Started = 1,
-        DataValidation = 2,
-        DataImport = 3
+        InternalDataValidation = 2,
+        ExternalDataImport = 3
     }
 
     /// <summary>
@@ -297,8 +297,8 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         SimCard = 7,
         [Description("Status Client Data")]
         StatusClient = 8,
-        [Description("Service Provider Data")]
-        ServiceProvider = 9,
+        [Description("External Data")]
+        ExternalData = 9,
     }
 
     /// <summary>

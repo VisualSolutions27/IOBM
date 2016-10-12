@@ -257,11 +257,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 case BillingExecutionState.Started:
                     Application.Current.Dispatcher.Invoke(() => { BillingRunStarted = true; StartProcessCompleted = false; }); break;
-                case BillingExecutionState.DataValidation:
+                case BillingExecutionState.InternalDataValidation:
                     Application.Current.Dispatcher.Invoke(() => { DataValidationProcessCompleted = false; }); break;
 
             }
-
         }
 
         /// <summary>
@@ -275,9 +274,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 case BillingExecutionState.Started:
                     Application.Current.Dispatcher.Invoke(() => { BillingRunStarted = StartProcessCompleted = true; }); break;
-                case BillingExecutionState.DataValidation:
+                case BillingExecutionState.InternalDataValidation:
                     Application.Current.Dispatcher.Invoke(() => { BillingRunStarted = DataValidationProcessCompleted = true; }); break;
-
+                case BillingExecutionState.ExternalDataImport:
+                    Application.Current.Dispatcher.Invoke(() => { BillingRunStarted = DataValidationProcessCompleted = true; }); break;
             }
         }
 

@@ -88,6 +88,27 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         }
 
         /// <summary>
+        /// Read the package name from the database
+        /// </summary>
+        /// <param name="packageID">The package ID to get the name for.</param>
+        /// <returns>Package Name</returns>
+        public string ReadPackageName(int packageID)
+        {
+            try
+            {
+                using (var db = MobileManagerEntities.GetContext())
+                {
+                    return db.Packages.Where(p => p.pkPackageID == packageID).First().PackageName;
+                }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                return string.Empty;
+            }
+        }
+
+        /// <summary>
         /// Update an existing package entity in the database
         /// </summary>
         /// <param name="package">The package entity to update.</param>

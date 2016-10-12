@@ -22,8 +22,10 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         }
     
         public int pkDataValidationPropertyID { get; set; }
-        public short enDataValidationEntity { get; set; }
-        public short enDataValidationProperty { get; set; }
+        public short enDataValidationGroup { get; set; }
+        public Nullable<short> enDataValidationEntity { get; set; }
+        public Nullable<short> enDataValidationProperty { get; set; }
+        public string ExtDataValidationProperty { get; set; }
         public short enDataType { get; set; }
         public string ModifiedBy { get; set; }
         public System.DateTime ModifiedDate { get; set; }

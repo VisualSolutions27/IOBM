@@ -11,7 +11,13 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         /// <returns></returns>
         public string PropertyDescription
         {
-            get { return EnumHelper.GetDescriptionFromEnum((DataValidationPropertyName)enDataValidationProperty).ToString(); }
+            get
+            {
+                if (enDataValidationProperty != null)
+                    return EnumHelper.GetDescriptionFromEnum((DataValidationPropertyName)enDataValidationProperty).ToString();
+                else
+                    return string.Empty;
+            }
         }
     }
 }

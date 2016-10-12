@@ -5,9 +5,9 @@ namespace Gijima.IOBM.MobileManager.Views
     /// <summary>
     /// Interaction logic for ViewSupplierDataImport.xaml
     /// </summary>
-    public partial class ViewSupplierDataImport : UserControl
+    public partial class ViewExtDataValidation : UserControl
     {
-        public ViewSupplierDataImport()
+        public ViewExtDataValidation()
         {
             InitializeComponent();
         }

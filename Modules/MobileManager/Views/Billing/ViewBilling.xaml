@@ -67,10 +67,10 @@
                     IsReadOnly="True" TabIndex="1" Style="{StaticResource DataGridStyle}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}" 
                     ItemsSource="{Binding ProcessHistoryCollection}">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Process" Binding="{Binding BillingProcess.ProcessDescription}" Width="*"/>
+                        <DataGridTextColumn Header="Process" Binding="{Binding BillingProcess.ProcessDescription}" Width="Auto"/>
+                        <DataGridTextColumn Header="Result" Binding="{Binding ProcessResult, Converter={StaticResource UIDataConvertionHelper},  ConverterParameter='ProcessResult'}" Width="50"/>
                         <DataGridTextColumn Header="Start Date" Binding="{Binding ProcessStartDate}" Width="Auto" />
                         <DataGridTextColumn Header="End Date" Binding="{Binding ProcessEndDate}" Width="Auto" />
-                        <DataGridTextColumn Header="Result" Binding="{Binding ProcessResult, Converter={StaticResource UIDataConvertionHelper},  ConverterParameter='ProcessResult'}" Width="50"/>
                         <DataGridTextColumn Header="Duration" Binding="{Binding ProcessDuration}" Width="Auto" />
                     </DataGrid.Columns>
                 </DataGrid>
@@ -150,7 +150,7 @@
                     <local:ViewDataValidation Grid.Row="2" Grid.Column="0"/>
                 </Grid>                
             </xctk:WizardPage>
-            <xctk:WizardPage x:Name="WizardPage3" ExteriorPanelBackground="White" Title="Billing Wizard" Description="This Wizard page exposes functionality to execute the supplier data import process and to correct any resulting exceptions." 
+            <xctk:WizardPage x:Name="WizardPage3" ExteriorPanelBackground="White" Title="Billing Wizard" Description="This Wizard page exposes functionality to validate and manage the external billing data for each external data provider." 
                 CanSelectNextPage="{Binding DataImportProcessCompleted, UpdateSourceTrigger=PropertyChanged}" NextPage="{Binding ElementName=WizardPage4}" PreviousPage="{Binding ElementName=WizardPage2}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -161,7 +161,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    <Billing:ViewSupplierDataImport Grid.Row="2" Grid.Column="0"/>
+                    <Billing:ViewExtDataValidation Grid.Row="2" Grid.Column="0"/>
                 </Grid>
             </xctk:WizardPage>
             <xctk:WizardPage x:Name="LastPage" PageType="Blank" Visibility="Collapsed"

@@ -44,9 +44,11 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             {
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    if (!db.DataValidationRules.Any(p => p.enValidationProcess == validationRule.enValidationProcess &&
-                                                         p.fkDataValidationPropertyID == validationRule.fkDataValidationPropertyID &&
-                                                         p.DataValidationEntityID == validationRule.DataValidationEntityID))
+                    if (!db.DataValidationRules.Any(p => (p.enValidationProcess == validationRule.enValidationProcess &&
+                                                          p.enDataValidationEntity == validationRule.enDataValidationEntity &&
+                                                          p.DataValidationEntityID == validationRule.DataValidationEntityID &&
+                                                          p.fkDataValidationPropertyID == validationRule.fkDataValidationPropertyID) &&
+                                                         (validationRule.fkPackageID != null ? p.fkPackageID == validationRule.fkPackageID : true)))
                     {
                         db.DataValidationRules.Add(validationRule);
                         db.SaveChanges();
@@ -89,6 +91,9 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 var rules = (dynamic)null;
                 short processID = validationProcess.Value();
                 short entityID = validationEntity.Value();
+                DataValidationRule newDataRule = null;
+                string propertyDescription = string.Empty;
+                string packageDescription = string.Empty;
 
                 using (var db = MobileManagerEntities.GetContext())
                 {
@@ -110,6 +115,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                          DataValidationEntityID = validationRule.DataValidationEntityID,
                                          DataDescription = client.PrimaryCellNumber,
                                          fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID,
+                                         fkPackageID = validationRule.fkPackageID,
                                          enDataValidationProperty = validationProperty.enDataValidationProperty,
                                          enDataType = validationProperty.enDataType,
                                          enDataValidationOperator = validationRule.enDataValidationOperator,
@@ -134,6 +140,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                          DataValidationEntityID = validationRule.DataValidationEntityID,
                                          DataDescription = company.CompanyName,
                                          fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID,
+                                         fkPackageID = validationRule.fkPackageID,
                                          enDataValidationProperty = validationProperty.enDataValidationProperty,
                                          enDataType = validationProperty.enDataType,
                                          enDataValidationOperator = validationRule.enDataValidationOperator,
@@ -157,6 +164,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                          DataValidationEntityID = validationRule.DataValidationEntityID,
                                          DataDescription = "None",
                                          fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID,
+                                         fkPackageID = validationRule.fkPackageID,
                                          enDataValidationProperty = validationProperty.enDataValidationProperty,
                                          enDataType = validationProperty.enDataType,
                                          enDataValidationOperator = validationRule.enDataValidationOperator,
@@ -164,6 +172,30 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                          ModifiedBy = validationRule.ModifiedBy,
                                          ModifiedDate = validationRule.ModifiedDate
                                      }).ToList();
+                            break;
+                        case DataValidationGroupName.ExternalData:
+                            rules = (from validationRule in db.DataValidationRules
+                                     join externalData in db.ExternalBillingDatas
+                                     on validationRule.DataValidationEntityID equals externalData.pkExternalBillingDataID
+                                     where validationRule.enValidationProcess == processID &&
+                                           validationRule.enDataValidationEntity == entityID
+                                     select new
+                                     {
+                                         pkDataValidationRuleID = validationRule.pkDataValidationRuleID,
+                                         enValidationProcess = validationRule.enValidationProcess,
+                                         enDataValidationEntity = validationRule.enDataValidationEntity,
+                                         DataValidationEntityID = validationRule.DataValidationEntityID,
+                                         DataDescription = externalData.TableName,
+                                         fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID,
+                                         fkPackageID = validationRule.fkPackageID,
+                                         enDataValidationProperty = 0,
+                                         ExtDataValidationProperty = validationRule.ExtDataValidationProperty,
+                                         enDataValidationOperator = validationRule.enDataValidationOperator,
+                                         enDataType = 1,
+                                         DataValidationValue = validationRule.DataValidationValue,
+                                         ModifiedBy = validationRule.ModifiedBy,
+                                         ModifiedDate = validationRule.ModifiedDate
+                                     });
                             break;
                     }
 
@@ -173,24 +205,36 @@ namespace Gijima.IOBM.MobileManager.Model.Models
 
                     foreach (var rule in rules)
                     {
-                        validationRules.Add(new DataValidationRule
+                        if ((DataValidationGroupName)rule.enDataValidationEntity == DataValidationGroupName.ExternalData)
                         {
-                            pkDataValidationRuleID = rule.pkDataValidationRuleID,
-                            enValidationProcess = rule.enValidationProcess,
-                            enDataValidationEntity = rule.enDataValidationEntity,
-                            EntityDescription = EnumHelper.GetDescriptionFromEnum((DataValidationGroupName)rule.enDataValidationEntity).ToString(),
-                            DataValidationEntityID = rule.DataValidationEntityID,
-                            DataDescription = rule.DataDescription,
-                            fkDataValidationPropertyID = rule.fkDataValidationPropertyID,
-                            PropertyName = ((DataValidationPropertyName)rule.enDataValidationProperty).ToString(),
-                            DataTypeDescription = ((DataTypeName)rule.enDataType).ToString(),
-                            PropertyDescription = EnumHelper.GetDescriptionFromEnum((DataValidationPropertyName)rule.enDataValidationProperty).ToString(),
-                            enDataValidationOperator = rule.enDataValidationOperator,
-                            OperatorDescription = EnumHelper.GetOperatorFromDataTypeEnum((DataTypeName)rule.enDataType, rule.enDataValidationOperator).ToString(),
-                            DataValidationValue = rule.DataValidationValue,
-                            ModifiedBy = rule.ModifiedBy,
-                            ModifiedDate = rule.ModifiedDate,
-                        });
+                            propertyDescription = rule.ExtDataValidationProperty;
+                            if (rule.fkPackageID != null)
+                                packageDescription = new PackageModel(_eventAggregator).ReadPackageName(rule.fkPackageID);
+                        }
+                        else
+                        {
+                            propertyDescription = EnumHelper.GetDescriptionFromEnum((DataValidationPropertyName)rule.enDataValidationProperty).ToString();
+                            packageDescription = string.Empty;
+                        }
+                        newDataRule = new DataValidationRule();
+                        newDataRule.pkDataValidationRuleID = rule.pkDataValidationRuleID;
+                        newDataRule.enValidationProcess = rule.enValidationProcess;
+                        newDataRule.enDataValidationEntity = rule.enDataValidationEntity;
+                        newDataRule.EntityDescription = EnumHelper.GetDescriptionFromEnum((DataValidationGroupName)rule.enDataValidationEntity).ToString();
+                        newDataRule.DataValidationEntityID = rule.DataValidationEntityID;
+                        newDataRule.DataDescription = rule.DataDescription;
+                        newDataRule.fkDataValidationPropertyID = rule.fkDataValidationPropertyID;
+                        newDataRule.fkPackageID = rule.fkPackageID;
+                        newDataRule.PackageDescription = packageDescription;
+                        newDataRule.PropertyName = ((DataValidationPropertyName)rule.enDataValidationProperty).ToString();
+                        newDataRule.PropertyDescription = propertyDescription;
+                        newDataRule.enDataValidationOperator = rule.enDataValidationOperator;
+                        newDataRule.DataTypeDescription = ((DataTypeName)rule.enDataType).ToString();
+                        newDataRule.OperatorDescription = EnumHelper.GetOperatorFromDataTypeEnum((DataTypeName)rule.enDataType, rule.enDataValidationOperator).ToString();
+                        newDataRule.DataValidationValue = rule.DataValidationValue;
+                        newDataRule.ModifiedBy = rule.ModifiedBy;
+                        newDataRule.ModifiedDate = rule.ModifiedDate;
+                        validationRules.Add(newDataRule);
                     }
 
                     return new ObservableCollection<DataValidationRule>(validationRules.OrderBy(p => p.DataDescription).ThenBy(p => p.EntityDescription));
@@ -235,10 +279,11 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     {
                         if (existingValidationRule != null)
                         {
-                            existingValidationRule.fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID;
                             existingValidationRule.DataValidationEntityID = validationRule.DataValidationEntityID;
-                            existingValidationRule.DataValidationValue = validationRule.DataValidationValue;
+                            existingValidationRule.fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID;
+                            existingValidationRule.ExtDataValidationProperty = validationRule.ExtDataValidationProperty;
                             existingValidationRule.enDataValidationOperator = validationRule.enDataValidationOperator;
+                            existingValidationRule.DataValidationValue = validationRule.DataValidationValue;
                             existingValidationRule.ModifiedBy = validationRule.ModifiedBy;
                             existingValidationRule.ModifiedDate = validationRule.ModifiedDate;
                             db.SaveChanges();
@@ -487,8 +532,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                     {
                                         validationResult = new DataValidationException()
                                         {
-                                            fkBillingProcessID = BillingExecutionState.DataValidation.Value(),
-                                            fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID,
+                                            fkBillingProcessID = BillingExecutionState.InternalDataValidation.Value(),
+                                            fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID.Value,
                                             BillingPeriod = string.Format("{0}{1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year),
                                             enDataValidationEntity = DataValidationGroupName.Client.Value(),
                                             DataValidationEntityID = client.pkClientID,
@@ -501,7 +546,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                     {
                                         validationResult = new DataValidationException()
                                         {
-                                            fkBillingProcessID = BillingExecutionState.DataValidation.Value(),
+                                            fkBillingProcessID = BillingExecutionState.InternalDataValidation.Value(),
                                             fkDataValidationPropertyID = validationRule.pkDataValidationRuleID,
                                             BillingPeriod = string.Format("{0}{1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year),
                                             enDataValidationEntity = DataValidationGroupName.Client.Value(),
@@ -647,7 +692,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                     {
                                         validationResult = new DataValidationException()
                                         {
-                                            fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID,
+                                            fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID.Value,
                                             enDataValidationEntity = DataValidationGroupName.SimCard.Value(),
                                             DataValidationEntityID = sim.pkSimCardID,
                                             Result = true

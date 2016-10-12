@@ -18,12 +18,15 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public short enValidationProcess { get; set; }
         public short enDataValidationEntity { get; set; }
         public int DataValidationEntityID { get; set; }
-        public int fkDataValidationPropertyID { get; set; }
+        public Nullable<int> fkDataValidationPropertyID { get; set; }
+        public Nullable<int> fkPackageID { get; set; }
+        public string ExtDataValidationProperty { get; set; }
         public short enDataValidationOperator { get; set; }
         public string DataValidationValue { get; set; }
         public string ModifiedBy { get; set; }
         public System.DateTime ModifiedDate { get; set; }
     
         public virtual DataValidationProperty DataValidationProperty { get; set; }
+        public virtual Package Package { get; set; }
     }
 }

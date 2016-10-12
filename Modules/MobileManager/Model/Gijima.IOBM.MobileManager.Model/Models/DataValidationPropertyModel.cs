@@ -1,10 +1,13 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
+using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
+using Gijima.IOBM.MobileManager.Model.Helpers;
 using Prism.Events;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Data.Entity.Infrastructure;
 using System.Linq;
 
@@ -36,26 +39,40 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         {
             try
             {
+                bool result = false;
+
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    if (!db.DataValidationProperties.Any(p => p.enDataValidationEntity == validationProperty.enDataValidationEntity &&
-                                                              p.enDataValidationProperty == validationProperty.enDataValidationProperty))
+                    // Check for duplicate internal or external data properties
+                    if ((DataValidationGroupName)validationProperty.enDataValidationGroup == DataValidationGroupName.ExternalData)
                     {
-                        db.DataValidationProperties.Add(validationProperty);
-                        db.SaveChanges();
-                        return true;
+                        result = db.DataValidationProperties.Any(p => p.enDataValidationGroup == validationProperty.enDataValidationGroup &&
+                                                                      p.enDataValidationEntity == validationProperty.enDataValidationEntity &&
+                                                                      p.ExtDataValidationProperty == validationProperty.ExtDataValidationProperty);
                     }
                     else
                     {
-                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The data validation property {0} already exist.", 
-                        //                                                                ((DataValidationPropertyName)validationProperty.enDataValidationProperty)).ToString());
-                        return false;
+                        result = db.DataValidationProperties.Any(p => p.enDataValidationGroup == validationProperty.enDataValidationGroup &&
+                                                                      p.enDataValidationProperty == validationProperty.enDataValidationProperty);
                     }
+
+
+                    if (!result)
+                    {
+                        db.DataValidationProperties.Add(validationProperty);
+                        db.SaveChanges();
+                    }
+                    return true;
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("DataValidationPropertyModel",
+                                         string.Format("Error! {0}, {1}.",
+                                         ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                         "CreateDataValidationProperty",
+                                         ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }
@@ -65,24 +82,57 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// </summary>
         /// <param name="activeOnly">Flag to load all or active only entities.</param>
         /// <returns>Collection of DataValidationProperties</returns>
-        public ObservableCollection<DataValidationProperty> ReadDataValidationProperties(bool activeOnly)
+        public ObservableCollection<DataValidationProperty> ReadDataValidationProperties(DataValidationGroupName dataValidationGroup, bool activeOnly)
         {
             try
             {
                 IEnumerable<DataValidationProperty> validationRulesData = null;
+                short dataValidationGroupID = dataValidationGroup.Value();
 
                 using (var db = MobileManagerEntities.GetContext())
                 {
                     validationRulesData = ((DbQuery<DataValidationProperty>)(from validationProperty in db.DataValidationProperties
-                                                                             where activeOnly ? validationProperty.IsActive : true
+                                                                             where validationProperty.enDataValidationGroup == 0 ||
+                                                                                   validationProperty.enDataValidationGroup == dataValidationGroupID
                                                                              select validationProperty)).ToList();
+
+                    if (activeOnly)
+                        validationRulesData = validationRulesData.Where(p => p.IsActive);
 
                     return new ObservableCollection<DataValidationProperty>(validationRulesData);
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("DataValidationPropertyModel",
+                                         string.Format("Error! {0}, {1}.",
+                                         ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                         "ReadDataValidationProperties",
+                                         ApplicationMessage.MessageTypes.SystemError));
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Read the external data validation properties from the database
+        /// </summary>
+        /// <param name="externalDataName">The external data table name.</param>
+        /// <returns>DataTable</returns>
+        public DataTable ReadExtDataValidationProperties(string externalDataName)
+        {
+            try
+            {
+                return EDMHelper.GetEntityStructure(externalDataName); 
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("DataValidationPropertyModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadExternalDataPropertiesAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return null;
             }
         }
@@ -104,8 +154,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                     // Check to see if the data validation rule property already exist for another entity 
                     if (existingDataValidationProperty != null && existingDataValidationProperty.pkDataValidationPropertyID != validationProperty.pkDataValidationPropertyID)
                     {
-                        //_eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(string.Format("The data validation property {0} already exist.", 
-                        //                                                                ((DataValidationPropertyName)validationProperty.enDataValidationProperty)).ToString());
+                        _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                        .Publish(new ApplicationMessage("DataValidationPropertyModel",
+                                                 string.Format("The data validation property {0} already exist.",
+                                                 ((DataValidationPropertyName)validationProperty.enDataValidationProperty).ToString()),
+                                                 "UpdateDataValidationProperty",
+                                                 ApplicationMessage.MessageTypes.SystemError));
                         return false;
                     }
                     else
@@ -126,7 +180,12 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("DataValidationPropertyModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadExternalDataPropertiesAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
                 return false;
             }
         }

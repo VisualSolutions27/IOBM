@@ -34,7 +34,9 @@ namespace Gijima.IOBM.Infrastructure.Structs
         Integer = 3,
         Decimal = 4,
         DateTime = 5,
-        Bool = 6
+        Bool = 6,
+        Long = 7,
+        Float = 8,
     }
 
     /// <summary>

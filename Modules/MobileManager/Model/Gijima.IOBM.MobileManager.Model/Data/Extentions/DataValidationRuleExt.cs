@@ -31,6 +31,12 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public string PropertyDescription { get; set; }
 
         /// <summary>
+        /// Returns the package description from the packge entity.
+        /// </summary>
+        /// <returns></returns>
+        public string PackageDescription { get; set; }
+
+        /// <summary>
         /// Returns the data type description from the relevant DataTypeName enum.
         /// </summary>
         /// <returns></returns>
