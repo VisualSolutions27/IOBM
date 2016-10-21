@@ -88,5 +88,29 @@ namespace Gijima.IOBM.Infrastructure.Helpers
                     return ((NumericOperator)operatorEnumValue).ToString();
             }
         }
+
+        /// <summary>
+        /// Retrieve the name on the relevant operator, e.g.
+        /// string, date, numeric, bool, integer
+        /// </summary>
+        /// <param name="enOperatorType">The operator type Enumerator</param>
+        /// <param name="operatorEnumValue">The operator enum value.</param>
+        /// <returns>A string representing the friendly name</returns>
+        public static string GetOperatorFromOperatorTypeEnum(OperatorType enOperatorType, short operatorEnumValue)
+        {
+            switch (enOperatorType)
+            {
+                case OperatorType.StringOperator:
+                    return ((StringOperator)operatorEnumValue).ToString();
+                case OperatorType.NumericOperator:
+                    return ((NumericOperator)operatorEnumValue).ToString();
+                case OperatorType.DateOperator:
+                    return ((DateOperator)operatorEnumValue).ToString();
+                case OperatorType.BooleanOperator:
+                    return ((BooleanOperator)operatorEnumValue).ToString();
+                default:
+                    return StringOperator.Equal.ToString();
+            }
+        }
     }
 }

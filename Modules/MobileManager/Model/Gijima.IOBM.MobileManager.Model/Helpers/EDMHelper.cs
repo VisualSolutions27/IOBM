@@ -49,36 +49,6 @@ namespace Gijima.IOBM.MobileManager.Model.Helpers
         }
 
         /// <summary>
-        /// Drop the specified sql table
-        /// </summary>
-        /// <param name="sqlTableName">The SQL table name.</param>
-        /// <returns>Data table</returns>
-        public static DataTable GetEntityStructure(string sqlTableName)
-        {
-            try
-            {
-                string connectionString = MobileManagerEntities.GetContext().Database.Connection.ConnectionString;
-                string sql = "SELECT * FROM [" + sqlTableName + "]";
-                DataTable tableSchema = null;
-
-                using (SqlConnection con = new SqlConnection(connectionString))
-                {
-                    con.Open();
-                    SqlCommand cmd = new SqlCommand(sql, con);
-                    SqlDataReader reader = cmd.ExecuteReader();
-                    tableSchema = reader.GetSchemaTable();
-                    con.Close();
-                }
-
-                return tableSchema;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-        }
-
-        /// <summary>
         /// Write a data table schema and data to a sql table
         /// </summary>
         /// <param name="externalDataID">The external data entry ID.</param>

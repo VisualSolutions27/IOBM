@@ -990,7 +990,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns>True if can execute</returns>
         private bool CanExecuteMaintenace()
         {
-            return _securityHelper.IsUserInRole(SecurityRole.Administrator.Value()) || _securityHelper.IsUserInRole(SecurityRole.AccountManager.Value());
+            return _securityHelper.IsUserInRole(SecurityRole.Administrator.Value()) || _securityHelper.IsUserInRole(SecurityRole.AccountsUser.Value());
         }
 
         /// <summary>

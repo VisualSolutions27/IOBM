@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Data.Entity.Infrastructure;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Transactions;
 
@@ -72,7 +73,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                         foreach (DataColumn col in externalData.Columns)
                         {
                             dataProperty = new DataValidationProperty();
-                            dataProperty.enDataValidationGroup = DataValidationGroupName.ExternalData.Value();
+                            dataProperty.enDataValidationGroupName = DataValidationGroupName.ExternalData.Value();
                             dataProperty.enDataValidationEntity = (short)externalDataID;
                             dataProperty.ExtDataValidationProperty = col.ColumnName;
                             dataProperty.enDataType = GetDataValidationDataType(col.DataType);
@@ -138,34 +139,36 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         }
 
         /// <summary>
-        /// Drop the specified sql table
+        /// Read all the imported external data for the specified provider
         /// </summary>
         /// <param name="sqlTableName">The SQL table name.</param>
         /// <returns>Data table</returns>
-        //public static DataTable GetEntityStructure(string sqlTableName)
-        //{
-        //    try
-        //    {
-        //        string connectionString = MobileManagerEntities.GetContext().Database.Connection.ConnectionString;
-        //        string sql = "SELECT * FROM [" + sqlTableName + "]";
-        //        DataTable tableSchema = null;
+        public DataTable ReadExternalBillingData(string sqlTableName)
+        {
+            try
+            {
+                string connectionString = MobileManagerEntities.GetContext().Database.Connection.ConnectionString;
+                string sql = "SELECT * FROM [" + sqlTableName + "]";
+                DataTable billingData = new DataTable();
 
-        //        using (SqlConnection con = new SqlConnection(connectionString))
-        //        {
-        //            con.Open();
-        //            SqlCommand cmd = new SqlCommand(sql, con);
-        //            SqlDataReader reader = cmd.ExecuteReader();
-        //            tableSchema = reader.GetSchemaTable();
-        //            con.Close();
-        //        }
+                using (SqlConnection con = new SqlConnection(connectionString))
+                {
+                    con.Open();
+                    SqlCommand cmd = new SqlCommand(sql, con);
+                    using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                    {
+                        adapter.Fill(billingData);
+                    }
+                    con.Close();
+                }
 
-        //        return tableSchema;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        throw new Exception(ex.Message);
-        //    }
-        //}
+                return billingData;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
 
         /// <summary>
         /// Read all the external data entries from the database

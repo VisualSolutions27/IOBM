@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 
 namespace Gijima.IOBM.Infrastructure.Structs
 {
@@ -36,7 +37,25 @@ namespace Gijima.IOBM.Infrastructure.Structs
         DateTime = 5,
         Bool = 6,
         Long = 7,
-        Float = 8,
+        Float = 8
+    }
+
+    /// <summary>
+    /// The <see cref="OperatorType"/> enumeration a list of 
+    /// operrator types to validate on.
+    /// </summary>
+    public enum OperatorType
+    {
+        [Description("None")]
+        None = 0,
+        [Description("String")]
+        StringOperator = 1,
+        [Description("Numeric")]
+        NumericOperator = 2,
+        [Description("Date")]
+        DateOperator = 3,
+        [Description("Boolean")]
+        BooleanOperator = 4
     }
 
     /// <summary>
@@ -99,6 +118,17 @@ namespace Gijima.IOBM.Infrastructure.Structs
     }
 
     /// <summary>
+    /// The <see cref="BooleanOperator"/> enumeration a list of 
+    /// boolean operator to validate on.
+    /// </summary>
+    public enum BooleanOperator
+    {
+        None = 0,
+        True = 1,
+        False
+    }
+
+    /// <summary>
     /// The below extension class can be used for all Enum types defined herein.
     /// Please not that you'll have to define each extension method per Enum type
     /// to handle the correct return type.
@@ -110,6 +140,10 @@ namespace Gijima.IOBM.Infrastructure.Structs
             return Convert.ToInt16(type);
         }
         public static short Value(this IOBMSecurityRole type)
+        {
+            return Convert.ToInt16(type);
+        }
+        public static short Value(this OperatorType type)
         {
             return Convert.ToInt16(type);
         }
@@ -126,6 +160,10 @@ namespace Gijima.IOBM.Infrastructure.Structs
             return Convert.ToInt16(type);
         }
         public static short Value(this MathOperator type)
+        {
+            return Convert.ToInt16(type);
+        }
+        public static short Value(this BooleanOperator type)
         {
             return Convert.ToInt16(type);
         }

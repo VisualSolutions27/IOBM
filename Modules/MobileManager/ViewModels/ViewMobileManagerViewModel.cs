@@ -314,12 +314,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             TabCollection = new ObservableCollection<TabItem>();
             TabCollection.Add(new TabItem() { Header = "Administration" });
             if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()) ||
-                _securityHelper.IsUserInRole(SecurityRole.AccountManager.Value()))
+                _securityHelper.IsUserInRole(SecurityRole.AccountsUser.Value()))
                 TabCollection.Add(new TabItem() { Header = "Accounts" });
             if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()) ||
-                _securityHelper.IsUserInRole(SecurityRole.BillingManager.Value()))
+                _securityHelper.IsUserInRole(SecurityRole.BillingUser.Value()))
                 TabCollection.Add(new TabItem() { Header = "Billing" });
             TabCollection.Add(new TabItem() { Header = "Activity Log" });
+            TabCollection.Add(new TabItem() { Header = "Reports" });
             if (_securityHelper.IsUserInRole(SecurityRole.Administrator.Value()) ||
                 _securityHelper.IsUserInRole(SecurityRole.DataManager.Value()))
                 TabCollection.Add(new TabItem() { Header = "System Tools" });
@@ -342,6 +343,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <param name="e"></param>
         private void SetTabContent(TabItem tabItem)
         {
+            MobileManagerEnvironment.SelectedProcessMenu = EnumHelper.GetEnumFromDescription<ProcessMenuOption>(tabItem.Header.ToString());
+
             switch (tabItem.Header.ToString())
             {
                 case "Administration":
@@ -360,6 +363,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     if (tabItem.Content == null)
                         SelectedTab.Content = new ViewAuditLog();
                     break;
+                case "Reports":
+                    if (tabItem.Content == null)
+                        SelectedTab.Content = new ViewReports();
+                    break;
                 case "System Tools":
                     if (tabItem.Content == null)
                         SelectedTab.Content = new ViewSystemTools();
@@ -371,7 +378,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
 
             _selectedTabIndex = tabItem.TabIndex;
-            MobileManagerEnvironment.SelectedProcessMenu = EnumHelper.GetEnumFromDescription<ProcessMenuOption>(tabItem.Header.ToString());
         }
 
         /// <summary>

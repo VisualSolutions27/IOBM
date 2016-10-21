@@ -74,7 +74,7 @@
                     <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="55" />
+                    <ColumnDefinition Width="45" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="10" />
                     <ColumnDefinition Width="Auto" />
@@ -83,9 +83,12 @@
                     <ColumnDefinition Width="60" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="10" />
-                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="85" />
                     <ColumnDefinition Width="120" />
+                    <ColumnDefinition Width="1" />
+                    <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="90" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Row="0" Grid.Column="0" Text="Group:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
@@ -108,19 +111,20 @@
                     SelectedItem="{Binding SelectedDataProperty, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
                     </ComboBox>
                 </Border>
-                <StackPanel Grid.Row="0" Grid.Column="9" Orientation="Horizontal" Visibility="{Binding ShowPackage}">
-                    <TextBlock Text="Package:" Margin="0,0,5,0" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
-                    <ComboBox x:Name="ComboBoxPackges" ToolTip="Select the package linked to the data rule." TabIndex="5" IsSynchronizedWithCurrentItem="True"
-                        ItemsSource="{Binding PackageCollection}" DisplayMemberPath="PackageName" Height="22" Width="200" Margin="0,0,10,0"
-                        SelectedItem="{Binding SelectedPackage, UpdateSourceTrigger=PropertyChanged}">
+                <TextBlock Grid.Row="0" Grid.Column="9" Text="Operator type:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <Border Grid.Row="0" Grid.Column="10" BorderThickness="1" BorderBrush="{Binding ValidOperatorType}">
+                    <ComboBox x:Name="ComboBoxOperatorType" ToolTip="Select the operator type based on the data type." TabIndex="5" IsSynchronizedWithCurrentItem="True"
+                        ItemsSource="{Binding OperatorTypeCollection}" Height="22"
+                        SelectedItem="{Binding SelectedOperatorType, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}">
                     </ComboBox>
-                </StackPanel>
-                <Border Grid.Row="0" Grid.Column="10" BorderThickness="1" BorderBrush="{Binding ValidOperator}">
+                </Border>                
+                <Border Grid.Row="0" Grid.Column="12" BorderThickness="1" BorderBrush="{Binding ValidOperator}">
                     <ComboBox x:Name="ComboBoxOperator" ToolTip="Select the operator." TabIndex="6" IsSynchronizedWithCurrentItem="True"
                         ItemsSource="{Binding OperatorCollection}" SelectedItem="{Binding SelectedOperator, ValidatesOnDataErrors=True, UpdateSourceTrigger=PropertyChanged}" Height="22">
                     </ComboBox>
                 </Border>
-                <TextBox x:Name="TextBoxValidationValue" Grid.Row="0" Grid.Column="12" TabIndex="7" Style="{StaticResource UXTextBoxStyle}" ToolTip="Enter the value to validate against."
+                <TextBlock Grid.Row="0" Grid.Column="14" Text="Expected value:" Style="{StaticResource UXLabelTextStyle}"></TextBlock>
+                <TextBox x:Name="TextBoxValidationValue" Grid.Row="0" Grid.Column="15" TabIndex="7" Style="{StaticResource UXTextBoxStyle}" ToolTip="Enter the value to validate against."
                     Text="{Binding SelectedValidationValue, UpdateSourceTrigger=PropertyChanged}" Margin="0,1">
                 </TextBox>
             </Grid>
@@ -130,11 +134,23 @@
             IsReadOnly="True" TabIndex="8" Style="{StaticResource DataGridStyle}" ColumnHeaderStyle="{StaticResource DataGridColumnHeaderStyle}"  Margin="5,0,5,5"
             ItemsSource="{Binding ValidationRuleCollection}" SelectedItem="{Binding SelectedValidationRule}">
             <DataGrid.Columns>
+                <DataGridTextColumn Header="Group" Binding="{Binding GroupDescription}" Width="*" />
                 <DataGridTextColumn Header="Entity" Binding="{Binding EntityDescription}" Width="*" />
-                <DataGridTextColumn Header="Data Item" Binding="{Binding DataDescription}" Width="*" />
                 <DataGridTextColumn Header="Data Field" Binding="{Binding PropertyDescription}" Width="*" />
-                <DataGridTextColumn Header="Package" Binding="{Binding PackageDescription}" Width="*" />
-                <DataGridTextColumn Header="Data Type" Binding="{Binding DataTypeDescription}" Width="Auto" />
+                <DataGridTextColumn Header="Data Type" Binding="{Binding DataTypeDescription}" Width="Auto">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Operator Type" Binding="{Binding OperatorTypeDescription}" Width="Auto">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="HorizontalAlignment" Value="Center" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>                
                 <DataGridTextColumn Header="Operator" Binding="{Binding OperatorDescription}" Width="Auto">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">

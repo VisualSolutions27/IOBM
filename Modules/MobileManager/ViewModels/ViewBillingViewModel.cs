@@ -276,7 +276,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     Application.Current.Dispatcher.Invoke(() => { BillingRunStarted = StartProcessCompleted = true; }); break;
                 case BillingExecutionState.InternalDataValidation:
                     Application.Current.Dispatcher.Invoke(() => { BillingRunStarted = DataValidationProcessCompleted = true; }); break;
-                case BillingExecutionState.ExternalDataImport:
+                case BillingExecutionState.ExternalDataValidation:
                     Application.Current.Dispatcher.Invoke(() => { BillingRunStarted = DataValidationProcessCompleted = true; }); break;
             }
         }

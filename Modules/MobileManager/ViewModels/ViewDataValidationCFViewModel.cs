@@ -29,26 +29,18 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private DataValidationProcess _dataValidationProcess = DataValidationProcess.System;
         private DataValidationGroupName _dataValidationGroup = DataValidationGroupName.None;
         private string _defaultItem = "-- Please Select --";
+        private string _defaultEnum = "None";
 
         #region Commands
 
         public DelegateCommand CancelCommand { get; set; }
         public DelegateCommand AddCommand { get; set; }
+        public DelegateCommand DeleteCommand { get; set; }
         public DelegateCommand SaveCommand { get; set; }
 
         #endregion
 
         #region Properties
-
-        /// <summary>
-        /// Holds the selected (current) validation rule entity
-        /// </summary>
-        public Visibility ShowPackage
-        {
-            get { return _showPackage; }
-            set { SetProperty(ref _showPackage, value); }
-        }
-        private Visibility _showPackage = Visibility.Collapsed;
 
         /// <summary>
         /// Holds the selected (current) validation rule entity
@@ -60,7 +52,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             {
                 SetProperty(ref _selectedValidationRule, value);
 
-                if (value != null && value.enDataValidationEntity > 0)
+                if (value != null && value.enDataValidationGroupName > 0)
                 {
                     switch (_dataValidationGroup)
                     {
@@ -101,57 +93,17 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     }
 
                     if (_dataValidationGroup == DataValidationGroupName.ExternalData)
-                    {
-                        SelectedDataProperty = DataPropertyCollection.First(p => p.ExtDataValidationProperty == value.PropertyDescription);
-                        SelectedPackage = value.fkPackageID != null ? PackageCollection.First(p => p.pkPackageID == value.fkPackageID) : null;
-                    }
+                        SelectedDataProperty = DataPropertyCollection.Where(p => p.ExtDataValidationProperty == value.PropertyDescription).FirstOrDefault();
                     else
-                    {
                         SelectedDataProperty = DataPropertyCollection != null ? DataPropertyCollection.First(p => p.pkDataValidationPropertyID == value.fkDataValidationPropertyID) :
                                                DataPropertyCollection != null ? DataPropertyCollection.First(p => p.pkDataValidationPropertyID == 0) : null;
-                        SelectedPackage = null;
-                    }
-
-
-                    if (SelectedDataProperty != null)
-                    {
-                        switch (EnumHelper.GetEnumFromDescription<DataTypeName>(value.DataTypeDescription))
-                        {
-                            case DataTypeName.String:
-                                SelectedOperator = value != null && value.enDataValidationOperator > 0 ? ((StringOperator)value.enDataValidationOperator).ToString() : StringOperator.None.ToString();
-                                break;
-                            case DataTypeName.DateTime:
-                                SelectedOperator = value != null && value.enDataValidationOperator > 0 ? ((DateOperator)value.enDataValidationOperator).ToString() : DateOperator.None.ToString();
-                                break;
-                            case DataTypeName.Integer:
-                            case DataTypeName.Decimal:
-                                SelectedOperator = value != null && value.enDataValidationOperator > 0 ? ((NumericOperator)value.enDataValidationOperator).ToString() : StringOperator.None.ToString();
-                                break;
-                            default:
-                                SelectedOperator = "Equal";
-                                break;
-                        }
-                    }
-                    else if (OperatorCollection != null)
-                    {
-                        SelectedOperator = OperatorCollection.First();
-                    }
-
+                    SelectedOperatorType = value.OperatorTypeDescription;
+                    SelectedOperator = value.OperatorDescription;
                     SelectedValidationValue = value.DataValidationValue;
                 }
             }
         }
         private DataValidationRule _selectedValidationRule = new DataValidationRule();
-
-        /// <summary>
-        /// The selected package
-        /// </summary>
-        public Package SelectedPackage
-        {
-            get { return _selectedPackage; }
-            set { SetProperty(ref _selectedPackage, value); }
-        }
-        private Package _selectedPackage;
 
         /// <summary>
         /// The data entity display name based on the selected group
@@ -307,16 +259,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private ObservableCollection<Client> _clientCollection;
 
         /// <summary>
-        /// The collection of packages from the database
-        /// </summary>
-        public ObservableCollection<Package> PackageCollection
-        {
-            get { return _packageCollection; }
-            set { SetProperty(ref _packageCollection, value); }
-        }
-        private ObservableCollection<Package> _packageCollection = null;
-
-        /// <summary>
         /// The collection of entity properties from the 
         /// DataValidationPropertyName enum linked to the
         /// configuration in the database
@@ -329,8 +271,18 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private ObservableCollection<DataValidationProperty> _dataPropertyCollection;
 
         /// <summary>
-        /// The collection of operators types from the string, numeric
-        /// and date OperatorType enum's
+        /// The collection of operators types from the OperatorType enum's
+        /// </summary>
+        public ObservableCollection<string> OperatorTypeCollection
+        {
+            get { return _operatorTypeCollection; }
+            set { SetProperty(ref _operatorTypeCollection, value); }
+        }
+        private ObservableCollection<string> _operatorTypeCollection;
+
+        /// <summary>
+        /// The collection of operators from the string, numeric
+        /// date, math and validation OperatorType enum's
         /// </summary>
         public ObservableCollection<string> OperatorCollection
         {
@@ -355,16 +307,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 InitialiseViewControls();
                 EntityGroupCollection = null;
                 _dataValidationProcess = EnumHelper.GetEnumFromDescription<DataValidationProcess>(value);
-
-                if (_dataValidationProcess == DataValidationProcess.ExternalBilling)
-                {
-                    ShowPackage = Visibility.Visible;
-                    ReadPackagesAsync();
-                }
-                else
-                {
-                    ShowPackage = Visibility.Collapsed;
-                }
 
                 if (_dataValidationProcess != DataValidationProcess.None)
                     ReadDataValidationGroups();
@@ -423,16 +365,30 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <summary>
         /// The selected data validation property
         /// </summary>
-        public object SelectedDataProperty
+        public DataValidationProperty SelectedDataProperty
         {
             get { return _selectedDataProperty; }
             set
             {
                 SetProperty(ref _selectedDataProperty, value);
-                ReadDataTypeOperators();
+                ReadOperatorTypes();
             }
         }
-        private object _selectedDataProperty = null;
+        private DataValidationProperty _selectedDataProperty = null;
+
+        /// <summary>
+        /// The selected operator
+        /// </summary>
+        public string SelectedOperatorType
+        {
+            get { return _selectedOperatorType; }
+            set
+            {
+                SetProperty(ref _selectedOperatorType, value);
+                ReadTypeOperators();
+            }
+        }
+        private string _selectedOperatorType;
 
         /// <summary>
         /// The selected operator
@@ -457,16 +413,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         #endregion
 
         #region Input Validation
-
-        /// <summary>
-        /// Check if a valid data file was selected
-        /// </summary>
-        public bool ValidSelectedDestinationEntity
-        {
-            get { return _validSelectedDestinationEntity; }
-            set { SetProperty(ref _validSelectedDestinationEntity, value); }
-        }
-        private bool _validSelectedDestinationEntity = false;
 
         /// <summary>
         /// Set the required field border colour
@@ -497,6 +443,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set { SetProperty(ref _validDataProperty, value); }
         }
         private Brush _validDataProperty = Brushes.Red;
+
+        /// <summary>
+        /// Set the required field border colour
+        /// </summary>
+        public Brush ValidOperatorType
+        {
+            get { return _validOperatorType; }
+            set { SetProperty(ref _validOperatorType, value); }
+        }
+        private Brush _validOperatorType = Brushes.Red;
 
         /// <summary>
         /// Set the required field border colour
@@ -556,8 +512,10 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                             ValidDataProperty = SelectedDataProperty != null && SelectedDataProperty.ToString() != _defaultItem && 
                                                 ((DataValidationProperty)SelectedDataProperty).pkDataValidationPropertyID > 0 ? Brushes.Silver : Brushes.Red;
                         break;
+                    case "SelectedOperatorType":
+                        ValidOperatorType = string.IsNullOrEmpty(SelectedOperatorType) || SelectedOperatorType == _defaultEnum ? Brushes.Red : Brushes.Silver; break;
                     case "SelectedOperator":
-                        ValidOperator = string.IsNullOrEmpty(SelectedOperator) ? Brushes.Red : Brushes.Silver; break;
+                        ValidOperator = string.IsNullOrEmpty(SelectedOperator) || SelectedOperator == _defaultEnum ? Brushes.Red : Brushes.Silver; break;
                 }
                 return result;
             }
@@ -592,9 +550,11 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             // Initialise the view commands
             CancelCommand = new DelegateCommand(ExecuteCancel, CanExecuteCancel).ObservesProperty(() => SelectedEntityGroup);
             AddCommand = new DelegateCommand(ExecuteAdd, CanExecuteAdd);
+            DeleteCommand = new DelegateCommand(ExecuteDelete, CanExecuteDelete).ObservesProperty(() => SelectedValidationRule);
             SaveCommand = new DelegateCommand(ExecuteSave, CanExecuteSave).ObservesProperty(() => SelectedEntityGroup)
                                                                           .ObservesProperty(() => SelectedDataEntity)
                                                                           .ObservesProperty(() => ValidDataProperty)
+                                                                          .ObservesProperty(() => ValidOperatorType)
                                                                           .ObservesProperty(() => ValidOperator);
 
             // Load the view data
@@ -608,7 +568,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             SelectedDataEntity = null;
             SelectedDataProperty = null;
-            SelectedPackage = null;
             SelectedOperator = null;
             SelectedValidationValue = string.Empty;
             ValidationRuleCollection = null;
@@ -622,15 +581,15 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             try
             {
                 ValidationRuleCollection = await Task.Run(() => _model.ReadDataValidationRules(_dataValidationProcess, _dataValidationGroup));
-                SelectedValidationRule = null;
+                Application.Current.Dispatcher.Invoke(() => { SelectedValidationRule = null; });
             }
             catch (Exception ex)
             {
                 _eventAggregator.GetEvent<ApplicationMessageEvent>()
-                                .Publish(new ApplicationMessage("ViewDataUpdateViewModel",
+                                .Publish(new ApplicationMessage("ViewDataValidationCFViewModel",
                                                                 string.Format("Error! {0}, {1}.",
                                                                 ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
-                                                                "ReadDataUpdateRulesAsync",
+                                                                "ReadDataValidationRulesAsync",
                                                                 ApplicationMessage.MessageTypes.SystemError));
             }
         }
@@ -652,7 +611,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     ProcessCollection.Add(EnumHelper.GetDescriptionFromEnum(process));
                 }
 
-                SelectedProcess = EnumHelper.GetDescriptionFromEnum(DataValidationProcess.None);
+                SelectedProcess = _defaultItem;
             }
             catch (Exception ex)
             {
@@ -695,6 +654,57 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                                 string.Format("Error! {0}, {1}.",
                                                                 ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
                                                                 "ReadDataValidationGroups",
+                                                                ApplicationMessage.MessageTypes.SystemError));
+            }
+        }
+
+        /// <summary>
+        /// Load all the operator types from the OperatorType enum
+        /// </summary>
+        private void ReadOperatorTypes()
+        {
+            try
+            {
+                OperatorTypeCollection = new ObservableCollection<string>();
+
+                if (SelectedDataProperty != null && SelectedDataProperty.pkDataValidationPropertyID > 0)
+                {
+                    switch ((DataTypeName)SelectedDataProperty.enDataType)
+                    {
+                        case DataTypeName.Integer:
+                        case DataTypeName.Decimal:
+                        case DataTypeName.Float:
+                        case DataTypeName.Long:
+                        case DataTypeName.Short:
+                            OperatorTypeCollection.Add(EnumHelper.GetDescriptionFromEnum(OperatorType.None));
+                            OperatorTypeCollection.Add(EnumHelper.GetDescriptionFromEnum(OperatorType.NumericOperator));
+                            break;
+                        case DataTypeName.DateTime:
+                            OperatorTypeCollection.Add(EnumHelper.GetDescriptionFromEnum(OperatorType.None));
+                            OperatorTypeCollection.Add(EnumHelper.GetDescriptionFromEnum(OperatorType.DateOperator));
+                            break;
+                        case DataTypeName.Bool:
+                            OperatorTypeCollection.Add(EnumHelper.GetDescriptionFromEnum(OperatorType.None));
+                            OperatorTypeCollection.Add(EnumHelper.GetDescriptionFromEnum(OperatorType.BooleanOperator));
+                            break;
+                        default:
+                            foreach (OperatorType source in Enum.GetValues(typeof(OperatorType)))
+                            {
+                                OperatorTypeCollection.Add(EnumHelper.GetDescriptionFromEnum(source));
+                            }
+                            break;
+                    }
+                }
+
+                SelectedOperatorType = _defaultEnum;
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataValidationCFViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadOperatorTypes",
                                                                 ApplicationMessage.MessageTypes.SystemError));
             }
         }
@@ -771,9 +781,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                             {
                                 int dataEntityID = ((ExternalBillingData)SelectedDataEntity).pkExternalBillingDataID;
                                 DataPropertyDisplayName = "ExtDataValidationProperty";
-                                DataPropertyCollection = new ObservableCollection<DataValidationProperty>(new DataValidationPropertyModel(_eventAggregator).ReadDataValidationProperties(_dataValidationGroup, true)
-                                                                                                                                                           .Where(p => p.enDataValidationEntity == 0 || 
-                                                                                                                                                                       p.enDataValidationEntity == dataEntityID));
+                                DataPropertyCollection = new ObservableCollection<DataValidationProperty>(new DataValidationPropertyModel(_eventAggregator).ReadExtDataValidationProperties(_dataValidationGroup.Value(), dataEntityID));
                             }
                             break;
                         default:
@@ -794,74 +802,46 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         }
 
         /// <summary>
-        /// Load all the packages from the database
-        /// </summary>
-        private async void ReadPackagesAsync()
-        {
-            try
-            {
-                PackageCollection = await Task.Run(() => new PackageModel(_eventAggregator).ReadPackages(true));
-            }
-            catch (Exception ex)
-            {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>()
-                                .Publish(new ApplicationMessage("ViewDataValidationCFViewModel",
-                                                                string.Format("Error! {0}, {1}.",
-                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
-                                                                "ReadPackagesAsync",
-                                                                ApplicationMessage.MessageTypes.SystemError));
-            }
-        }
-
-        /// <summary>
         /// Load all the data type operators from the string, 
         /// numeric and date OperatorType enum's
         /// </summary>
-        private void ReadDataTypeOperators()
+        private void ReadTypeOperators()
         {
             try
             {
                 OperatorCollection = new ObservableCollection<string>();
 
-                if (SelectedDataProperty != null && SelectedDataProperty.ToString() != _defaultItem)
+                if (SelectedOperatorType != null && SelectedOperatorType != _defaultEnum)
                 {
-                    if (_dataValidationGroup == DataValidationGroupName.ExternalData)
+                    switch (EnumHelper.GetEnumFromDescription<OperatorType>(SelectedOperatorType))
                     {
-                        foreach (StringOperator source in Enum.GetValues(typeof(StringOperator)))
-                        {
-                            OperatorCollection.Add(source.ToString());
-                        }
-                        foreach (NumericOperator source in Enum.GetValues(typeof(NumericOperator)))
-                        {
-                            if (source != NumericOperator.Equal && source != NumericOperator.None)
+                        case OperatorType.StringOperator:
+                            foreach (StringOperator source in Enum.GetValues(typeof(StringOperator)))
+                            {
                                 OperatorCollection.Add(source.ToString());
-                        }
-                        SelectedOperator = StringOperator.None.ToString();
+                            }
+                            break;
+                        case OperatorType.NumericOperator:
+                            foreach (NumericOperator source in Enum.GetValues(typeof(NumericOperator)))
+                            {
+                                OperatorCollection.Add(source.ToString());
+                            }
+                            break;
+                        case OperatorType.DateOperator:
+                            foreach (DateOperator source in Enum.GetValues(typeof(DateOperator)))
+                            {
+                                OperatorCollection.Add(source.ToString());
+                            }
+                            break;
+                        case OperatorType.BooleanOperator:
+                            foreach (BooleanOperator source in Enum.GetValues(typeof(BooleanOperator)))
+                            {
+                                OperatorCollection.Add(source.ToString());
+                            }
+                            break;
                     }
-                    else
-                    {
-                        switch ((DataTypeName)((DataValidationProperty)SelectedDataProperty).enDataType)
-                        {
-                            case DataTypeName.String:
-                                foreach (StringOperator source in Enum.GetValues(typeof(StringOperator)))
-                                {
-                                    OperatorCollection.Add(source.ToString());
-                                }
-                                SelectedOperator = StringOperator.None.ToString();
-                                break;
-                            case DataTypeName.Bool:
-                                OperatorCollection.Add("Equal");
-                                SelectedOperator = "Equal";
-                                break;
-                            default:
-                                foreach (NumericOperator source in Enum.GetValues(typeof(NumericOperator)))
-                                {
-                                    OperatorCollection.Add(source.ToString());
-                                }
-                                SelectedOperator = NumericOperator.None.ToString();
-                                break;
-                        }
-                    }
+
+                    SelectedOperator = _defaultEnum;
                 }
             }
             catch (Exception ex)
@@ -870,7 +850,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                 .Publish(new ApplicationMessage("ViewDataValidationCFViewModel",
                                                                 string.Format("Error! {0}, {1}.",
                                                                 ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
-                                                                "ReadDataTypeOperators",
+                                                                "ReadTypeOperators",
                                                                 ApplicationMessage.MessageTypes.SystemError));
             }
         }
@@ -902,7 +882,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns></returns>
         private bool CanExecuteAdd()
         {
-            return _securityHelper.IsUserInRole(SecurityRole.Administrator.Value());
+            return _securityHelper.IsUserInRole(SecurityRole.Administrator.Value()) || 
+                   _securityHelper.IsUserInRole(SecurityRole.DataManager.Value());
         }
 
         /// <summary>
@@ -912,6 +893,39 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             ExecuteCancel();
             SelectedValidationRule = new DataValidationRule();
+        }
+
+        /// <summary>
+        /// Set view command buttons enabled/disabled state
+        /// </summary>
+        /// <returns></returns>
+        private bool CanExecuteDelete()
+        {
+            return SelectedValidationRule != null && SelectedValidationRule.pkDataValidationRuleID > 0;
+        }
+
+        /// <summary>
+        /// Execute when the add command button is clicked 
+        /// </summary>
+        private async void ExecuteDelete()
+        {
+            try
+            {
+                if (_model.DeleteDataValidationRule(SelectedValidationRule.pkDataValidationRuleID))
+                {
+                    InitialiseViewControls();
+                    await ReadDataValidationRulesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataValidationCFViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ExecuteDelete",
+                                                                ApplicationMessage.MessageTypes.SystemError));
+            }
         }
 
         /// <summary>
@@ -928,61 +942,79 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private async void ExecuteSave()
         {
-            bool result = false;
-            DataTypeName dataType = (DataTypeName)((DataValidationProperty)SelectedDataProperty).enDataType;
+            try
+            { 
+                bool result = false;
+                DataTypeName dataType = (DataTypeName)((DataValidationProperty)SelectedDataProperty).enDataType;
 
-            if (SelectedValidationRule == null)
-                SelectedValidationRule = new DataValidationRule();
+                if (SelectedValidationRule == null)
+                    SelectedValidationRule = new DataValidationRule();
 
-            SelectedValidationRule.enValidationProcess = _dataValidationProcess.Value();
-            SelectedValidationRule.enDataValidationEntity = _dataValidationGroup.Value();
-            SelectedValidationRule.fkDataValidationPropertyID = ((DataValidationProperty)SelectedDataProperty).pkDataValidationPropertyID;
-            SelectedValidationRule.DataValidationValue = SelectedValidationValue.ToUpper();
-            if (_dataValidationGroup == DataValidationGroupName.ExternalData)
-            {
-                SelectedValidationRule.ExtDataValidationProperty = ((DataValidationProperty)SelectedDataProperty).ExtDataValidationProperty;
-                if (SelectedPackage != null && SelectedPackage.pkPackageID > 0)
-                    SelectedValidationRule.fkPackageID = SelectedPackage.pkPackageID;
+                SelectedValidationRule.enDataValidationProcess = _dataValidationProcess.Value();
+                SelectedValidationRule.enDataValidationGroupName = _dataValidationGroup.Value();
+                SelectedValidationRule.fkDataValidationPropertyID = ((DataValidationProperty)SelectedDataProperty).pkDataValidationPropertyID;
+                SelectedValidationRule.DataValidationValue = SelectedValidationValue.ToUpper();
+
+                switch (_dataValidationGroup)
+                {
+                    case DataValidationGroupName.Client:
+                        SelectedValidationRule.DataValidationEntityID = ((Client)SelectedDataEntity).pkClientID;
+                        break;
+                    case DataValidationGroupName.CompanyClient:
+                    case DataValidationGroupName.Company:
+                        SelectedValidationRule.DataValidationEntityID = ((Company)SelectedDataEntity).pkCompanyID;
+                        break;
+                    case DataValidationGroupName.Device:
+                    case DataValidationGroupName.SimCard:
+                        SelectedValidationRule.DataValidationEntityID = 0;
+                        break;
+                    case DataValidationGroupName.ExternalData:
+                        SelectedValidationRule.DataValidationEntityID = ((ExternalBillingData)SelectedDataEntity).pkExternalBillingDataID;
+                        break;
+                }
+
+                SelectedValidationRule.enOperatorType = EnumHelper.GetEnumFromDescription<OperatorType>(SelectedOperatorType).Value();
+                switch ((OperatorType)SelectedValidationRule.enOperatorType)
+                {
+                    case OperatorType.StringOperator:
+                        SelectedValidationRule.enOperator = ((StringOperator)Enum.Parse(typeof(StringOperator), SelectedOperator)).Value();
+                        break;
+                    case OperatorType.NumericOperator:
+                        SelectedValidationRule.enOperator = ((NumericOperator)Enum.Parse(typeof(NumericOperator), SelectedOperator)).Value();
+                        break;
+                    case OperatorType.DateOperator:
+                        SelectedValidationRule.enOperator = ((DateOperator)Enum.Parse(typeof(DateOperator), SelectedOperator)).Value();
+                        break;
+                    case OperatorType.BooleanOperator:
+                        SelectedValidationRule.enOperator = ((BooleanOperator)Enum.Parse(typeof(BooleanOperator), SelectedOperator)).Value();
+                        break;
+                    default:
+                        SelectedValidationRule.enOperator = StringOperator.None.Value();
+                        break;
+                }
+
+                SelectedValidationRule.ModifiedBy = SecurityHelper.LoggedInUserFullName;
+                SelectedValidationRule.ModifiedDate = DateTime.Now;
+
+                if (SelectedValidationRule.pkDataValidationRuleID == 0)
+                    result = _model.CreateDataValidationRule(SelectedValidationRule);
+                else
+                    result = _model.UpdateDataValidationRule(SelectedValidationRule);
+
+                if (result)
+                {
+                    InitialiseViewControls();
+                    await ReadDataValidationRulesAsync();
+                }
             }
-
-            switch (_dataValidationGroup)
+            catch (Exception ex)
             {
-                case DataValidationGroupName.Client:
-                    SelectedValidationRule.DataValidationEntityID = ((Client)SelectedDataEntity).pkClientID;
-                    break;
-                case DataValidationGroupName.CompanyClient:
-                case DataValidationGroupName.Company:
-                    SelectedValidationRule.DataValidationEntityID = ((Company)SelectedDataEntity).pkCompanyID;
-                    break;
-                case DataValidationGroupName.Device:
-                case DataValidationGroupName.SimCard:
-                    SelectedValidationRule.DataValidationEntityID = 0;
-                    break;
-                case DataValidationGroupName.ExternalData:
-                    SelectedValidationRule.DataValidationEntityID = ((ExternalBillingData)SelectedDataEntity).pkExternalBillingDataID;
-                    break;
-            }
-
-            SelectedValidationRule.enDataValidationOperator = 0;
-            if (dataType == DataTypeName.String)
-                SelectedValidationRule.enDataValidationOperator = ((StringOperator)Enum.Parse(typeof(StringOperator), SelectedOperator)).Value();
-            else if (dataType == DataTypeName.DateTime)
-                SelectedValidationRule.enDataValidationOperator = ((DateOperator)Enum.Parse(typeof(DateOperator), SelectedOperator)).Value();
-            else
-                SelectedValidationRule.enDataValidationOperator = ((NumericOperator)Enum.Parse(typeof(NumericOperator), SelectedOperator)).Value();
-
-            SelectedValidationRule.ModifiedBy = SecurityHelper.LoggedInUserFullName;
-            SelectedValidationRule.ModifiedDate = DateTime.Now;
-
-            if (SelectedValidationRule.pkDataValidationRuleID == 0)
-                result = _model.CreateDataValidationRule(SelectedValidationRule);
-            else
-                result = _model.UpdateDataValidationRule(SelectedValidationRule);
-
-            if (result)
-            {
-                InitialiseViewControls();
-                await ReadDataValidationRulesAsync();
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewDataValidationCFViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ExecuteSave",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 

@@ -67,9 +67,9 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     {
         Administrator = 1,
         DataManager = 2,
-        User = 3,
-        AccountManager = 4,
-        BillingManager = 5,
+        SystemUser = 3,
+        AccountsUser = 4,
+        BillingUser = 5,
         ReadOnly = 6
     }
 
@@ -119,14 +119,14 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
     }
 
     /// <summary>
-    /// The <see cref="BillingProcess"/> enumeration a list of 
+    /// The <see cref="BillingExecutionState"/> enumeration a list of 
     /// billing processes.
     /// </summary>
     public enum BillingExecutionState
     {
         Started = 1,
         InternalDataValidation = 2,
-        ExternalDataImport = 3
+        ExternalDataValidation = 3
     }
 
     /// <summary>
@@ -191,6 +191,19 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
         NONE = 0,
         STANDARD = 1,
         AMORTIZED = 2
+    }
+
+    /// <summary>
+    /// The <see cref="ReportType"/> enumeration lists of report types.
+    /// </summary>
+    public enum ReportType
+    {
+        [Description("-- Please Select --")]
+        None = 0,
+        [Description("Accounts")]
+        Accounts = 1,
+        [Description("Usage")]
+        Usage = 2,
     }
 
     #endregion
@@ -517,6 +530,10 @@ namespace Gijima.IOBM.MobileManager.Common.Structs
             return Convert.ToInt16(type);
         }
         public static short Value(this DataBaseEntity type)
+        {
+            return Convert.ToInt16(type);
+        }
+        public static short Value(this ReportType type)
         {
             return Convert.ToInt16(type);
         }

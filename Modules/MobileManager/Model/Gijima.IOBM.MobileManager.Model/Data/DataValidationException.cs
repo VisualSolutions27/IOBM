@@ -17,9 +17,9 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public int pkDataValidationExceptionID { get; set; }
         public string BillingPeriod { get; set; }
         public int fkBillingProcessID { get; set; }
-        public int fkDataValidationPropertyID { get; set; }
-        public short enDataValidationEntity { get; set; }
+        public short enDataValidationGroupName { get; set; }
         public int DataValidationEntityID { get; set; }
+        public int fkDataValidationPropertyID { get; set; }
         public string Message { get; set; }
         public Nullable<bool> CanApplyRule { get; set; }
         public Nullable<bool> Result { get; set; }

@@ -1,4 +1,5 @@
-﻿using Gijima.IOBM.Infrastructure.Structs;
+﻿using Gijima.IOBM.Infrastructure.Helpers;
+using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using System;
 using System.Windows.Data;
@@ -91,6 +92,20 @@ namespace Gijima.IOBM.MobileManager.Common.Helpers
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             throw new NotImplementedException();
+        }
+
+        public static DataTypeName ConvertStringToDataType(string dataString)
+        {
+            if (UIHelper.IsNumeric(dataString))
+                return DataTypeName.Integer;
+            else if (UIHelper.IsDecimal(dataString))
+                return DataTypeName.Decimal;
+            else if (UIHelper.IsFloat(dataString))
+                return DataTypeName.Float;
+            else if (UIHelper.IsDateTime(dataString))
+                return DataTypeName.DateTime;
+            else
+                return DataTypeName.String;
         }
     }
 }

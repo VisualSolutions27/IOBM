@@ -7,15 +7,15 @@ namespace Gijima.IOBM.MobileManager.Model.Data
     public partial class DataValidationRule
     {
         /// <summary>
-        /// Returns a string representing the data description.
-        /// </summary>
-        /// <returns>Data Description</returns>
-        public string DataDescription { get; set; }
-
-        /// <summary>
-        /// Returns the entity description from the DataValidationPropertyName enum.
+        /// Returns the entity description from the DataValidationGroupName enum.
         /// </summary>
         /// <returns></returns>
+        public string GroupDescription { get; set; }
+
+        /// <summary>
+        /// Returns a string representing the entity description.
+        /// </summary>
+        /// <returns>Data Description</returns>
         public string EntityDescription { get; set; }
 
         /// <summary>
@@ -41,6 +41,12 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         /// </summary>
         /// <returns></returns>
         public string DataTypeDescription { get; set; }
+
+        /// <summary>
+        /// Returns the operator type description from the relevant operator type enum.
+        /// </summary>
+        /// <returns></returns>
+        public string OperatorTypeDescription { get; set; }
 
         /// <summary>
         /// Returns the operator description from the relevant operator enum.

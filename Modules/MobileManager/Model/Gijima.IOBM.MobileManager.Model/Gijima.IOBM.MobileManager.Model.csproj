@@ -164,6 +164,9 @@
     <Compile Include="Data\Province.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
+    <Compile Include="Data\Report.cs">
+      <DependentUpon>MobileManagerEntities.tt</DependentUpon>
+    </Compile>
     <Compile Include="Data\Role.cs">
       <DependentUpon>MobileManagerEntities.tt</DependentUpon>
     </Compile>
@@ -217,6 +220,7 @@
     <Compile Include="Models\InvoiceModel.cs" />
     <Compile Include="Models\PackageModel.cs" />
     <Compile Include="Models\ProvinceModel.cs" />
+    <Compile Include="Models\ReportModel.cs" />
     <Compile Include="Models\SearchEngineModel.cs" />
     <Compile Include="Models\SecurityModel.cs" />
     <Compile Include="Models\ServiceProviderModel.cs" />

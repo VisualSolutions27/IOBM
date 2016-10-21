@@ -44,15 +44,15 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 using (var db = MobileManagerEntities.GetContext())
                 {
                     // Check for duplicate internal or external data properties
-                    if ((DataValidationGroupName)validationProperty.enDataValidationGroup == DataValidationGroupName.ExternalData)
+                    if ((DataValidationGroupName)validationProperty.enDataValidationGroupName == DataValidationGroupName.ExternalData)
                     {
-                        result = db.DataValidationProperties.Any(p => p.enDataValidationGroup == validationProperty.enDataValidationGroup &&
+                        result = db.DataValidationProperties.Any(p => p.enDataValidationGroupName == validationProperty.enDataValidationGroupName &&
                                                                       p.enDataValidationEntity == validationProperty.enDataValidationEntity &&
                                                                       p.ExtDataValidationProperty == validationProperty.ExtDataValidationProperty);
                     }
                     else
                     {
-                        result = db.DataValidationProperties.Any(p => p.enDataValidationGroup == validationProperty.enDataValidationGroup &&
+                        result = db.DataValidationProperties.Any(p => p.enDataValidationGroupName == validationProperty.enDataValidationGroupName &&
                                                                       p.enDataValidationProperty == validationProperty.enDataValidationProperty);
                     }
 
@@ -92,8 +92,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 using (var db = MobileManagerEntities.GetContext())
                 {
                     validationRulesData = ((DbQuery<DataValidationProperty>)(from validationProperty in db.DataValidationProperties
-                                                                             where validationProperty.enDataValidationGroup == 0 ||
-                                                                                   validationProperty.enDataValidationGroup == dataValidationGroupID
+                                                                             where validationProperty.enDataValidationGroupName == 0 ||
+                                                                                   validationProperty.enDataValidationGroupName == dataValidationGroupID
                                                                              select validationProperty)).ToList();
 
                     if (activeOnly)
@@ -119,11 +119,22 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         /// </summary>
         /// <param name="externalDataName">The external data table name.</param>
         /// <returns>DataTable</returns>
-        public DataTable ReadExtDataValidationProperties(string externalDataName)
+        public IEnumerable<DataValidationProperty> ReadExtDataValidationProperties(int validationGroupID, int validationEntityID)
         {
             try
             {
-                return EDMHelper.GetEntityStructure(externalDataName); 
+                IEnumerable<DataValidationProperty> properties = null;
+                
+                using (var db = MobileManagerEntities.GetContext())
+                {
+                    properties = ((DbQuery<DataValidationProperty>)(from validationProperty in db.DataValidationProperties
+                                                                    where validationProperty.enDataValidationGroupName == 0 ||
+                                                                          (validationProperty.enDataValidationGroupName == validationGroupID &&
+                                                                           validationProperty.enDataValidationEntity == validationEntityID)
+                                                                    select validationProperty)).ToList();
+
+                    return new ObservableCollection<DataValidationProperty>(properties);
+                }
             }
             catch (Exception ex)
             {

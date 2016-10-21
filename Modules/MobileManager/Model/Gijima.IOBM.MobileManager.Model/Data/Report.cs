@@ -12,19 +12,15 @@ namespace Gijima.IOBM.MobileManager.Model.Data
     using System;
     using System.Collections.Generic;
     
-    public partial class DataValidationRule
+    public partial class Report
     {
-        public int pkDataValidationRuleID { get; set; }
-        public short enDataValidationProcess { get; set; }
-        public short enDataValidationGroupName { get; set; }
-        public int DataValidationEntityID { get; set; }
-        public Nullable<int> fkDataValidationPropertyID { get; set; }
-        public short enOperatorType { get; set; }
-        public short enOperator { get; set; }
-        public string DataValidationValue { get; set; }
+        public int pkReportID { get; set; }
+        public short enReportType { get; set; }
+        public string ReportName { get; set; }
+        public string ReportDescription { get; set; }
+        public string ReportFileName { get; set; }
+        public string ReportLocation { get; set; }
         public string ModifiedBy { get; set; }
         public System.DateTime ModifiedDate { get; set; }
-    
-        public virtual DataValidationProperty DataValidationProperty { get; set; }
     }
 }

@@ -57,12 +57,13 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public virtual DbSet<UserInCompany> UserInCompanies { get; set; }
         public virtual DbSet<Company> Companies { get; set; }
         public virtual DbSet<DataImportRule> DataImportRules { get; set; }
-        public virtual DbSet<DataValidationException> DataValidationExceptions { get; set; }
         public virtual DbSet<DataUpdateRule> DataUpdateRules { get; set; }
-        public virtual DbSet<DataValidationProperty> DataValidationProperties { get; set; }
         public virtual DbSet<ExternalBillingData> ExternalBillingDatas { get; set; }
-        public virtual DbSet<DataValidationRule> DataValidationRules { get; set; }
         public virtual DbSet<Package> Packages { get; set; }
+        public virtual DbSet<DataValidationRule> DataValidationRules { get; set; }
+        public virtual DbSet<DataValidationProperty> DataValidationProperties { get; set; }
+        public virtual DbSet<DataValidationException> DataValidationExceptions { get; set; }
+        public virtual DbSet<Report> Reports { get; set; }
     
         public virtual ObjectResult<sp_report_Invoice_Result> sp_report_Invoice(Nullable<int> invoiceID)
         {

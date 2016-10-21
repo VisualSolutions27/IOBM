@@ -89,38 +89,73 @@ namespace Gijima.IOBM.Infrastructure.Helpers
         /// <param name="numericOperator">The numeric operator to use in the validation.</param>
         /// <param name="valueToCompare">The value to compare.</param>
         /// <param name="valueToCompareTo">The value to compare to.</param>
-        /// <returns>True if successfull</
+        /// <returns>True if successfull</returns>
         public bool CompareNumericValues(NumericOperator numericOperator, string valueToCompare, string valueToCompareTo)
         {
             try
             {
+                dynamic parsedValueToCompare = 0;
+                dynamic parsedValueToCompareTo = 0;
+                short shortValueToCompare = Convert.ToInt16(valueToCompare);
+                short shortValueToCompareTo = Convert.ToInt16(valueToCompareTo);
+                int intValueToCompare = Convert.ToInt32(valueToCompare);
+                int intValueToCompareTo = Convert.ToInt32(valueToCompareTo);
+                long longValueToCompare = Convert.ToInt64(valueToCompare);
+                long longValueToCompareTo = Convert.ToInt64(valueToCompareTo);
+                decimal decimalValueToCompare = Convert.ToDecimal(valueToCompare);
+                decimal decimalValueToCompareTo = Convert.ToDecimal(valueToCompareTo);
+                float floatValueToCompare = Convert.ToSingle(valueToCompare);
+                float floatValueToCompareTo = Convert.ToSingle(valueToCompareTo);
                 string[] compareToValues = valueToCompareTo.Split(';');
 
                 foreach (string value in compareToValues)
                 {
-                    int intToCompare = Convert.ToInt32(valueToCompare);
-                    int intToCompareTo = Convert.ToInt32(value);
+                    if (short.TryParse(valueToCompareTo, out shortValueToCompare) && short.TryParse(value, out shortValueToCompareTo))
+                    {
+                        parsedValueToCompare = shortValueToCompare;
+                        parsedValueToCompareTo = shortValueToCompareTo;
+                    }
+                    else if (int.TryParse(valueToCompareTo, out intValueToCompare) && int.TryParse(value, out intValueToCompareTo))
+                    {
+                        parsedValueToCompare = intValueToCompare;
+                        parsedValueToCompareTo = intValueToCompareTo;
+                    }
+                    else if (long.TryParse(valueToCompareTo, out longValueToCompare) && long.TryParse(value, out longValueToCompareTo))
+                    {
+                        parsedValueToCompare = longValueToCompare;
+                        parsedValueToCompareTo = longValueToCompareTo;
+                    }
+                    else if (decimal.TryParse(valueToCompareTo, out decimalValueToCompare) && decimal.TryParse(value, out decimalValueToCompareTo))
+                    {
+                        parsedValueToCompare = decimalValueToCompare;
+                        parsedValueToCompareTo = decimalValueToCompareTo;
+                    }
+                    else if (float.TryParse(valueToCompareTo, out floatValueToCompare) && float.TryParse(value, out floatValueToCompareTo))
+                    {
+                        parsedValueToCompare = floatValueToCompare;
+                        parsedValueToCompareTo = floatValueToCompareTo;
+                    }
 
                     switch (numericOperator)
                     {
                         case NumericOperator.Equal:
-                            if (intToCompare == intToCompareTo)
+                            if (parsedValueToCompare == parsedValueToCompareTo)
                                 return true;
                             break;
                         case NumericOperator.Greater:
-                            if (intToCompare > intToCompareTo)
+                            if (parsedValueToCompare > parsedValueToCompareTo)
                                 return true;
                             break;
                         case NumericOperator.GreaterEqual:
-                            if (intToCompare >= intToCompareTo)
+                            if (parsedValueToCompare >= parsedValueToCompareTo)
                                 return true;
                             break;
                         case NumericOperator.Smaller:
-                            if (intToCompare < intToCompareTo)
+                            if (parsedValueToCompare < parsedValueToCompareTo)
                                 return true;
                             break;
                         case NumericOperator.SmallerEqual:
-                            if (intToCompare <= intToCompareTo)
+                            if (parsedValueToCompare <= parsedValueToCompareTo)
                                 return true;
                             break;
                         default:
@@ -138,51 +173,29 @@ namespace Gijima.IOBM.Infrastructure.Helpers
         }
 
         /// <summary>
-        /// Compare decimal values based on the specified operator
+        /// Compare values based on the specified boolean operator
         /// </summary>
-        /// <param name="decimalOperator">The decimal operator to use in the validation.</param>
+        /// <param name="booleanOperator">The boolean operator to use in the validation.</param>
         /// <param name="valueToCompare">The value to compare.</param>
-        /// <param name="valueToCompareTo">The value to compare to.</param>
         /// <returns>True if successfull</returns>
-        public bool CompareDecimalValues(NumericOperator decimalOperator, string valueToCompare, string valueToCompareTo)
+        public bool CompareBooleanValues(BooleanOperator booleanOperator, string valueToCompare)
         {
             try
             {
-                string[] compareToValues = valueToCompareTo.Split(';');
+                bool parsedValueToCompare;
 
-                foreach (string value in compareToValues)
+                if (!bool.TryParse(valueToCompare, out parsedValueToCompare))
+                    return false;
+
+                switch (booleanOperator)
                 {
-                    decimal intToCompare = Convert.ToDecimal(valueToCompare);
-                    decimal intToCompareTo = Convert.ToDecimal(value);
-
-                    switch (decimalOperator)
-                    {
-                        case NumericOperator.Equal:
-                            if (intToCompare == intToCompareTo)
-                                return true;
-                            break;
-                        case NumericOperator.Greater:
-                            if (intToCompare > intToCompareTo)
-                                return true;
-                            break;
-                        case NumericOperator.GreaterEqual:
-                            if (intToCompare >= intToCompareTo)
-                                return true;
-                            break;
-                        case NumericOperator.Smaller:
-                            if (intToCompare < intToCompareTo)
-                                return true;
-                            break;
-                        case NumericOperator.SmallerEqual:
-                            if (intToCompare <= intToCompareTo)
-                                return true;
-                            break;
-                        default:
-                            return false;
-                    }
+                    case BooleanOperator.True:
+                        return parsedValueToCompare == true ? true : false;
+                    case BooleanOperator.False:
+                        return parsedValueToCompare == true ? true : false;
+                    default:
+                        return false;
                 }
-
-                return false;
             }
             catch (Exception ex)
             {

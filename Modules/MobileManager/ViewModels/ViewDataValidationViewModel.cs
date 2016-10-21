@@ -27,6 +27,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private DataValidationRuleModel _model = null;
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
+        DataValidationProcess _validationProcess = DataValidationProcess.None;
         private string _billingPeriod = string.Format("{0}{1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year);
 
         #region Commands
@@ -347,30 +348,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
         #region View Lookup Data Collections
 
-        /// <summary>
-        /// The collection of data validation processes from
-        /// the DataValidationProcess enum
-        /// </summary>
-        public ObservableCollection<string> ProcessCollection
-        {
-            get { return _processCollection; }
-            set { SetProperty(ref _processCollection, value); }
-        }
-        private ObservableCollection<string> _processCollection;
-
         #endregion
 
         #region Required Fields
-
-        /// <summary>
-        /// The selected data validation process
-        /// </summary>
-        public string SelectedProcess
-        {
-            get { return _selectedProcess; }
-            set { SetProperty(ref _selectedProcess, value); }
-        }
-        private string _selectedProcess = EnumHelper.GetDescriptionFromEnum(DataValidationProcess.System);
 
         #endregion
 
@@ -473,13 +453,14 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
             // Initialise the view commands 
             StartValidationCommand = new DelegateCommand(ExecuteStartValidation, CanStartValidation).ObservesProperty(() => ValidationRuleCollection)
-                                                                                                    .ObservesProperty(() => SelectedProcess)    
                                                                                                     .ObservesProperty(() => BillingProcessCompleted);
             StopValidationCommand = new DelegateCommand(ExecuteStopValidation, CanStopValidation).ObservesProperty(() => ValidationStarted)
                                                                                                  .ObservesProperty(() => ValidationRuleEntitiesFailed);
             ExportCommand = new DelegateCommand(ExecuteExport, CanExport).ObservesProperty(() => ExceptionsToFix);
             ApplyRuleFixCommand = new DelegateCommand(ExecuteApplyRuleFix, CanApplyRuleFix).ObservesProperty(() => ExceptionsToFix);
             ManualFixCommand = new DelegateCommand(ExecuteManualFix, CanManualFix).ObservesProperty(() => ExceptionsToFix);
+            _validationProcess = MobileManagerEnvironment.SelectedProcessMenu == ProcessMenuOption.SystemTools ? DataValidationProcess.System :
+                                                                                                                 DataValidationProcess.SystemBilling;
 
             // Subscribe to this event to update the progressbar
             _eventAggregator.GetEvent<ProgressBarInfoEvent>().Subscribe(ProgressBarInfo_Event, true);
@@ -496,7 +477,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
             // Load the view data
             // Load the view data
-            ReadDataValidationProcesses();
             ReadDataValidationGroups();
             await ReadValidationRuleExceptionsAsync();
         }
@@ -506,7 +486,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private void InitialiseViewControls()
         {
-            ValidationPageInstruction = string.Format("Please start the process to validate the {0} based on the rules configured for each data validation group.", SelectedProcess.ToLower());
+            ValidationPageInstruction = string.Format("Please start the process to validate the {0} based on the rules configured for each data validation group.", _validationProcess.ToString().ToLower());
             ValidationGroupDescription = string.Format("Validating data group - {0} of {1}", 0, ValidationGroupCollection != null ? ValidationGroupCollection.Count : 0);
             ValidationEntityDescription = string.Format("Validating entity - {0} of {1}", 0, 0);
             ValidationDataRuleDescription = string.Format("Validating data rule - {0} of {1}", 0, 0);
@@ -529,7 +509,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
                 foreach (DataValidationGroupName source in Enum.GetValues(typeof(DataValidationGroupName)))
                 {
-                    if (source != DataValidationGroupName.None)
+                    if (source != DataValidationGroupName.None && source != DataValidationGroupName.ExternalData)
                         ValidationGroupCollection.Add(source.ToString());
                 }
             }
@@ -552,14 +532,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             try
             {
-                DataValidationProcess process = DataValidationProcess.None;
-
-                if (MobileManagerEnvironment.SelectedProcessMenu == ProcessMenuOption.Billing)
-                    process = DataValidationProcess.SystemBilling;
-                else
-                    process = EnumHelper.GetEnumFromDescription<DataValidationProcess>(SelectedProcess);
-
-                ValidationRuleCollection = await Task.Run(() => _model.ReadDataValidationRules(process, (DataValidationGroupName)Enum.Parse(typeof(DataValidationGroupName), validationGroup)));
+                ValidationRuleCollection = await Task.Run(() => _model.ReadDataValidationRules(_validationProcess, (DataValidationGroupName)Enum.Parse(typeof(DataValidationGroupName), validationGroup)));
             }
             catch (Exception ex)
             {
@@ -579,7 +552,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         {
             try
             {
-                ValidationErrorCollection = await Task.Run(() => new DataValidationExceptionModel(_eventAggregator).ReadDataValidationExceptions(_billingPeriod));
+                ValidationErrorCollection = await Task.Run(() => new DataValidationExceptionModel(_eventAggregator).ReadDataValidationExceptions(_billingPeriod, _validationProcess.Value()));
             }
             catch (Exception ex)
             {
@@ -775,33 +748,6 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
         #region Lookup Data Loading
 
-        /// <summary>
-        /// Load all the data validation processes from the  
-        /// DataValidationProcess enum's
-        /// </summary>
-        private void ReadDataValidationProcesses()
-        {
-            try
-            {
-                ProcessCollection = new ObservableCollection<string>();
-
-                foreach (DataValidationProcess process in Enum.GetValues(typeof(DataValidationProcess)))
-                {
-                    if (process != DataValidationProcess.SystemBilling)
-                        ProcessCollection.Add(EnumHelper.GetDescriptionFromEnum(process));
-                }
-            }
-            catch (Exception ex)
-            {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>()
-                                .Publish(new ApplicationMessage("ViewDataValidationViewModel",
-                                                                string.Format("Error! {0}, {1}.",
-                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
-                                                                "ReadDataValidationProcesses",
-                                                                ApplicationMessage.MessageTypes.SystemError));
-            }
-        }
-
         #endregion
 
         #region Command Execution
@@ -812,8 +758,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns></returns>
         private bool CanStartValidation()
         {
-            return SelectedProcess != EnumHelper.GetDescriptionFromEnum(DataValidationProcess.None) && 
-                   ValidationGroupCollection != null && ValidationGroupCollection.Count > 0  && BillingProcessCompleted == false ? true : false;
+            return _validationProcess != DataValidationProcess.None && ValidationGroupCollection != null && 
+                   ValidationGroupCollection.Count > 0  && BillingProcessCompleted == false ? true : false;
         }
 
         /// <summary>
@@ -829,7 +775,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             try
             {
                 // Update billing related values
-                if (EnumHelper.GetEnumFromDescription<DataValidationProcess>(SelectedProcess) == DataValidationProcess.SystemBilling)
+                if (_validationProcess == DataValidationProcess.SystemBilling)
                 {
                     // Set the previous data validation process as complete
                     await CompleteBillingProcessHistoryAsync(BillingExecutionState.Started);
@@ -894,7 +840,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
                                 // Set the validation entity progresssbar description
                                 ValidationEntityDescription = string.Format("Validating {0} {1} - {2} of {3}", group.ToLower(),
-                                                                                                               rule.DataDescription.ToUpper(),
+                                                                                                               rule.EntityDescription.ToUpper(),
                                                                                                                ++ValidationEntityProgress,
                                                                                                                entityCount);
                                 // Update the entity progress values
