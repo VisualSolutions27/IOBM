@@ -107,5 +107,23 @@ namespace Gijima.IOBM.MobileManager.Common.Helpers
             else
                 return DataTypeName.String;
         }
+
+        public static string ConvertStringToCellNumber(string dataString)
+        {
+            // Test for starting with +27
+            if (dataString.Length == 12 && dataString.Substring(3) == "+27")
+                return dataString.Replace("+27", "0");
+            // Test for starting with 27
+            if (dataString.Length == 11 && dataString.Substring(2) == "27")
+                return dataString.Replace("27", "0");
+            // Valid number
+            if (dataString.Length == 10 && dataString.Substring(1) == "0")
+                return dataString;
+            // Test for NO starting 0
+            if (dataString.Length == 9)
+                return string.Format("0{0}", dataString);
+
+            return dataString;
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
+using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
 using Gijima.IOBM.Security;
@@ -37,7 +38,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         {
             try
             {
-                string billingPeriod = string.Format("{0}{1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year);
+                string billingPeriod = MobileManagerEnvironment.BillingPeriod;
                 int processID = billingProcess.Value();
 
                 using (var db = MobileManagerEntities.GetContext())
@@ -112,7 +113,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         {
             try
             {
-                billingPeriod = billingPeriod != null ? billingPeriod : string.Format("{0}{1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year);
+                billingPeriod = billingPeriod != null ? billingPeriod : MobileManagerEnvironment.BillingPeriod;
                 IEnumerable<BillingProcessHistory> billingProcessHistory = null;
 
                 using (var db = MobileManagerEntities.GetContext())
@@ -162,7 +163,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
         {
             try
             {
-                string billingPeriod = string.Format("{0}{1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year);
+                string billingPeriod = MobileManagerEnvironment.BillingPeriod;
                 int processID = billingProcess.Value();
 
                 using (var db = MobileManagerEntities.GetContext())

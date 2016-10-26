@@ -247,8 +247,8 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Acc Period" Binding="{Binding InvoicePeriod}" Width="80" />
                         <DataGridTextColumn Header="Service" Binding="{Binding Service1.ServiceDescription}" Width="150" />
-                        <DataGridTextColumn Header="Invoice Number" Binding="{Binding InvoiceNumber}" Width="200" />
-                        <DataGridTextColumn Header="Client" Binding="{Binding Client.ClientName}" Width="*" />
+                        <DataGridTextColumn Header="Invoice Number" Binding="{Binding InvoiceNumber}" Width="Auto" />
+                        <DataGridTextColumn Header="Client" Binding="{Binding Client.ClientName}" Width="Auto" />
                         <DataGridTextColumn Header="Private Due" Binding="{Binding PrivateDue}" Width="100" >
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
@@ -256,7 +256,7 @@
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-                        <DataGridTextColumn Header="Company" Binding="{Binding Client.Company.CompanyName}" Width="*" />
+                        <DataGridTextColumn Header="Company" Binding="{Binding Client.Company.CompanyName}" Width="Auto" />
                         <DataGridTextColumn Header="Company Due" Binding="{Binding CompanyDue}" Width="100" >
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">

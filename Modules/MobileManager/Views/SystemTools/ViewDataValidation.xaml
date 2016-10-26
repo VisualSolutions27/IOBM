@@ -80,21 +80,21 @@
                 </TextBox>
             </StackPanel>
             <StackPanel Grid.Row="0" Grid.Column="0" Grid.RowSpan="10" VerticalAlignment="Bottom">
-                <Button x:Name="ButtonExport" ToolTip="Export the exceptions to Excel." TabIndex="3" Margin="0,0,0,10" 
+                <Button x:Name="ButtonExport" ToolTip="Export the exceptions to Excel." TabIndex="5" Margin="0,0,0,10" 
                     Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" Command="{Binding ExportCommand}">
                     <StackPanel Orientation="Horizontal" Width="118">
                         <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/Excel-icon.png" Margin="0,1,10,1"/>
                         <TextBlock Text="Export to Excel" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
-                <Button x:Name="ButtonApplyRule" ToolTip="Apply the data rule to fix the exceptions." TabIndex="3" Margin="0,0,0,10" 
+                <Button x:Name="ButtonApplyRule" ToolTip="Apply the data rule to fix the exceptions." TabIndex="6" Margin="0,0,0,10" 
                     Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" Command="{Binding ApplyRuleFixCommand}">
                     <StackPanel Orientation="Horizontal" Width="118">
                         <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/T (263).ico" Margin="0,1,10,1"/>
                         <TextBlock Text="Apply Data Rule" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
-                <Button x:Name="ButtonFixManually" ToolTip="Fix the selected exception manually." TabIndex="4" 
+                <Button x:Name="ButtonFixManually" ToolTip="Fix the selected exception manually." TabIndex="7" 
                     Style="{StaticResource UXImageTextButtonStyle}" Width="Auto" Command="{Binding ManualFixCommand}">
                     <StackPanel Orientation="Horizontal" Width="118">
                         <Image Source="/Gijima.IOBM.MobileManager;component/Assets/Images/T (264).ico" Margin="0,1,10,1"/>
@@ -158,11 +158,8 @@
                     Text="{Binding ValidationRuleEntitiesFailed, UpdateSourceTrigger=PropertyChanged}"/>
                 <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Height="1" VerticalAlignment="Bottom" Background="Gray" Margin="0,5,0,0"></Border>
             </Grid>
-            <StackPanel Grid.Row="8" Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Bottom">
-                <CheckBox Margin="1,0,5,1"/>
-                <TextBlock Text="Data Validation Exceptions" Style="{StaticResource UXLabelTextStyle}" VerticalAlignment="Bottom" ></TextBlock>
-            </StackPanel>
-            <xctk:CheckListBox x:Name="ListBoxExceptions" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="3" Background="WhiteSmoke" TabIndex="2" ValueMemberPath="Message"
+            <CheckBox Grid.Row="8" Grid.Column="2" Content="Data Validation Exceptions" VerticalAlignment="Bottom" Margin="1,0,5,1" TabIndex="3" IsChecked="{Binding SelectAllExceptions, UpdateSourceTrigger=PropertyChanged}" />
+            <xctk:CheckListBox x:Name="ListBoxExceptions" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="3" Background="WhiteSmoke" TabIndex="4" ValueMemberPath="Message"
                 ItemsSource="{Binding ValidationErrorCollection, UpdateSourceTrigger=PropertyChanged}" SelectedValue="{Binding SelectedExceptions, UpdateSourceTrigger=PropertyChanged}">
                 <xctk:CheckListBox.ItemTemplate>
                     <DataTemplate>

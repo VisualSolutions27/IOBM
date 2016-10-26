@@ -50,23 +50,23 @@ namespace Gijima.IOBM.Infrastructure.Helpers
                        case StringOperator.Format:
                             return false;
                         case StringOperator.LenghtSmaller:
-                            if (valueToCompare.Length < Convert.ToInt32(value))
+                            if (valueToCompare.Trim().Length < Convert.ToInt32(value))
                                 return true;
                             break;
                         case StringOperator.LengthEqual:
-                            if (valueToCompare.Length == Convert.ToInt32(value))
+                            if (valueToCompare.Trim().Length == Convert.ToInt32(value))
                                 return true;
                             break;
                         case StringOperator.LengthGreater:
-                            if (valueToCompare.Length > Convert.ToInt32(value))
+                            if (valueToCompare.Trim().Length > Convert.ToInt32(value))
                                 return true;
                             break;
                         case StringOperator.PostFix:
-                            if (valueToCompare.EndsWith(value))
+                            if (valueToCompare.Trim().EndsWith(value))
                                 return true;
                             break;
                         case StringOperator.PreFix:
-                            if (valueToCompare.StartsWith(value))
+                            if (valueToCompare.Trim().StartsWith(value))
                                 return true;
                             break;
                         default:
@@ -96,16 +96,16 @@ namespace Gijima.IOBM.Infrastructure.Helpers
             {
                 dynamic parsedValueToCompare = 0;
                 dynamic parsedValueToCompareTo = 0;
-                short shortValueToCompare = Convert.ToInt16(valueToCompare);
-                short shortValueToCompareTo = Convert.ToInt16(valueToCompareTo);
-                int intValueToCompare = Convert.ToInt32(valueToCompare);
-                int intValueToCompareTo = Convert.ToInt32(valueToCompareTo);
-                long longValueToCompare = Convert.ToInt64(valueToCompare);
-                long longValueToCompareTo = Convert.ToInt64(valueToCompareTo);
-                decimal decimalValueToCompare = Convert.ToDecimal(valueToCompare);
-                decimal decimalValueToCompareTo = Convert.ToDecimal(valueToCompareTo);
-                float floatValueToCompare = Convert.ToSingle(valueToCompare);
-                float floatValueToCompareTo = Convert.ToSingle(valueToCompareTo);
+                short shortValueToCompare = 0;
+                short shortValueToCompareTo = 0;
+                int intValueToCompare = 0;
+                int intValueToCompareTo = 0;
+                long longValueToCompare = 0;
+                long longValueToCompareTo = 0;
+                decimal decimalValueToCompare = 0;
+                decimal decimalValueToCompareTo = 0;
+                float floatValueToCompare = 0;
+                float floatValueToCompareTo = 0 ;
                 string[] compareToValues = valueToCompareTo.Split(';');
 
                 foreach (string value in compareToValues)

@@ -17,16 +17,16 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public BillingProcess()
         {
-            this.BillingProcessHistories = new HashSet<BillingProcessHistory>();
             this.DataValidationExceptions = new HashSet<DataValidationException>();
+            this.BillingProcessHistories = new HashSet<BillingProcessHistory>();
         }
     
         public int pkBillingProcessID { get; set; }
         public string ProcessDescription { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<BillingProcessHistory> BillingProcessHistories { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<DataValidationException> DataValidationExceptions { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<BillingProcessHistory> BillingProcessHistories { get; set; }
     }
 }

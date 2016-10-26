@@ -28,7 +28,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private IEventAggregator _eventAggregator;
         private SecurityHelper _securityHelper = null;
         DataValidationProcess _validationProcess = DataValidationProcess.None;
-        private string _billingPeriod = string.Format("{0}{1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year);
+        private string _billingPeriod = MobileManagerEnvironment.BillingPeriod;
 
         #region Commands
 
@@ -287,6 +287,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private string _selectedExceptions;
 
         /// <summary>
+        /// Indicate if all exceptions is slected
+        /// </summary>
+        public bool SelectAllExceptions
+        {
+            get { return _selectAllExceptions; }
+            set { SetProperty(ref _selectAllExceptions, value); }
+        }
+        private bool _selectAllExceptions = false;
+
+        /// <summary>
         /// The current selected exception
         /// </summary>
         private DataValidationException SelectedException
@@ -496,6 +506,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             ValidationGroupsPassed = ValidationEntitiesPassed = ValidationDataRulesPassed = ValidationRuleEntitiesPassed = 0;
             ValidationGroupsFailed = ValidationEntitiesFailed = ValidationDataRulesFailed = ValidationRuleEntitiesFailed = 0;
             ValidationErrorCollection = null;
+            SelectAllExceptions = false;
         }
 
         /// <summary>
@@ -803,9 +814,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     await ReadValidationRulesAsync(group);
 
                     // Set the validation group progresssbar description
-                    ValidationGroupDescription = string.Format("Validating data group {0} - {1} of {2}", groupDescription.ToUpper(),
-                                                                                                         ++ValidationGroupProgress,
-                                                                                                         ValidationGroupCollection.Count);
+                    ValidationGroupDescription = string.Format("Validating {0} - {1} of {2}", groupDescription.ToUpper(),
+                                                                                              ++ValidationGroupProgress,
+                                                                                              ValidationGroupCollection.Count);
                     if (ValidationRuleCollection != null && ValidationRuleCollection.Count > 0)
                     {
                         int entityCount = ValidationRuleCollection.GroupBy(p => p.DataValidationEntityID).Count();
@@ -822,9 +833,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                 break;
 
                             // Set the data rule progresssbar description
-                            ValidationDataRuleDescription = string.Format("Validating data rule {0} - {1} of {2}", rule.PropertyDescription.ToUpper(),
-                                                                                                                   ++ValidationDataRuleProgress,
-                                                                                                                   ValidationRuleCollection.Count);
+                            ValidationDataRuleDescription = string.Format("Validating {0} - {1} of {2}", rule.PropertyDescription.ToUpper(),
+                                                                                                         ++ValidationDataRuleProgress,
+                                                                                                         ValidationRuleCollection.Count);
 
                             // Validate the data rule and update
                             // the progress values accodingly
@@ -839,10 +850,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                 entityID = rule.DataValidationEntityID;
 
                                 // Set the validation entity progresssbar description
-                                ValidationEntityDescription = string.Format("Validating {0} {1} - {2} of {3}", group.ToLower(),
-                                                                                                               rule.EntityDescription.ToUpper(),
-                                                                                                               ++ValidationEntityProgress,
-                                                                                                               entityCount);
+                                ValidationEntityDescription = string.Format("Validating {0} - {1} of {2}", rule.EntityDescription.ToUpper(),
+                                                                                                           ++ValidationEntityProgress,
+                                                                                                           entityCount);
                                 // Update the entity progress values
                                 if (ValidationDataRulesFailed == 0)
                                     ++ValidationEntitiesPassed;
@@ -897,7 +907,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// <returns></returns>
         private bool CanStopValidation()
         {
-            return ValidationStarted && ValidationRuleEntitiesFailed > 0;
+            return ValidationStarted;
         }
 
         /// <summary>

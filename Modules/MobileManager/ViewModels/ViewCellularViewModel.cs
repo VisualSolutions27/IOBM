@@ -94,7 +94,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                                      : PackageCollection.Where(p => p.pkPackageID == 0).FirstOrDefault();
                         SelectedCostType = value.Contract != null ? ((CostType)value.Contract.enCostType).ToString() : "NONE";
                         SelectedPackageType = SelectedPackage != null ? ((PackageType)SelectedPackage.enPackageType).ToString() : "NONE";
-                        SelectedContractAccNumber = value.Contract != null ? value.Contract.AccountNumber : null;
+                        SelectedContractAccNumber = value.Contract != null && value.Contract.AccountNumber != null ? value.Contract.AccountNumber : null;
                         SelectedPackageCost = value.Contract != null && value.Contract.PackageSetup != null ? value.Contract.PackageSetup.Cost.ToString() : "0";
                         SelectedPackageRandValue = value.Contract != null && value.Contract.PackageSetup != null ? value.Contract.PackageSetup.RandValue.ToString() : "0";
                         SelectedPackageMBData = value.Contract != null && value.Contract.PackageSetup != null ? value.Contract.PackageSetup.MBData.ToString() : "0";
@@ -102,7 +102,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                         SelectedPackageTalkTime = value.Contract != null && value.Contract.PackageSetup != null ? value.Contract.PackageSetup.TalkTimeMinutes.ToString() : "0";
                         SelectedPackageSPULValue = value.Contract != null && value.Contract.PackageSetup != null ? value.Contract.PackageSetup.SPULValue.ToString() : "0";
                         SelectedContractStartDate = value.Contract != null && value.Contract.ContractStartDate != null ? value.Contract.ContractStartDate.Value : DateTime.MinValue;
-                        SelectedContractEndDate = value.Contract != null && value.Contract.ContractEndDate.Value != null ? value.Contract.ContractEndDate.Value : DateTime.MinValue;
+                        SelectedContractEndDate = value.Contract != null && value.Contract.ContractEndDate != null ? value.Contract.ContractEndDate.Value : DateTime.MinValue;
 
                         // Set billing properties
                         SetClientBilling(value.ClientBilling);
@@ -1316,7 +1316,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                                           .ObservesProperty(() => SelectedContractEndDate);
             ClientCompanyCommand = new DelegateCommand(ExecuteShowCompanyView, CanExecuteMaintenace);
             ClientUserSiteCommand = new DelegateCommand(ExecuteShowClientSiteView);
-            ClientSuburbCommand = new DelegateCommand(ExecuteShowSuburbView, CanExecuteMaintenace);
+            ClientSuburbCommand = new DelegateCommand(ExecuteShowSuburbView);
             ContractStatusCommand = new DelegateCommand(ExecuteShowStatusView, CanExecuteMaintenace);
             ContractPackageCommand = new DelegateCommand(ExecuteShowPackageView, CanExecuteMaintenace);
 

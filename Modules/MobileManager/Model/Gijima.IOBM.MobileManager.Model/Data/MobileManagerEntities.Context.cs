@@ -30,7 +30,6 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public virtual DbSet<AuditLog> AuditLogs { get; set; }
         public virtual DbSet<BillingLevel> BillingLevels { get; set; }
         public virtual DbSet<BillingProcess> BillingProcesses { get; set; }
-        public virtual DbSet<BillingProcessHistory> BillingProcessHistories { get; set; }
         public virtual DbSet<City> Cities { get; set; }
         public virtual DbSet<ClientLocation> ClientLocations { get; set; }
         public virtual DbSet<Contract> Contracts { get; set; }
@@ -64,6 +63,7 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public virtual DbSet<DataValidationProperty> DataValidationProperties { get; set; }
         public virtual DbSet<DataValidationException> DataValidationExceptions { get; set; }
         public virtual DbSet<Report> Reports { get; set; }
+        public virtual DbSet<BillingProcessHistory> BillingProcessHistories { get; set; }
     
         public virtual ObjectResult<sp_report_Invoice_Result> sp_report_Invoice(Nullable<int> invoiceID)
         {

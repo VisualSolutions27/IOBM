@@ -1,4 +1,5 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
+using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Common.Events;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
@@ -43,7 +44,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             get { return _selectedBillingPeriod; }
             set { SetProperty(ref _selectedBillingPeriod, value); }
         }
-        private string _selectedBillingPeriod = string.Format("{0} {1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year);
+        private string _selectedBillingPeriod = MobileManagerEnvironment.BillingPeriod;
 
         /// <summary>
         /// The number of pages in the billing wizard
@@ -133,7 +134,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             get { return _selectedBillingMonth; }
             set { SetProperty(ref _selectedBillingMonth, value); }
         }
-        private int _selectedBillingMonth = DateTime.Now.Month;
+        private int _selectedBillingMonth;
 
         /// <summary>
         /// The selected billing year
@@ -143,7 +144,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             get { return _selectedBillingYear; }
             set { SetProperty(ref _selectedBillingYear, value); }
         }
-        private int _selectedBillingYear = DateTime.Now.Year;
+        private int _selectedBillingYear;
 
         /// <summary>
         /// Indicate if the billing run started
@@ -346,8 +347,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             BillingWizardPageCount = 4;
             BillingWizardProgress = 1;
             BillingProcessProgress = 0;
-            SelectedBillingMonth = DateTime.Now.Month;
-            SelectedBillingYear = DateTime.Now.Year;
+            SelectedBillingMonth = Convert.ToInt32(MobileManagerEnvironment.BillingPeriod.Substring(5, 2));
+            SelectedBillingYear =  Convert.ToInt32(MobileManagerEnvironment.BillingPeriod.Substring(0, 4));
             BillingWizardDescription = string.Format("Billing step - {0} of {1}", 1, BillingWizardPageCount);
             BillingRunStarted = false;
         }
@@ -367,7 +368,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewBillingViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadBillingProcessesAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -395,7 +401,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewBillingViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadBillingProcessHistoryAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -413,7 +424,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewBillingViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "CreateBillingProcessHistoryAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -444,7 +460,12 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewBillingViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "SetCompletedBillingProcessesAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 
@@ -489,11 +510,23 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         /// </summary>
         private async void ExecuteAccept()
         {
-            BillingRunStarted = true;
-            SelectedBillingPeriod = string.Format("{0} {1}", SelectedBillingMonth.ToString().PadLeft(2, '0'), SelectedBillingYear);
+            try
+            {
+                BillingRunStarted = true;
+                SelectedBillingPeriod = string.Format("{0}/{1}", SelectedBillingYear, SelectedBillingMonth.ToString().PadLeft(2, '0'));
 
-            // Create a new history entry everytime the process get started
-            await CreateBillingProcessHistoryAsync();
+                // Create a new history entry everytime the process get started
+                await CreateBillingProcessHistoryAsync();
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                .Publish(new ApplicationMessage("ViewBillingViewModel",
+                                                string.Format("Error! {0}, {1}.",
+                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                "ExecuteAccept",
+                                                ApplicationMessage.MessageTypes.SystemError));
+            }
         }
 
         #endregion

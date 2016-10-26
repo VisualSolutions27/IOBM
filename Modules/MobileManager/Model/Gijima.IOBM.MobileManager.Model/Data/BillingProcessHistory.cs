@@ -22,7 +22,7 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public bool ProcessCurrent { get; set; }
         public Nullable<bool> ProcessResult { get; set; }
         public Nullable<double> ProcessDuration { get; set; }
-        public byte[] BillingComment { get; set; }
+        public string BillingComment { get; set; }
         public string ModifiedBy { get; set; }
         public System.DateTime DateModified { get; set; }
     

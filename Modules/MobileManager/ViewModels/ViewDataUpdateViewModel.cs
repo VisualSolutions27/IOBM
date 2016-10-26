@@ -2,6 +2,7 @@
 using Gijima.IOBM.Infrastructure.Events;
 using Gijima.IOBM.Infrastructure.Helpers;
 using Gijima.IOBM.Infrastructure.Structs;
+using Gijima.IOBM.MobileManager.Common.Helpers;
 using Gijima.IOBM.MobileManager.Common.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
 using Gijima.IOBM.MobileManager.Model.Models;
@@ -899,7 +900,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 string errorMessage = string.Empty;
                 string searchCriteria = string.Empty;
                 object updateValue = null;
-                bool result = false;
+                bool result = true;
                 int rowIdx = 1;
 
                 // Convert enum description back to the enum
@@ -915,43 +916,51 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     updateValue = row[SelectedSourceColumn];
                     rowIdx = ImportedDataCollection.Rows.IndexOf(row);
 
-                    // Update the related entity data
-                    switch ((DataBaseEntity)_importRule.enDataBaseEntity)
+                    // If the search field is on Cell Number
+                    // convert search field to a valid cell number
+                    if (searchEntity == SearchEntity.PrimaryCellNumber)
+                        searchCriteria = UIDataConvertionHelper.ConvertStringToCellNumber(searchCriteria);
+
+                    if (updateValue != null && updateValue.ToString().Length > 0)
                     {
-                        case DataBaseEntity.Client:
-                            result = await Task.Run(() => new ClientModel(_eventAggregator).UpdateClient(searchEntity,
-                                                                                                         searchCriteria,
-                                                                                                         destinationColumn,
-                                                                                                         updateValue,
-                                                                                                         SelectedDestinationCompany,
-                                                                                                         out errorMessage)); break;
-                        case DataBaseEntity.Company:
-                            result = await Task.Run(() => new CompanyModel(_eventAggregator).UpdateCompany(searchCriteria,
-                                                                                                           destinationColumn,
-                                                                                                           updateValue,
-                                                                                                           SelectedDestinationCompany,
-                                                                                                           out errorMessage)); break;
-                        case DataBaseEntity.PackageSetup:
-                            result = await Task.Run(() => new PackageSetupModel(_eventAggregator).UpdatePackageSetup(searchEntity,
-                                                                                                                     searchCriteria,
-                                                                                                                     destinationColumn,
-                                                                                                                     updateValue,
-                                                                                                                     SelectedDestinationCompany,
-                                                                                                                     out errorMessage)); break;
-                        case DataBaseEntity.Contract:
-                            result = await Task.Run(() => new ContractModel(_eventAggregator).UpdateContract(searchEntity,
+                        // Update the related entity data
+                        switch ((DataBaseEntity)_importRule.enDataBaseEntity)
+                        {
+                            case DataBaseEntity.Client:
+                                result = await Task.Run(() => new ClientModel(_eventAggregator).UpdateClient(searchEntity,
                                                                                                              searchCriteria,
                                                                                                              destinationColumn,
                                                                                                              updateValue,
                                                                                                              SelectedDestinationCompany,
                                                                                                              out errorMessage)); break;
-                        case DataBaseEntity.SimCard:
-                            result = await Task.Run(() => new SimCardModel(_eventAggregator).UpdateSimCard(searchEntity,
-                                                                                                           searchCriteria,
-                                                                                                           destinationColumn,
-                                                                                                           updateValue,
-                                                                                                           SelectedDestinationCompany,
-                                                                                                           out errorMessage)); break;
+                            case DataBaseEntity.Company:
+                                result = await Task.Run(() => new CompanyModel(_eventAggregator).UpdateCompany(searchCriteria,
+                                                                                                               destinationColumn,
+                                                                                                               updateValue,
+                                                                                                               SelectedDestinationCompany,
+                                                                                                               out errorMessage)); break;
+                            case DataBaseEntity.PackageSetup:
+                                result = await Task.Run(() => new PackageSetupModel(_eventAggregator).UpdatePackageSetup(searchEntity,
+                                                                                                                         searchCriteria,
+                                                                                                                         destinationColumn,
+                                                                                                                         updateValue,
+                                                                                                                         SelectedDestinationCompany,
+                                                                                                                         out errorMessage)); break;
+                            case DataBaseEntity.Contract:
+                                result = await Task.Run(() => new ContractModel(_eventAggregator).UpdateContract(searchEntity,
+                                                                                                                 searchCriteria,
+                                                                                                                 destinationColumn,
+                                                                                                                 updateValue,
+                                                                                                                 SelectedDestinationCompany,
+                                                                                                                 out errorMessage)); break;
+                            case DataBaseEntity.SimCard:
+                                result = await Task.Run(() => new SimCardModel(_eventAggregator).UpdateSimCard(searchEntity,
+                                                                                                               searchCriteria,
+                                                                                                               destinationColumn,
+                                                                                                               updateValue,
+                                                                                                               SelectedDestinationCompany,
+                                                                                                               out errorMessage)); break;
+                        }
                     }
 
                     if (result)

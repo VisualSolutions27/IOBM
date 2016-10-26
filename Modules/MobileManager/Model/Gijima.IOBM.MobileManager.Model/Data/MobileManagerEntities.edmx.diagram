@@ -8,7 +8,6 @@
         <EntityTypeShape EntityType="MobileManagerModel.AuditLog" Width="1.5" PointX="7.125" PointY="0.75" IsExpanded="false" />
         <EntityTypeShape EntityType="MobileManagerModel.BillingLevel" Width="1.5" PointX="1" PointY="4.375" IsExpanded="false" />
         <EntityTypeShape EntityType="MobileManagerModel.BillingProcess" Width="1.5" PointX="3" PointY="7" IsExpanded="false" />
-        <EntityTypeShape EntityType="MobileManagerModel.BillingProcessHistory" Width="1.5" PointX="7" PointY="7.25" IsExpanded="false" />
         <EntityTypeShape EntityType="MobileManagerModel.City" Width="1.5" PointX="0.875" PointY="7" IsExpanded="false" />
         <EntityTypeShape EntityType="MobileManagerModel.ClientLocation" Width="1.5" PointX="3.125" PointY="4.125" IsExpanded="false" />
         <EntityTypeShape EntityType="MobileManagerModel.Contract" Width="1.5" PointX="2.75" PointY="2.375" IsExpanded="false" />
@@ -25,7 +24,6 @@
         <EntityTypeShape EntityType="MobileManagerModel.Suburb" Width="1.5" PointX="0.625" PointY="7.75" IsExpanded="false" />
         <EntityTypeShape EntityType="MobileManagerModel.User" Width="1.5" PointX="6.25" PointY="1.5" IsExpanded="false" />
         <EntityTypeShape EntityType="MobileManagerModel.UserInRole" Width="1.5" PointX="7.25" PointY="2.375" IsExpanded="false" />
-        <AssociationConnector Association="MobileManagerModel.FK_BillingProcessHistory_BillingProcess" ManuallyRouted="false" />
         <AssociationConnector Association="MobileManagerModel.FK_City_Province" ManuallyRouted="false" />
         <AssociationConnector Association="MobileManagerModel.FK_Suburb_City" ManuallyRouted="false" />
         <AssociationConnector Association="MobileManagerModel.FK_Contract_PackageSetup" ManuallyRouted="false" />
@@ -77,6 +75,8 @@
         <AssociationConnector Association="MobileManagerModel.FK_DataValidationException_BillingProcess1" />
         <AssociationConnector Association="MobileManagerModel.FK_DataValidationException_DataValidationProperty" />
         <EntityTypeShape EntityType="MobileManagerModel.Report" Width="1.5" PointX="2.875" PointY="8.375" IsExpanded="false" />
+        <EntityTypeShape EntityType="MobileManagerModel.BillingProcessHistory" Width="1.5" PointX="8.75" PointY="5.625" IsExpanded="false" />
+        <AssociationConnector Association="MobileManagerModel.FK_BillingProcessHistory_BillingProcess" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

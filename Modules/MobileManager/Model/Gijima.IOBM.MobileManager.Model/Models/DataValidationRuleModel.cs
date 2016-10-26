@@ -94,8 +94,6 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 short processID = validationProcess.Value();
                 short entityID = validationEntity.Value();
                 DataValidationRule newDataRule = null;
-                string propertyDescription = string.Empty;
-                string packageDescription = string.Empty;
 
                 using (var db = MobileManagerEntities.GetContext())
                 {
@@ -208,11 +206,17 @@ namespace Gijima.IOBM.MobileManager.Model.Models
 
                     foreach (var rule in rules)
                     {
-                        if ((DataValidationGroupName)rule.enDataValidationGroupName == DataValidationGroupName.ExternalData)
-                            propertyDescription = rule.ExtDataValidationProperty;
-                        else
-                            propertyDescription = EnumHelper.GetDescriptionFromEnum((DataValidationPropertyName)rule.enDataValidationProperty);
                         newDataRule = new DataValidationRule();
+                        if ((DataValidationGroupName)rule.enDataValidationGroupName == DataValidationGroupName.ExternalData)
+                        { 
+                            newDataRule.PropertyName = rule.ExtDataValidationProperty;
+                            newDataRule.PropertyDescription = rule.ExtDataValidationProperty;
+                        }
+                        else
+                        {
+                            newDataRule.PropertyName = ((DataValidationPropertyName)rule.enDataValidationProperty).ToString();
+                            newDataRule.PropertyDescription = EnumHelper.GetDescriptionFromEnum((DataValidationPropertyName)rule.enDataValidationProperty);
+                        }
                         newDataRule.pkDataValidationRuleID = rule.pkDataValidationRuleID;
                         newDataRule.enDataValidationProcess = rule.enDataValidationProcess;
                         newDataRule.enDataValidationGroupName = rule.enDataValidationGroupName;
@@ -220,7 +224,6 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                         newDataRule.DataValidationEntityID = rule.DataValidationEntityID;
                         newDataRule.EntityDescription = rule.EntityDescription;
                         newDataRule.fkDataValidationPropertyID = rule.fkDataValidationPropertyID;
-                        newDataRule.PropertyDescription = propertyDescription;
                         newDataRule.DataTypeDescription = ((DataTypeName)rule.enDataType).ToString();
                         newDataRule.enOperatorType = rule.enOperatorType;
                         newDataRule.OperatorTypeDescription = EnumHelper.GetDescriptionFromEnum((OperatorType)rule.enOperatorType);
