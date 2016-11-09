@@ -300,6 +300,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private string _selectedPackageSMSNumber = "0";
 
         /// <summary>
+        /// Indicate if split billing can be set
+        /// </summary>
+        public bool CanSetSplitBilling
+        {
+            get { return _canSetSplitBilling; }
+            set{ SetProperty(ref _canSetSplitBilling, value); }
+        }
+        private bool _canSetSplitBilling;
+
+        /// <summary>
         /// The delete button active/in-active image
         /// </summary>
         public string DeleteButtonImage
@@ -717,7 +727,59 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             }
         }
         private bool _noSplitBilling;
-       
+
+        /// <summary>
+        /// Indicate if there is a split billing exception
+        /// to the selected company default
+        /// </summary>
+        public bool SplitBillingException
+        {
+            get { return _splitBillingException; }
+            set
+            {
+                SetProperty(ref _splitBillingException, value);
+                if (value && this.SelectedCompany != null)
+                {
+                    CanSetSplitBilling = false;
+                    if (SelectedCompany.HasSpitBilling)
+                    {
+                        NoSplitBilling = true;
+                        SplitBilling = false;
+                    }
+                    else
+                    {
+                        if (SelectedCompany.HasSpitBilling)
+                            return;
+                        NoSplitBilling = false;
+                        SplitBilling = true;
+                    }
+                }
+                else if (!value && SelectedCompany != null)
+                {
+                    CanSetSplitBilling = true;
+                    if (SelectedCompany.HasSpitBilling)
+                    {
+                        NoSplitBilling = false;
+                        SplitBilling = true;
+                    }
+                    else
+                    {
+                        if (SelectedCompany.HasSpitBilling)
+                            return;
+                        NoSplitBilling = true;
+                        SplitBilling = false;
+                    }
+                }
+                else
+                {
+                    NoSplitBilling = true;
+                    SplitBilling = false;
+                    CanSetSplitBilling = true;
+                }
+            }
+        }
+        private bool _splitBillingException;
+
         /// <summary>
         /// The entered voice allowance
         /// </summary>
@@ -1356,7 +1418,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedClientWBSNumber = SelectedClientCostCode = SelectedClientIPAddress = string.Empty;
             SelectedContractStartDate = SelectedContractEndDate = DateTime.MinValue;
             SelectedClientAdminFee = "0";
-            SelectedClientState = SaIDNumber = CompanyClient = true;
+            SelectedClientState = SaIDNumber = CompanyClient = CanSetSplitBilling = true;
             SelectedCostType = SelectedPackageType = "NONE";
             DeleteButtonImage = "278.png";
             DeleteButtonToolTip = "active";
@@ -1462,10 +1524,25 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private void SetClientBilling(ClientBilling clientBilling)
         {
             try
-            { 
+            {
+                bool flag = false;
                 SelectedClientBilling = clientBilling;
+                CanSetSplitBilling = true;
 
-                if (clientBilling != null && clientBilling.IsSplitBilling)
+                if (clientBilling != null)
+                {
+                    if (clientBilling.SplitBillingException)
+                    {
+                        flag = SelectedCompany == null || !SelectedCompany.HasSpitBilling;
+                        CanSetSplitBilling = false;
+                    }
+                    else
+                    {
+                        flag = clientBilling.IsSplitBilling;
+                    }
+                }
+
+                if (flag)
                 {
                     SplitBilling = true;
                     NoSplitBilling = false;
@@ -1498,7 +1575,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     }
                     else
                     {
-                        SelectedSPAllowance =  SelectedAllowanceLimit = "0";
+                        SelectedSPAllowance = SelectedAllowanceLimit = "0";
                     }
                 }
             }
@@ -1832,6 +1909,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 if (SelectedClient.ClientBilling == null)
                     SelectedClient.ClientBilling = new ClientBilling();
                 SelectedClient.ClientBilling.IsSplitBilling = SplitBilling;
+                SelectedClient.ClientBilling.SplitBillingException = SplitBillingException;
                 SelectedClient.ClientBilling.fkCompanyBillingLevelID = SelectedBillingLevel != null ? SelectedBillingLevel.pkCompanyBillingLevelID : (Int32?)null;
                 SelectedClient.ClientBilling.WDPAllowance = Convert.ToDecimal(SelectedWDPAllowance);
                 SelectedClient.ClientBilling.VoiceAllowance = Convert.ToDecimal(SelectedVoiceAllowance);

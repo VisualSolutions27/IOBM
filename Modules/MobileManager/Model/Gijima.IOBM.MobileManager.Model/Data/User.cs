@@ -17,8 +17,8 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2214:DoNotCallOverridableMethodsInConstructors")]
         public User()
         {
-            this.UserInRoles = new HashSet<UserInRole>();
             this.UserInCompanies = new HashSet<UserInCompany>();
+            this.UserInRoles = new HashSet<UserInRole>();
         }
     
         public int pkUserID { get; set; }
@@ -28,8 +28,8 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public bool IsActive { get; set; }
     
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
-        public virtual ICollection<UserInRole> UserInRoles { get; set; }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<UserInCompany> UserInCompanies { get; set; }
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
+        public virtual ICollection<UserInRole> UserInRoles { get; set; }
     }
 }

@@ -28,6 +28,7 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public string CostCode { get; set; }
         public decimal AdminFee { get; set; }
         public string IPAddress { get; set; }
+        public bool HasSpitBilling { get; set; }
         public string ModifiedBy { get; set; }
         public System.DateTime ModifiedDate { get; set; }
         public bool IsActive { get; set; }

@@ -38,9 +38,9 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public string ModifiedBy { get; set; }
         public Nullable<System.DateTime> ModifiedDate { get; set; }
     
+        public virtual Client Client { get; set; }
         public virtual Service Service1 { get; set; }
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2227:CollectionPropertiesShouldBeReadOnly")]
         public virtual ICollection<InvoiceDetail> InvoiceDetails { get; set; }
-        public virtual Client Client { get; set; }
     }
 }

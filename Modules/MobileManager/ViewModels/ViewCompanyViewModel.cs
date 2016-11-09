@@ -51,6 +51,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                     SelectedGroup = GroupCollection != null && value.fkCompanyGroupID != null ? GroupCollection.First(p => p.pkCompanyGroupID == value.fkCompanyGroupID) : null;
                     SelectedWBSNumber = value.WBSNumber;
                     SelectedCostCode = value.CostCode;
+                    HasSplitBilling = value.HasSpitBilling;
                     SelectedIPAddress = value.IPAddress;
                     CompanyState = value.IsActive;
                     ReadCompanyBillingLevelsAsync();
@@ -154,6 +155,16 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             set { SetProperty(ref _selectedCostCode, value); }
         }
         private string _selectedCostCode;
+
+        /// <summary>
+        /// Indicate if the company has split billing
+        /// </summary>
+        public bool HasSplitBilling
+        {
+            get { return _hasSplitBilling; }
+            set { SetProperty(ref _hasSplitBilling, value); }
+        }
+        private bool _hasSplitBilling;
 
         #endregion
 
@@ -279,6 +290,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private void InitialiseViewControls()
         {
             SelectedCompany = new Company();
+            HasSplitBilling = CompanyState = true;
         }
 
         /// <summary>
@@ -395,6 +407,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             SelectedCompany.fkCompanyGroupID = SelectedGroup.pkCompanyGroupID;
             SelectedCompany.WBSNumber = SelectedWBSNumber.ToUpper();
             SelectedCompany.CostCode = SelectedCostCode.ToUpper();
+            SelectedCompany.HasSpitBilling = HasSplitBilling;
             SelectedCompany.ModifiedBy = SecurityHelper.LoggedInUserFullName;
             SelectedCompany.ModifiedDate = DateTime.Now;
             SelectedCompany.IsActive = CompanyState;

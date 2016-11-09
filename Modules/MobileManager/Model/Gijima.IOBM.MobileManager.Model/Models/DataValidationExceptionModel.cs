@@ -1,4 +1,5 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
+using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Model.Data;
 using Prism.Events;
 using System;
@@ -37,7 +38,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
             {
                 using (var db = MobileManagerEntities.GetContext())
                 {
-                    string billingPeriod = validationRuleExceptions.First().BillingPeriod;
+                    string billingPeriod = MobileManagerEnvironment.BillingPeriod;
 
                     IEnumerable<DataValidationException> exceptionsToDelete = db.DataValidationExceptions.Where(p => p.BillingPeriod == billingPeriod).ToList();
 

@@ -560,7 +560,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                         validationResult = new DataValidationException()
                                         {
                                             fkBillingProcessID = BillingExecutionState.InternalDataValidation.Value(),
-                                            fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID.Value,
+                                            fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID,
                                             BillingPeriod = string.Format("{0}{1}", DateTime.Now.Month.ToString().PadLeft(2, '0'), DateTime.Now.Year),
                                             enDataValidationGroupName = DataValidationGroupName.Client.Value(),
                                             DataValidationEntityID = client.pkClientID,
@@ -711,7 +711,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                     {
                                         validationResult = new DataValidationException()
                                         {
-                                            fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID.Value,
+                                            fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID,
                                             enDataValidationGroupName = DataValidationGroupName.SimCard.Value(),
                                             DataValidationEntityID = sim.pkSimCardID,
                                             Result = true
@@ -865,7 +865,7 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                                 {
                                     validationResult = new DataValidationException()
                                     {
-                                        fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID.Value,
+                                        fkDataValidationPropertyID = validationRule.fkDataValidationPropertyID,
                                         enDataValidationGroupName = validationRule.enDataValidationGroupName,
                                         DataValidationEntityID = validationRule.DataValidationEntityID,
                                         Result = true

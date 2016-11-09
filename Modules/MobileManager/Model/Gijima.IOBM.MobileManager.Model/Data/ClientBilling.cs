@@ -24,6 +24,7 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public Nullable<int> fkCompanyBillingLevelID { get; set; }
         public bool IsBillable { get; set; }
         public bool IsSplitBilling { get; set; }
+        public bool SplitBillingException { get; set; }
         public Nullable<decimal> WDPAllowance { get; set; }
         public decimal VoiceAllowance { get; set; }
         public Nullable<decimal> SPLimit { get; set; }

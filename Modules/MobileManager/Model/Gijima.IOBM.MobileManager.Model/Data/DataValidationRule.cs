@@ -18,7 +18,7 @@ namespace Gijima.IOBM.MobileManager.Model.Data
         public short enDataValidationProcess { get; set; }
         public short enDataValidationGroupName { get; set; }
         public int DataValidationEntityID { get; set; }
-        public Nullable<int> fkDataValidationPropertyID { get; set; }
+        public int fkDataValidationPropertyID { get; set; }
         public short enOperatorType { get; set; }
         public short enOperator { get; set; }
         public string DataValidationValue { get; set; }

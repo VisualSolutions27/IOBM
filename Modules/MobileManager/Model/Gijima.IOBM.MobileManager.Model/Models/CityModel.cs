@@ -115,27 +115,28 @@ namespace Gijima.IOBM.MobileManager.Model.Models
                 {
                     City existingCity = db.Cities.Where(p => p.CityName == city.CityName).FirstOrDefault();
 
-                    // Check to see if the city description already exist for another entity 
-                    if (existingCity != null && existingCity.pkCityID != city.pkCityID)
+                    if (existingCity != null)
                     {
-                        _eventAggregator.GetEvent<ApplicationMessageEvent>()
-                                        .Publish(new ApplicationMessage("ReportModel",
-                                                 string.Format("The {0} city already exist.", city.CityName),
-                                                 "UpdateCity",
-                                                 ApplicationMessage.MessageTypes.Information));
-                        return false;
-                    }
-                    else
-                    {
-                        // Prevent primary key confilcts when using attach property
-                        if (existingCity != null)
-                            db.Entry(existingCity).State = System.Data.Entity.EntityState.Detached;
+                        // Check to see if the city description already exist for another entity 
+                        if (existingCity.pkCityID != city.pkCityID)
+                        {
+                            _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                            .Publish(new ApplicationMessage("ReportModel",
+                                                     string.Format("The {0} city already exist.", city.CityName),
+                                                     "UpdateCity",
+                                                     ApplicationMessage.MessageTypes.Information));
+                            return false;
+                        }
 
-                        db.Cities.Attach(city);
-                        db.Entry(city).State = System.Data.Entity.EntityState.Modified;
+                        existingCity.CityName = city.CityName;
+                        existingCity.fkProvinceID = city.fkProvinceID;
+                        existingCity.ModifiedBy = city.ModifiedBy;
+                        existingCity.ModifiedDate = city.ModifiedDate;
+                        existingCity.IsActive = city.IsActive;
                         db.SaveChanges();
-                        return true;
                     }
+
+                    return true;
                 }
             }
             catch (Exception ex)
