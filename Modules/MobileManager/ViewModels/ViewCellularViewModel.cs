@@ -1911,8 +1911,8 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 SelectedClient.ClientBilling.IsSplitBilling = SplitBilling;
                 SelectedClient.ClientBilling.SplitBillingException = SplitBillingException;
                 SelectedClient.ClientBilling.fkCompanyBillingLevelID = SelectedBillingLevel != null ? SelectedBillingLevel.pkCompanyBillingLevelID : (Int32?)null;
-                SelectedClient.ClientBilling.WDPAllowance = Convert.ToDecimal(SelectedWDPAllowance);
-                SelectedClient.ClientBilling.VoiceAllowance = Convert.ToDecimal(SelectedVoiceAllowance);
+                SelectedClient.ClientBilling.WDPAllowance = !string.IsNullOrEmpty(SelectedWDPAllowance) ? Convert.ToDecimal(SelectedWDPAllowance) : 0;
+                SelectedClient.ClientBilling.VoiceAllowance = !string.IsNullOrEmpty(SelectedVoiceAllowance) ? Convert.ToDecimal(SelectedVoiceAllowance) : 0;
                 SelectedClient.ClientBilling.SPLimit = !string.IsNullOrEmpty(SelectedSPAllowance) ? Convert.ToDecimal(SelectedSPAllowance) : 0; 
                 SelectedClient.ClientBilling.AllowanceLimit = !string.IsNullOrEmpty(SelectedAllowanceLimit) ? Convert.ToDecimal(SelectedAllowanceLimit) : 0;
                 SelectedClient.ClientBilling.InternationalDailing = SelectedClientBilling.InternationalDailing;

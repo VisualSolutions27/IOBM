@@ -62,7 +62,8 @@ namespace Gijima.IOBM.MobileManager.Model.Models
 
                     if (!db.Devices.Any(p => p.fkDeviceMakeID == device.fkDeviceMakeID && 
                                              p.fkDeviceModelID == device.fkDeviceModelID &&
-                                             p.fkContractID == device.fkContractID))
+                                             p.fkContractID == device.fkContractID &&
+                                             p.fkStatusID != reAllocatedStatusID))
                     {
                         db.Devices.Add(device);
                         db.SaveChanges();
