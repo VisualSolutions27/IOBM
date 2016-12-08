@@ -960,6 +960,13 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                                                                                updateValue,
                                                                                                                SelectedDestinationCompany,
                                                                                                                out errorMessage)); break;
+                            case DataBaseEntity.ClientBilling:
+                                result = await Task.Run(() => new ClientBillingModel(_eventAggregator).UpdateClientBilling(searchEntity,
+                                                                                                                           searchCriteria,
+                                                                                                                           destinationColumn,
+                                                                                                                           updateValue,
+                                                                                                                           SelectedDestinationCompany,
+                                                                                                                           out errorMessage)); break;
                         }
                     }
 
