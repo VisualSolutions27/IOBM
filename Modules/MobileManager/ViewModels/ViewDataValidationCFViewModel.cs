@@ -79,6 +79,9 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                 }
                             }
                             break;
+                        case DataValidationGroupName.Device:
+                        case DataValidationGroupName.SimCard:
+                            ValidDataEntity = Brushes.Silver; break;
                         case DataValidationGroupName.ExternalData:
                             DataEntityDisplayName = "TableName";
                             foreach (ExternalBillingData entity in DataEntityCollection)
@@ -488,7 +491,15 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                 switch (columnName)
                 {
                     case "SelectedEntityGroup":
-                        ValidEntityGroup = string.IsNullOrEmpty(SelectedEntityGroup) || SelectedEntityGroup == _defaultItem ? Brushes.Red : Brushes.Silver; break;
+                        ValidEntityGroup = string.IsNullOrEmpty(SelectedEntityGroup) || SelectedEntityGroup == _defaultItem ? Brushes.Red : Brushes.Silver;
+                        //if (ValidEntityGroup == Brushes.Silver)
+                        //    switch (EnumHelper.GetEnumFromDescription<DataValidationGroupName>(SelectedEntityGroup))
+                        //    {
+                        //        case DataValidationGroupName.Device:
+                        //        case DataValidationGroupName.SimCard:
+                        //            ValidDataEntity = Brushes.Silver; break;
+                        //    }
+                        break;
                     case "SelectedDataEntity":
                         if (SelectedEntityGroup != null && SelectedEntityGroup != _defaultItem &&
                             SelectedDataEntity != null && SelectedDataEntity.ToString() != _defaultItem)

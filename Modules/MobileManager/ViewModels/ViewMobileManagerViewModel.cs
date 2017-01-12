@@ -297,7 +297,7 @@ namespace Gijima.IOBM.MobileManager.ViewModels
             _eventAggregator = eventAggreagator;
             _securityHelper = new SecurityHelper(eventAggreagator);
             InitialiseMobileManagerView();
-            ReadAppSettingsAsync();
+            ReadCurrentBillingProcesssAsync();
         }
 
         /// <summary>
@@ -381,6 +381,43 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         }
 
         /// <summary>
+        /// Read the current billing process history from the database
+        /// </summary>
+        private async void ReadCurrentBillingProcesssAsync()
+        {
+            try
+            {
+                BillingProcessHistory billingProcess = null;
+
+                await Task.Run(() => billingProcess = new BillingProcessModel(_eventAggregator).ReadBillingProcessCurrentHistory());
+
+                if (billingProcess == null)
+                {
+                    _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                    .Publish(new ApplicationMessage("ViewMobileManagerViewModel",
+                                             "There is no billing period set,\nPlease contact the system administrator.",
+                                             "ReadCurrentBillingProcesssAsync",
+                                             ApplicationMessage.MessageTypes.Information));
+
+                }
+
+                BillingPeriod = billingProcess.BillingPeriod;
+                BillingPeriodOpen = billingProcess.ProcessResult == null ? "(Open)" : "(Closed)";
+                MobileManagerEnvironment.BillingPeriod = BillingPeriod;
+                MobileManagerEnvironment.IsBillingPeriodOpen = billingProcess.ProcessResult == null ? true : false;
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewMobileManagerViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadCurrentBillingProcesssAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
+            }
+        }
+
+        /// <summary>
         /// Read the app settings from the database
         /// </summary>
         private async void ReadAppSettingsAsync()
@@ -393,15 +430,20 @@ namespace Gijima.IOBM.MobileManager.ViewModels
 
                 if (appSetting != null)
                 {
-                    BillingPeriod = appSetting.BillingPeriod;
-                    BillingPeriodOpen = appSetting.IsBillingPeriodOpen ? "(Open)" : "(Closed)";
-                    MobileManagerEnvironment.BillingPeriod = appSetting.BillingPeriod;
-                    MobileManagerEnvironment.IsBillingPeriodOpen = appSetting.IsBillingPeriodOpen;
+                    //BillingPeriod = appSetting.BillingPeriod;
+                    //BillingPeriodOpen = appSetting.IsBillingPeriodOpen ? "(Open)" : "(Closed)";
+                    //MobileManagerEnvironment.BillingPeriod = appSetting.BillingPeriod;
+                    //MobileManagerEnvironment.IsBillingPeriodOpen = appSetting.IsBillingPeriodOpen;
                 }
             }
             catch (Exception ex)
             {
-                _eventAggregator.GetEvent<ApplicationMessageEvent>().Publish(null);
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewMobileManagerViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "ReadAppSettingsAsync",
+                                                                ApplicationMessage.MessageTypes.SystemError));
             }
         }
 

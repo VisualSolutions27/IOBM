@@ -12,9 +12,6 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using Gijima.IOBM.MobileManager.Model.Models;
-using System.Collections.Generic;
-using Gijima.IOBM.MobileManager.Model.Data;
 
 namespace Gijima.IOBM.MobileManager
 {
@@ -43,23 +40,28 @@ namespace Gijima.IOBM.MobileManager
             _regionManager = _container.Resolve<IRegionManager>();
             _eventAggregator = _container.Resolve<IEventAggregator>();
 
-            // Close the application is the user
-            // do not authenticate
-            if (AuthenticateUser())
+            // Close the application is the
+            // user is not authenticated
+            if (!AuthenticateUser())
             {
-                ReadPublishedApplicationVersionAsync();
-                ReadConnectionInfoAsync();
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("MobileManagerController",
+                                         string.Format("Authentication failed for user {0}.", WindowsIdentity.GetCurrent().Name),
+                                                "MobileManagerController",
+                                                ApplicationMessage.MessageTypes.Information));
 
-                ApplicationInfo connectionInfo = new ApplicationInfo();
-                connectionInfo.ApplicationInfoSource = InfoSource.UserInfo;
-
-                // Publish the event to update the IOBM shell
-                _eventAggregator.GetEvent<ApplicationInfoEvent>().Publish(connectionInfo);
+                // Raise the event to close the application
+                _eventAggregator.GetEvent<ApplicationCloseEvent>().Publish(true);
             }
 
-            //ShowMobileManager();
-            //_eventAggregator.GetEvent<ShowMobileManagerEvent>().Subscribe(ShowMobileManager, true);
-            //_eventAggregator.GetEvent<HideMessageBoxEvent>().Subscribe(HideMessageBox, true);
+            ReadPublishedApplicationVersionAsync();
+            ReadConnectionInfoAsync();
+
+            ApplicationInfo connectionInfo = new ApplicationInfo();
+            connectionInfo.ApplicationInfoSource = InfoSource.UserInfo;
+
+            // Publish the event to update the IOBM shell
+            _eventAggregator.GetEvent<ApplicationInfoEvent>().Publish(connectionInfo);
         }
 
         /// <summary>

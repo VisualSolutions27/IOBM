@@ -1,7 +1,7 @@
 ﻿using Gijima.IOBM.Infrastructure.Events;
 using Gijima.IOBM.Infrastructure.Structs;
 using Gijima.IOBM.MobileManager.Common.Events;
-using Gijima.IOBM.MobileManager.Security;
+using Gijima.IOBM.Security;
 using Gijima.IOBM.Model.Data;
 using Gijima.IOBM.Model.Models;
 using Prism.Events;
@@ -9,6 +9,7 @@ using Prism.Mvvm;
 using System;
 using System.ComponentModel;
 using System.Reflection;
+using System.Security.Principal;
 using System.Windows;
 using System.Xml;
 
@@ -31,6 +32,8 @@ namespace Gijima.IOBM.Shell.ViewModels
         #endregion
 
         #region Properties
+
+        public Action CloseAction { get; set; }
 
         /// <summary>
         /// The IOBM published version
@@ -148,6 +151,16 @@ namespace Gijima.IOBM.Shell.ViewModels
         /// Receive the application info for the selected application
         /// </summary>
         /// <param name="sender">The selected application info.</param>
+        private void ApplicationClose_Event(bool sender)
+        {
+            CloseAction();
+
+        }
+
+        /// <summary>
+        /// Receive the application info for the selected application
+        /// </summary>
+        /// <param name="sender">The selected application info.</param>
         private void ApplicationInfo_Event(object sender)
         {
             ApplicationInfo appInfo = (ApplicationInfo)sender;
@@ -155,8 +168,8 @@ namespace Gijima.IOBM.Shell.ViewModels
             switch (appInfo.ApplicationInfoSource)
             {
                 case ApplicationInfo.InfoSource.UserInfo:
-                    LoggedInUser = string.Format("Welcome {0}", SecurityHelper.LoggedInUserFullName);
-                    UserRole = SecurityHelper.LoggedInUserRoleName;
+                    LoggedInUser = string.Format("Welcome {0}", SecurityHelper.LoggedInFullName);
+                    //UserRole = appInfo.;
                     break;
                 case ApplicationInfo.InfoSource.ConnectionInfo:
                     ServerName = appInfo.ServerName;
@@ -216,15 +229,6 @@ namespace Gijima.IOBM.Shell.ViewModels
             new IOBMSecurityModel(_eventAggregator).SyncSolutionUser((User)sender);
         }
 
-        /// <summary>
-        /// Display application info or error info to the user
-        /// </summary>
-        /// <param name="sender">The application user enetity.</param>
-        private void AppMessage_Event(object sender)
-        {
-            new IOBMSecurityModel(_eventAggregator).SyncSolutionUser((User)sender);
-        }
-
         #endregion
 
         #region Methods
@@ -235,6 +239,9 @@ namespace Gijima.IOBM.Shell.ViewModels
         public ViewIOBMShellViewModel(IEventAggregator eventAggreagator)
         {
             _eventAggregator = eventAggreagator;
+
+            // Subscribe to this event to close the application
+            _eventAggregator.GetEvent<ApplicationCloseEvent>().Subscribe(ApplicationClose_Event, true);
 
             // Subscribe to this event to get the application info
             _eventAggregator.GetEvent<ApplicationInfoEvent>().Subscribe(ApplicationInfo_Event, true);
@@ -248,10 +255,49 @@ namespace Gijima.IOBM.Shell.ViewModels
             InitialiseShellView();
         }
 
+        /// <summary>
+        /// Validate the shell environment
+        /// </summary>
         private void InitialiseShellView()
         {
             ShowApplicationFooter = Visibility.Collapsed;
+
+            // Close the applicaion if the user do no authenticate
+            if (!AuthenticateUser())
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewIOBMShellViewModel",
+                                         string.Format("Authentication failed for user {0}.", WindowsIdentity.GetCurrent().Name),
+                                                "InitialiseShellView",
+                                                ApplicationMessage.MessageTypes.Information));
+
+                // Raise the event to close the application
+                _eventAggregator.GetEvent<ApplicationCloseEvent>().Publish(true);
+            }
+
             GetPublishedSoltionVersion();
+        }
+
+        /// <summary>
+        /// Authenticate the user against the IOBM database users
+        /// </summary>
+        /// <returns></returns>
+        private bool AuthenticateUser()
+        {
+            try
+            {
+                return new SecurityHelper(_eventAggregator).IsUserAuthenticated(WindowsIdentity.GetCurrent().Name);
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewIOBMShellViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "AuthenticateUser",
+                                                                ApplicationMessage.MessageTypes.SystemError));
+                return false;
+            }
         }
 
         /// <summary>
@@ -260,22 +306,30 @@ namespace Gijima.IOBM.Shell.ViewModels
         /// <returns>The Version number</returns>
         private void GetPublishedSoltionVersion()
         {
-            XmlDocument xmlDoc = new XmlDocument();
-            Assembly asmCurrent = System.Reflection.Assembly.GetEntryAssembly();
-            string executePath = new Uri(asmCurrent.GetName().CodeBase).LocalPath;
+            try
+            {
+                XmlDocument xmlDoc = new XmlDocument();
+                Assembly asmCurrent = System.Reflection.Assembly.GetEntryAssembly();
+                string executePath = new Uri(asmCurrent.GetName().CodeBase).LocalPath;
 
-            xmlDoc.Load(executePath + ".manifest");
-            string retval = string.Empty;
+                xmlDoc.Load(executePath + ".manifest");
+                string retval = string.Empty;
 
-            if (xmlDoc.HasChildNodes)
-                retval = xmlDoc.ChildNodes[1].ChildNodes[0].Attributes.GetNamedItem("version").Value.ToString();
+                if (xmlDoc.HasChildNodes)
+                    retval = xmlDoc.ChildNodes[1].ChildNodes[0].Attributes.GetNamedItem("version").Value.ToString();
 
-            PublishedIOBMVersion = retval;
+                PublishedIOBMVersion = retval;
+            }
+            catch (Exception ex)
+            {
+                _eventAggregator.GetEvent<ApplicationMessageEvent>()
+                                .Publish(new ApplicationMessage("ViewIOBMShellViewModel",
+                                                                string.Format("Error! {0}, {1}.",
+                                                                ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
+                                                                "GetPublishedSoltionVersion",
+                                                                ApplicationMessage.MessageTypes.SystemError));
+            }
         }
-
-        #region Lookup Data Loading
-
-        #endregion
 
         #region Command Execution
 

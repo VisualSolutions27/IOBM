@@ -9,7 +9,8 @@ namespace Gijima.IOBM.Infrastructure.Structs
     /// </summary>
     public enum SolutionApplication
     {
-        MobileManager = 1
+        BillingEngine = 1,
+        MobileManager = 2
     }
 
     /// <summary>

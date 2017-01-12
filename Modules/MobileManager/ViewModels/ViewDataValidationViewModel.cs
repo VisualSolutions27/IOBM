@@ -287,12 +287,30 @@ namespace Gijima.IOBM.MobileManager.ViewModels
         private string _selectedExceptions;
 
         /// <summary>
+        /// The selected exceptions
+        /// </summary>
+        public DataValidationException SelectedExceptiond
+        {
+            get { return _selectedExceptiond; }
+            set
+            {
+                SetProperty(ref _selectedExceptiond, value);
+                //PopulateSelectedExceptions(value);
+            }
+        }
+        private DataValidationException _selectedExceptiond;
+
+        /// <summary>
         /// Indicate if all exceptions is slected
         /// </summary>
         public bool SelectAllExceptions
         {
             get { return _selectAllExceptions; }
-            set { SetProperty(ref _selectAllExceptions, value); }
+            set
+            {
+                SetProperty(ref _selectAllExceptions, value);
+                SelectAll(value);
+            }
         }
         private bool _selectAllExceptions = false;
 
@@ -754,6 +772,21 @@ namespace Gijima.IOBM.MobileManager.ViewModels
                                                                 ex.Message, ex.InnerException != null ? ex.InnerException.Message : string.Empty),
                                                                 "CreateValidationRuleExceptionsAsync",
                                                                 ApplicationMessage.MessageTypes.SystemError));
+            }
+        }
+
+        private void SelectAll(bool value)
+        {
+            if (ValidationErrorCollection != null)
+            {
+                ObservableCollection<DataValidationException>  tempErrorCollection = new ObservableCollection<DataValidationException>(ValidationErrorCollection);
+
+                foreach (DataValidationException exception in tempErrorCollection)
+                {
+                    exception.Result = value; 
+                }
+
+                ValidationErrorCollection = new ObservableCollection<DataValidationException>(tempErrorCollection);
             }
         }
 

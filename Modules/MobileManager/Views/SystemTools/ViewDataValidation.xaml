@@ -159,14 +159,22 @@
                 <Border Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="3" Height="1" VerticalAlignment="Bottom" Background="Gray" Margin="0,5,0,0"></Border>
             </Grid>
             <CheckBox Grid.Row="8" Grid.Column="2" Content="Data Validation Exceptions" VerticalAlignment="Bottom" Margin="1,0,5,1" TabIndex="3" IsChecked="{Binding SelectAllExceptions, UpdateSourceTrigger=PropertyChanged}" />
-            <xctk:CheckListBox x:Name="ListBoxExceptions" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="3" Background="WhiteSmoke" TabIndex="4" ValueMemberPath="Message"
+            <!--<xctk:CheckListBox x:Name="ListBoxExceptions" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="3" Background="WhiteSmoke" TabIndex="4" ValueMemberPath="Message"
                 ItemsSource="{Binding ValidationErrorCollection, UpdateSourceTrigger=PropertyChanged}" SelectedValue="{Binding SelectedExceptions, UpdateSourceTrigger=PropertyChanged}">
                 <xctk:CheckListBox.ItemTemplate>
                     <DataTemplate>
                         <TextBlock Text="{Binding Message, UpdateSourceTrigger=PropertyChanged}" Foreground="{Binding CanApplyRule, Converter={StaticResource UIDataConvertionHelper},  ConverterParameter='Foreground'}"/>
                     </DataTemplate>
                 </xctk:CheckListBox.ItemTemplate>
-            </xctk:CheckListBox>
+            </xctk:CheckListBox>-->
+            <DataGrid x:Name="DataGridExceptions" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="3" AutoGenerateColumns="false" CanUserReorderColumns="False" CanUserSortColumns="True" MinHeight="52"
+                IsReadOnly="True" TabIndex="4" Style="{StaticResource DataGridStyle}" ColumnHeaderHeight="0" ItemsSource="{Binding ValidationErrorCollection, UpdateSourceTrigger=PropertyChanged}" 
+                SelectedValue="{Binding SelectedExceptiond, UpdateSourceTrigger=PropertyChanged}">
+                <DataGrid.Columns>
+                    <DataGridCheckBoxColumn Binding="{Binding Result, Mode=TwoWay}"/>
+                    <DataGridTextColumn Binding="{Binding Message}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
         </Grid>
     </Grid>
 </UserControl>

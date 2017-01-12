@@ -69,8 +69,8 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Process" Binding="{Binding BillingProcess.ProcessDescription}" Width="Auto"/>
                         <DataGridTextColumn Header="Result" Binding="{Binding ProcessResult, Converter={StaticResource UIDataConvertionHelper},  ConverterParameter='ProcessResult'}" Width="50"/>
-                        <DataGridTextColumn Header="Start Date" Binding="{Binding ProcessStartDate}" Width="Auto" />
-                        <DataGridTextColumn Header="End Date" Binding="{Binding ProcessEndDate}" Width="Auto" />
+                        <DataGridTextColumn Header="Start Date" Binding="{Binding ProcessStartDate, StringFormat='{}{0: dd/MM/yyyy}'}" Width="Auto" />
+                        <DataGridTextColumn Header="End Date" Binding="{Binding ProcessEndDate, StringFormat='{}{0: dd/MM/yyyy}'}" Width="Auto" />
                         <DataGridTextColumn Header="Duration" Binding="{Binding ProcessDuration}" Width="Auto" />
                     </DataGrid.Columns>
                 </DataGrid>
